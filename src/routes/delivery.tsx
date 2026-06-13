@@ -1,0 +1,72 @@
+import { Link, Outlet, createFileRoute, useNavigate, useRouterState } from "@tanstack/react-router";
+import { useEffect } from "react";
+import { Bike, Home as HomeIcon, ListChecks, Wallet, User } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
+import { cn } from "@/lib/utils";
+
+export const Route = createFileRoute("/delivery")({ component: DeliveryLayout });
+
+function DeliveryLayout() {
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+  const path = useRouterState({ select: (s) => s.location.pathname });
+  const isAuthRoute = path === "/delivery/auth";
+
+  useEffect(() => {
+    if (loading) return;
+    if (!user && !isAuthRoute) navigate({ to: "/delivery/auth" });
+  }, [user, loading, isAuthRoute, navigate]);
+
+  if (isAuthRoute) return <Outlet />;
+  if (loading || !user) {
+    return <div className="grid min-h-screen place-items-center text-sm text-muted-foreground">Loading…</div>;
+  }
+
+  return (
+    <div className="min-h-screen bg-muted/20 pb-20">
+      <header className="sticky top-0 z-30 border-b border-border/60 bg-background/90 backdrop-blur">
+        <div className="mx-auto flex h-14 max-w-3xl items-center justify-between px-4">
+          <Link to="/delivery" className="flex items-center gap-2">
+            <span className="grid h-8 w-8 place-items-center rounded-xl bg-primary text-primary-foreground">
+              <Bike className="h-4 w-4" />
+            </span>
+            <span className="font-display font-bold">Rider</span>
+          </Link>
+          <Link to="/" className="text-xs text-muted-foreground hover:underline">App ↗</Link>
+        </div>
+      </header>
+      <main className="mx-auto max-w-3xl px-4 py-4"><Outlet /></main>
+      <RiderBottomNav path={path} />
+    </div>
+  );
+}
+
+function RiderBottomNav({ path }: { path: string }) {
+  const items = [
+    { to: "/delivery", icon: HomeIcon, label: "Home", exact: true },
+    { to: "/delivery/assignments", icon: ListChecks, label: "Trips" },
+    { to: "/delivery/earnings", icon: Wallet, label: "Earnings" },
+    { to: "/delivery/profile", icon: User, label: "Profile" },
+  ];
+  return (
+    <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-border/60 bg-background/95 backdrop-blur">
+      <ul className="mx-auto grid max-w-3xl grid-cols-4">
+        {items.map((it) => {
+          const active = it.exact ? path === it.to : path.startsWith(it.to);
+          const Icon = it.icon;
+          return (
+            <li key={it.to}>
+              <Link to={it.to} className={cn(
+                "flex flex-col items-center gap-0.5 py-2.5 text-[11px] font-medium transition",
+                active ? "text-primary" : "text-muted-foreground",
+              )}>
+                <Icon className={cn("h-5 w-5", active && "scale-110")} />
+                {it.label}
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </nav>
+  );
+}
