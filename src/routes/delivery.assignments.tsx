@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Package } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
-import { formatINR } from "@/lib/format";
+import { inr } from "@/lib/format";
 
 export const Route = createFileRoute("/delivery/assignments")({ component: Trips });
 
@@ -43,8 +43,8 @@ function Trips() {
             <p className="text-xs capitalize text-muted-foreground">{t.status.replace("_", " ")}</p>
           </div>
           <div className="text-right">
-            <p className="font-display font-bold">{formatINR(Number(t.orders?.total ?? 0))}</p>
-            <p className="text-xs text-primary">+{formatINR(Number(t.payout_amount ?? 0))}</p>
+            <p className="font-display font-bold">{inr(Number(t.orders?.total ?? 0))}</p>
+            <p className="text-xs text-primary">+{inr(Number(t.payout_amount ?? 0))}</p>
           </div>
         </div>
       ))}

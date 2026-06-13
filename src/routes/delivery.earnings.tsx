@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Wallet } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
-import { formatINR } from "@/lib/format";
+import { inr } from "@/lib/format";
 
 export const Route = createFileRoute("/delivery/earnings")({ component: Earnings });
 
@@ -32,7 +32,7 @@ function Earnings() {
       <div className="rounded-3xl border border-border/60 bg-gradient-to-br from-primary-soft/40 to-card p-6 shadow-soft">
         <Wallet className="h-6 w-6 text-primary" />
         <p className="mt-2 text-xs uppercase tracking-wider text-muted-foreground">Lifetime earnings</p>
-        <p className="font-display text-3xl font-bold">{formatINR(total)}</p>
+        <p className="font-display text-3xl font-bold">{inr(total)}</p>
       </div>
       <div className="space-y-2">
         {(data ?? []).map((r: any) => (
@@ -41,7 +41,7 @@ function Earnings() {
               <p className="font-medium capitalize">{r.type.replace("_", " ")}</p>
               <p className="text-xs text-muted-foreground">{new Date(r.created_at).toLocaleString()}</p>
             </div>
-            <p className="font-display font-bold text-primary">+{formatINR(Number(r.amount))}</p>
+            <p className="font-display font-bold text-primary">+{inr(Number(r.amount))}</p>
           </div>
         ))}
         {!data?.length && <p className="py-6 text-center text-sm text-muted-foreground">No earnings yet.</p>}

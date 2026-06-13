@@ -54,10 +54,10 @@ function Onboarding() {
   const saveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
-    const payload = { user_id: user!.id, ...form };
+    const payload: any = { user_id: user!.id, ...form };
     const { error } = partner
-      ? await supabase.from("delivery_partners").update(form).eq("user_id", user!.id)
-      : await supabase.from("delivery_partners").insert(payload as any);
+      ? await supabase.from("delivery_partners").update(form as any).eq("user_id", user!.id)
+      : await supabase.from("delivery_partners").insert(payload);
     setSubmitting(false);
     if (error) return toast.error(error.message);
     qc.invalidateQueries({ queryKey: ["rider-onb"] });

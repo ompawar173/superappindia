@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { formatINR } from "@/lib/format";
+import { inr } from "@/lib/format";
 
 export const Route = createFileRoute("/delivery/")({ component: RiderHome });
 
@@ -90,7 +90,7 @@ function RiderHome() {
       <OnlineCard partner={partner} disabled={partner.kyc_status !== "approved"} onChanged={() => qc.invalidateQueries({ queryKey: ["rider", user?.id] })} />
 
       <div className="grid grid-cols-3 gap-3">
-        <Stat icon={Wallet} label="Today" value={formatINR(todayEarnings ?? 0)} />
+        <Stat icon={Wallet} label="Today" value={inr(todayEarnings ?? 0)} />
         <Stat icon={Package} label="Trips" value={String(partner.total_deliveries)} />
         <Stat icon={CheckCircle2} label="Rating" value={Number(partner.rating ?? 5).toFixed(1)} />
       </div>
@@ -202,7 +202,7 @@ function ActiveAssignment({ assignment }: { assignment: any }) {
         </span>
         <span className="text-xs text-muted-foreground">Order #{String(assignment.order_id).slice(0, 6)}</span>
       </div>
-      <p className="mt-3 font-display text-lg font-bold">{formatINR(Number(assignment.orders?.total ?? 0))}</p>
+      <p className="mt-3 font-display text-lg font-bold">{inr(Number(assignment.orders?.total ?? 0))}</p>
       <div className="mt-3 space-y-2 text-sm">
         <div className="flex items-start gap-2">
           <MapPin className="mt-0.5 h-4 w-4 text-primary" />
