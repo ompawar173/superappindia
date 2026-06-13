@@ -31,6 +31,7 @@ function TopBar() {
           <TopLink to="/categories" label="Explore" />
           <TopLink to="/rewards" label="Rewards" />
           <TopLink to="/vendor" label="Sell with us" />
+          <TopLink to="/delivery" label="Ride with us" />
         </nav>
         <Link
           to="/account"

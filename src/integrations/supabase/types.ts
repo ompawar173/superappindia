@@ -212,6 +212,203 @@ export type Database = {
           },
         ]
       }
+      delivery_assignments: {
+        Row: {
+          accepted_at: string | null
+          assigned_at: string
+          created_at: string
+          delivered_at: string | null
+          distance_km: number | null
+          id: string
+          notes: string | null
+          order_id: string
+          partner_id: string
+          payout_amount: number | null
+          picked_up_at: string | null
+          status: Database["public"]["Enums"]["assignment_status_t"]
+          updated_at: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          assigned_at?: string
+          created_at?: string
+          delivered_at?: string | null
+          distance_km?: number | null
+          id?: string
+          notes?: string | null
+          order_id: string
+          partner_id: string
+          payout_amount?: number | null
+          picked_up_at?: string | null
+          status?: Database["public"]["Enums"]["assignment_status_t"]
+          updated_at?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          assigned_at?: string
+          created_at?: string
+          delivered_at?: string | null
+          distance_km?: number | null
+          id?: string
+          notes?: string | null
+          order_id?: string
+          partner_id?: string
+          payout_amount?: number | null
+          picked_up_at?: string | null
+          status?: Database["public"]["Enums"]["assignment_status_t"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "delivery_assignments_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "delivery_assignments_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "delivery_partners"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      delivery_documents: {
+        Row: {
+          doc_type: Database["public"]["Enums"]["delivery_doc_type"]
+          id: string
+          partner_id: string
+          storage_path: string
+          uploaded_at: string
+          verified: boolean
+        }
+        Insert: {
+          doc_type: Database["public"]["Enums"]["delivery_doc_type"]
+          id?: string
+          partner_id: string
+          storage_path: string
+          uploaded_at?: string
+          verified?: boolean
+        }
+        Update: {
+          doc_type?: Database["public"]["Enums"]["delivery_doc_type"]
+          id?: string
+          partner_id?: string
+          storage_path?: string
+          uploaded_at?: string
+          verified?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "delivery_documents_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "delivery_partners"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      delivery_earnings_ledger: {
+        Row: {
+          amount: number
+          assignment_id: string | null
+          created_at: string
+          id: string
+          partner_id: string
+          type: Database["public"]["Enums"]["earning_type_t"]
+        }
+        Insert: {
+          amount: number
+          assignment_id?: string | null
+          created_at?: string
+          id?: string
+          partner_id: string
+          type?: Database["public"]["Enums"]["earning_type_t"]
+        }
+        Update: {
+          amount?: number
+          assignment_id?: string | null
+          created_at?: string
+          id?: string
+          partner_id?: string
+          type?: Database["public"]["Enums"]["earning_type_t"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "delivery_earnings_ledger_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "delivery_assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "delivery_earnings_ledger_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "delivery_partners"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      delivery_partners: {
+        Row: {
+          city: string
+          created_at: string
+          current_lat: number | null
+          current_lng: number | null
+          full_name: string
+          is_online: boolean
+          kyc_rejection_reason: string | null
+          kyc_status: Database["public"]["Enums"]["kyc_status_t"]
+          last_seen_at: string | null
+          phone: string
+          rating: number | null
+          total_deliveries: number
+          updated_at: string
+          user_id: string
+          vehicle_number: string
+          vehicle_type: Database["public"]["Enums"]["vehicle_type_t"]
+        }
+        Insert: {
+          city: string
+          created_at?: string
+          current_lat?: number | null
+          current_lng?: number | null
+          full_name: string
+          is_online?: boolean
+          kyc_rejection_reason?: string | null
+          kyc_status?: Database["public"]["Enums"]["kyc_status_t"]
+          last_seen_at?: string | null
+          phone: string
+          rating?: number | null
+          total_deliveries?: number
+          updated_at?: string
+          user_id: string
+          vehicle_number: string
+          vehicle_type: Database["public"]["Enums"]["vehicle_type_t"]
+        }
+        Update: {
+          city?: string
+          created_at?: string
+          current_lat?: number | null
+          current_lng?: number | null
+          full_name?: string
+          is_online?: boolean
+          kyc_rejection_reason?: string | null
+          kyc_status?: Database["public"]["Enums"]["kyc_status_t"]
+          last_seen_at?: string | null
+          phone?: string
+          rating?: number | null
+          total_deliveries?: number
+          updated_at?: string
+          user_id?: string
+          vehicle_number?: string
+          vehicle_type?: Database["public"]["Enums"]["vehicle_type_t"]
+        }
+        Relationships: []
+      }
       link_clicks: {
         Row: {
           created_at: string
@@ -328,10 +525,19 @@ export type Database = {
       orders: {
         Row: {
           created_at: string
+          delivery_partner_id: string | null
+          delivery_status:
+            | Database["public"]["Enums"]["assignment_status_t"]
+            | null
+          drop_lat: number | null
+          drop_lng: number | null
           external_order_id: string | null
           id: string
           items: Json
           payment_ref: string | null
+          pickup_address: Json | null
+          pickup_lat: number | null
+          pickup_lng: number | null
           shipping_address: Json | null
           source: Database["public"]["Enums"]["order_source"]
           status: Database["public"]["Enums"]["order_status"]
@@ -344,10 +550,19 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          delivery_partner_id?: string | null
+          delivery_status?:
+            | Database["public"]["Enums"]["assignment_status_t"]
+            | null
+          drop_lat?: number | null
+          drop_lng?: number | null
           external_order_id?: string | null
           id?: string
           items?: Json
           payment_ref?: string | null
+          pickup_address?: Json | null
+          pickup_lat?: number | null
+          pickup_lng?: number | null
           shipping_address?: Json | null
           source?: Database["public"]["Enums"]["order_source"]
           status?: Database["public"]["Enums"]["order_status"]
@@ -360,10 +575,19 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          delivery_partner_id?: string | null
+          delivery_status?:
+            | Database["public"]["Enums"]["assignment_status_t"]
+            | null
+          drop_lat?: number | null
+          drop_lng?: number | null
           external_order_id?: string | null
           id?: string
           items?: Json
           payment_ref?: string | null
+          pickup_address?: Json | null
+          pickup_lat?: number | null
+          pickup_lng?: number | null
           shipping_address?: Json | null
           source?: Database["public"]["Enums"]["order_source"]
           status?: Database["public"]["Enums"]["order_status"]
@@ -375,6 +599,13 @@ export type Database = {
           vendor_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "orders_delivery_partner_id_fkey"
+            columns: ["delivery_partner_id"]
+            isOneToOne: false
+            referencedRelation: "delivery_partners"
+            referencedColumns: ["user_id"]
+          },
           {
             foreignKeyName: "orders_vendor_id_fkey"
             columns: ["vendor_id"]
@@ -714,9 +945,25 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "user" | "vendor" | "admin" | "super_admin"
+      app_role: "user" | "vendor" | "admin" | "super_admin" | "delivery"
+      assignment_status_t:
+        | "assigned"
+        | "accepted"
+        | "rejected"
+        | "picked_up"
+        | "delivered"
+        | "cancelled"
       conversion_status: "pending" | "approved" | "rejected" | "paid"
+      delivery_doc_type:
+        | "aadhaar"
+        | "pan"
+        | "dl"
+        | "rc"
+        | "vehicle_photo"
+        | "selfie"
+      earning_type_t: "delivery_fee" | "tip" | "bonus" | "adjustment"
       kyc_status: "pending" | "approved" | "rejected"
+      kyc_status_t: "pending" | "approved" | "rejected"
       order_source: "own" | "ondc" | "affiliate"
       order_status:
         | "placed"
@@ -727,6 +974,7 @@ export type Database = {
         | "cancelled"
         | "refunded"
       partner_type: "affiliate" | "ondc" | "own"
+      vehicle_type_t: "bike" | "scooter" | "cycle" | "car"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -854,9 +1102,27 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["user", "vendor", "admin", "super_admin"],
+      app_role: ["user", "vendor", "admin", "super_admin", "delivery"],
+      assignment_status_t: [
+        "assigned",
+        "accepted",
+        "rejected",
+        "picked_up",
+        "delivered",
+        "cancelled",
+      ],
       conversion_status: ["pending", "approved", "rejected", "paid"],
+      delivery_doc_type: [
+        "aadhaar",
+        "pan",
+        "dl",
+        "rc",
+        "vehicle_photo",
+        "selfie",
+      ],
+      earning_type_t: ["delivery_fee", "tip", "bonus", "adjustment"],
       kyc_status: ["pending", "approved", "rejected"],
+      kyc_status_t: ["pending", "approved", "rejected"],
       order_source: ["own", "ondc", "affiliate"],
       order_status: [
         "placed",
@@ -868,6 +1134,7 @@ export const Constants = {
         "refunded",
       ],
       partner_type: ["affiliate", "ondc", "own"],
+      vehicle_type_t: ["bike", "scooter", "cycle", "car"],
     },
   },
 } as const
