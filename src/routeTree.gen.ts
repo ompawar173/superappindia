@@ -9,19 +9,67 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VendorRouteImport } from './routes/vendor'
+import { Route as SearchRouteImport } from './routes/search'
+import { Route as RewardsRouteImport } from './routes/rewards'
+import { Route as OrdersRouteImport } from './routes/orders'
 import { Route as CategoriesRouteImport } from './routes/categories'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as RShortCodeRouteImport } from './routes/r.$shortCode'
 import { Route as PPartnerRouteImport } from './routes/p.$partner'
 import { Route as CCategoryRouteImport } from './routes/c.$category'
 
+const VendorRoute = VendorRouteImport.update({
+  id: '/vendor',
+  path: '/vendor',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RewardsRoute = RewardsRouteImport.update({
+  id: '/rewards',
+  path: '/rewards',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OrdersRoute = OrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CategoriesRoute = CategoriesRouteImport.update({
   id: '/categories',
   path: '/categories',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccountRoute = AccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RShortCodeRoute = RShortCodeRouteImport.update({
+  id: '/r/$shortCode',
+  path: '/r/$shortCode',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PPartnerRoute = PPartnerRouteImport.update({
@@ -37,40 +85,137 @@ const CCategoryRoute = CCategoryRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/account': typeof AccountRoute
+  '/admin': typeof AdminRoute
+  '/auth': typeof AuthRoute
   '/categories': typeof CategoriesRoute
+  '/orders': typeof OrdersRoute
+  '/rewards': typeof RewardsRoute
+  '/search': typeof SearchRoute
+  '/vendor': typeof VendorRoute
   '/c/$category': typeof CCategoryRoute
   '/p/$partner': typeof PPartnerRoute
+  '/r/$shortCode': typeof RShortCodeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/account': typeof AccountRoute
+  '/admin': typeof AdminRoute
+  '/auth': typeof AuthRoute
   '/categories': typeof CategoriesRoute
+  '/orders': typeof OrdersRoute
+  '/rewards': typeof RewardsRoute
+  '/search': typeof SearchRoute
+  '/vendor': typeof VendorRoute
   '/c/$category': typeof CCategoryRoute
   '/p/$partner': typeof PPartnerRoute
+  '/r/$shortCode': typeof RShortCodeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/account': typeof AccountRoute
+  '/admin': typeof AdminRoute
+  '/auth': typeof AuthRoute
   '/categories': typeof CategoriesRoute
+  '/orders': typeof OrdersRoute
+  '/rewards': typeof RewardsRoute
+  '/search': typeof SearchRoute
+  '/vendor': typeof VendorRoute
   '/c/$category': typeof CCategoryRoute
   '/p/$partner': typeof PPartnerRoute
+  '/r/$shortCode': typeof RShortCodeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/categories' | '/c/$category' | '/p/$partner'
+  fullPaths:
+    | '/'
+    | '/account'
+    | '/admin'
+    | '/auth'
+    | '/categories'
+    | '/orders'
+    | '/rewards'
+    | '/search'
+    | '/vendor'
+    | '/c/$category'
+    | '/p/$partner'
+    | '/r/$shortCode'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/categories' | '/c/$category' | '/p/$partner'
-  id: '__root__' | '/' | '/categories' | '/c/$category' | '/p/$partner'
+  to:
+    | '/'
+    | '/account'
+    | '/admin'
+    | '/auth'
+    | '/categories'
+    | '/orders'
+    | '/rewards'
+    | '/search'
+    | '/vendor'
+    | '/c/$category'
+    | '/p/$partner'
+    | '/r/$shortCode'
+  id:
+    | '__root__'
+    | '/'
+    | '/account'
+    | '/admin'
+    | '/auth'
+    | '/categories'
+    | '/orders'
+    | '/rewards'
+    | '/search'
+    | '/vendor'
+    | '/c/$category'
+    | '/p/$partner'
+    | '/r/$shortCode'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AccountRoute: typeof AccountRoute
+  AdminRoute: typeof AdminRoute
+  AuthRoute: typeof AuthRoute
   CategoriesRoute: typeof CategoriesRoute
+  OrdersRoute: typeof OrdersRoute
+  RewardsRoute: typeof RewardsRoute
+  SearchRoute: typeof SearchRoute
+  VendorRoute: typeof VendorRoute
   CCategoryRoute: typeof CCategoryRoute
   PPartnerRoute: typeof PPartnerRoute
+  RShortCodeRoute: typeof RShortCodeRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/vendor': {
+      id: '/vendor'
+      path: '/vendor'
+      fullPath: '/vendor'
+      preLoaderRoute: typeof VendorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rewards': {
+      id: '/rewards'
+      path: '/rewards'
+      fullPath: '/rewards'
+      preLoaderRoute: typeof RewardsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/orders': {
+      id: '/orders'
+      path: '/orders'
+      fullPath: '/orders'
+      preLoaderRoute: typeof OrdersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/categories': {
       id: '/categories'
       path: '/categories'
@@ -78,11 +223,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CategoriesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/account': {
+      id: '/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AccountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/r/$shortCode': {
+      id: '/r/$shortCode'
+      path: '/r/$shortCode'
+      fullPath: '/r/$shortCode'
+      preLoaderRoute: typeof RShortCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/p/$partner': {
@@ -104,10 +277,28 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AccountRoute: AccountRoute,
+  AdminRoute: AdminRoute,
+  AuthRoute: AuthRoute,
   CategoriesRoute: CategoriesRoute,
+  OrdersRoute: OrdersRoute,
+  RewardsRoute: RewardsRoute,
+  SearchRoute: SearchRoute,
+  VendorRoute: VendorRoute,
   CCategoryRoute: CCategoryRoute,
   PPartnerRoute: PPartnerRoute,
+  RShortCodeRoute: RShortCodeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
