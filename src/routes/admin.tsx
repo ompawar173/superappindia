@@ -1,7 +1,7 @@
 import { Link, Outlet, createFileRoute, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect } from "react";
 import {
-  BarChart3, Building2, Globe2, Link2, ShieldCheck, Sparkles, Store, Users2,
+  BarChart3, Bike, Building2, Globe2, Link2, ShieldCheck, Sparkles, Store, Users2,
 } from "lucide-react";
 import { useRoles } from "@/hooks/use-role";
 import { cn } from "@/lib/utils";
@@ -13,6 +13,7 @@ const NAV = [
   { to: "/admin/partners", label: "Partners", icon: Building2 },
   { to: "/admin/links", label: "UTM Links", icon: Link2 },
   { to: "/admin/vendors", label: "Vendors", icon: Store },
+  { to: "/admin/delivery", label: "Riders", icon: Bike },
   { to: "/admin/users", label: "Users & Roles", icon: Users2 },
   { to: "/admin/ondc", label: "ONDC", icon: Globe2 },
 ];
