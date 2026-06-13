@@ -14,16 +14,719 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      affiliate_links: {
+        Row: {
+          active: boolean
+          campaign: string | null
+          channel: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          partner_id: string
+          short_code: string
+          target_url: string
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string
+          utm_source: string
+        }
+        Insert: {
+          active?: boolean
+          campaign?: string | null
+          channel?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          partner_id: string
+          short_code: string
+          target_url: string
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string
+          utm_source?: string
+        }
+        Update: {
+          active?: boolean
+          campaign?: string | null
+          channel?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          partner_id?: string
+          short_code?: string
+          target_url?: string
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string
+          utm_source?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_links_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      banners: {
+        Row: {
+          active: boolean
+          bg_color: string | null
+          created_at: string
+          cta_label: string | null
+          cta_url: string | null
+          id: string
+          image_url: string | null
+          sort_order: number
+          subtitle: string | null
+          title: string
+        }
+        Insert: {
+          active?: boolean
+          bg_color?: string | null
+          created_at?: string
+          cta_label?: string | null
+          cta_url?: string | null
+          id?: string
+          image_url?: string | null
+          sort_order?: number
+          subtitle?: string | null
+          title: string
+        }
+        Update: {
+          active?: boolean
+          bg_color?: string | null
+          created_at?: string
+          cta_label?: string | null
+          cta_url?: string | null
+          id?: string
+          image_url?: string | null
+          sort_order?: number
+          subtitle?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
+      categories: {
+        Row: {
+          active: boolean
+          color: string | null
+          created_at: string
+          icon: string | null
+          id: string
+          name: string
+          slug: string
+          sort_order: number
+        }
+        Insert: {
+          active?: boolean
+          color?: string | null
+          created_at?: string
+          icon?: string | null
+          id?: string
+          name: string
+          slug: string
+          sort_order?: number
+        }
+        Update: {
+          active?: boolean
+          color?: string | null
+          created_at?: string
+          icon?: string | null
+          id?: string
+          name?: string
+          slug?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      conversions: {
+        Row: {
+          click_id: string | null
+          commission_amount: number
+          created_at: string
+          gross_amount: number
+          id: string
+          link_id: string | null
+          network: string | null
+          partner_id: string
+          partner_order_id: string | null
+          payload: Json | null
+          status: Database["public"]["Enums"]["conversion_status"]
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          click_id?: string | null
+          commission_amount?: number
+          created_at?: string
+          gross_amount?: number
+          id?: string
+          link_id?: string | null
+          network?: string | null
+          partner_id: string
+          partner_order_id?: string | null
+          payload?: Json | null
+          status?: Database["public"]["Enums"]["conversion_status"]
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          click_id?: string | null
+          commission_amount?: number
+          created_at?: string
+          gross_amount?: number
+          id?: string
+          link_id?: string | null
+          network?: string | null
+          partner_id?: string
+          partner_order_id?: string | null
+          payload?: Json | null
+          status?: Database["public"]["Enums"]["conversion_status"]
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversions_click_id_fkey"
+            columns: ["click_id"]
+            isOneToOne: false
+            referencedRelation: "link_clicks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversions_link_id_fkey"
+            columns: ["link_id"]
+            isOneToOne: false
+            referencedRelation: "affiliate_links"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversions_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      link_clicks: {
+        Row: {
+          created_at: string
+          device: string | null
+          id: string
+          ip_hash: string | null
+          link_id: string
+          referrer: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          device?: string | null
+          id?: string
+          ip_hash?: string | null
+          link_id: string
+          referrer?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          device?: string | null
+          id?: string
+          ip_hash?: string | null
+          link_id?: string
+          referrer?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "link_clicks_link_id_fkey"
+            columns: ["link_id"]
+            isOneToOne: false
+            referencedRelation: "affiliate_links"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ondc_participants: {
+        Row: {
+          active: boolean
+          created_at: string
+          domain: string | null
+          encr_pub_key: string | null
+          id: string
+          registry_env: string
+          role: string
+          signing_pub_key: string | null
+          subscriber_id: string
+          ukid: string | null
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          domain?: string | null
+          encr_pub_key?: string | null
+          id?: string
+          registry_env?: string
+          role: string
+          signing_pub_key?: string | null
+          subscriber_id: string
+          ukid?: string | null
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          domain?: string | null
+          encr_pub_key?: string | null
+          id?: string
+          registry_env?: string
+          role?: string
+          signing_pub_key?: string | null
+          subscriber_id?: string
+          ukid?: string | null
+        }
+        Relationships: []
+      }
+      ondc_transactions: {
+        Row: {
+          action: string
+          created_at: string
+          direction: string
+          id: string
+          message_id: string | null
+          payload: Json | null
+          status: string | null
+          transaction_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          direction: string
+          id?: string
+          message_id?: string | null
+          payload?: Json | null
+          status?: string | null
+          transaction_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          direction?: string
+          id?: string
+          message_id?: string | null
+          payload?: Json | null
+          status?: string | null
+          transaction_id?: string
+        }
+        Relationships: []
+      }
+      orders: {
+        Row: {
+          created_at: string
+          external_order_id: string | null
+          id: string
+          items: Json
+          payment_ref: string | null
+          shipping_address: Json | null
+          source: Database["public"]["Enums"]["order_source"]
+          status: Database["public"]["Enums"]["order_status"]
+          subtotal: number
+          tax: number
+          total: number
+          updated_at: string
+          user_id: string
+          vendor_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          external_order_id?: string | null
+          id?: string
+          items?: Json
+          payment_ref?: string | null
+          shipping_address?: Json | null
+          source?: Database["public"]["Enums"]["order_source"]
+          status?: Database["public"]["Enums"]["order_status"]
+          subtotal?: number
+          tax?: number
+          total?: number
+          updated_at?: string
+          user_id: string
+          vendor_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          external_order_id?: string | null
+          id?: string
+          items?: Json
+          payment_ref?: string | null
+          shipping_address?: Json | null
+          source?: Database["public"]["Enums"]["order_source"]
+          status?: Database["public"]["Enums"]["order_status"]
+          subtotal?: number
+          tax?: number
+          total?: number
+          updated_at?: string
+          user_id?: string
+          vendor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partner_offers: {
+        Row: {
+          active: boolean
+          code: string | null
+          created_at: string
+          description: string | null
+          id: string
+          partner_id: string
+          title: string
+          valid_to: string | null
+        }
+        Insert: {
+          active?: boolean
+          code?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          partner_id: string
+          title: string
+          valid_to?: string | null
+        }
+        Update: {
+          active?: boolean
+          code?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          partner_id?: string
+          title?: string
+          valid_to?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_offers_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partners: {
+        Row: {
+          active: boolean
+          affiliate_network: string | null
+          base_url: string | null
+          category_id: string | null
+          commission_pct: number
+          created_at: string
+          description: string | null
+          featured: boolean
+          id: string
+          logo_url: string | null
+          name: string
+          slug: string
+          type: Database["public"]["Enums"]["partner_type"]
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          affiliate_network?: string | null
+          base_url?: string | null
+          category_id?: string | null
+          commission_pct?: number
+          created_at?: string
+          description?: string | null
+          featured?: boolean
+          id?: string
+          logo_url?: string | null
+          name: string
+          slug: string
+          type?: Database["public"]["Enums"]["partner_type"]
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          affiliate_network?: string | null
+          base_url?: string | null
+          category_id?: string | null
+          commission_pct?: number
+          created_at?: string
+          description?: string | null
+          featured?: boolean
+          id?: string
+          logo_url?: string | null
+          name?: string
+          slug?: string
+          type?: Database["public"]["Enums"]["partner_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partners_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          default_city: string | null
+          full_name: string | null
+          id: string
+          phone: string | null
+          referral_code: string | null
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          default_city?: string | null
+          full_name?: string | null
+          id: string
+          phone?: string | null
+          referral_code?: string | null
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          default_city?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          referral_code?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      referrals: {
+        Row: {
+          created_at: string
+          id: string
+          referee_id: string
+          referrer_id: string
+          reward: number | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          referee_id: string
+          referrer_id: string
+          reward?: number | null
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          referee_id?: string
+          referrer_id?: string
+          reward?: number | null
+          status?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      vendor_products: {
+        Row: {
+          active: boolean
+          category_id: string | null
+          created_at: string
+          description: string | null
+          id: string
+          images: string[] | null
+          ondc_attrs: Json | null
+          price: number
+          sku: string | null
+          stock: number
+          title: string
+          updated_at: string
+          vendor_id: string
+        }
+        Insert: {
+          active?: boolean
+          category_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          images?: string[] | null
+          ondc_attrs?: Json | null
+          price?: number
+          sku?: string | null
+          stock?: number
+          title: string
+          updated_at?: string
+          vendor_id: string
+        }
+        Update: {
+          active?: boolean
+          category_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          images?: string[] | null
+          ondc_attrs?: Json | null
+          price?: number
+          sku?: string | null
+          stock?: number
+          title?: string
+          updated_at?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_products_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_products_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendors: {
+        Row: {
+          address: string | null
+          business_name: string
+          city: string | null
+          created_at: string
+          gstin: string | null
+          id: string
+          kyc_status: Database["public"]["Enums"]["kyc_status"]
+          pan: string | null
+          payout_account: Json | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address?: string | null
+          business_name: string
+          city?: string | null
+          created_at?: string
+          gstin?: string | null
+          id?: string
+          kyc_status?: Database["public"]["Enums"]["kyc_status"]
+          pan?: string | null
+          payout_account?: Json | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address?: string | null
+          business_name?: string
+          city?: string | null
+          created_at?: string
+          gstin?: string | null
+          id?: string
+          kyc_status?: Database["public"]["Enums"]["kyc_status"]
+          pan?: string | null
+          payout_account?: Json | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      wallet_ledger: {
+        Row: {
+          amount: number
+          balance_after: number | null
+          created_at: string
+          id: string
+          ref: string | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          balance_after?: number | null
+          created_at?: string
+          id?: string
+          ref?: string | null
+          type: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          balance_after?: number | null
+          created_at?: string
+          id?: string
+          ref?: string | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "user" | "vendor" | "admin" | "super_admin"
+      conversion_status: "pending" | "approved" | "rejected" | "paid"
+      kyc_status: "pending" | "approved" | "rejected"
+      order_source: "own" | "ondc" | "affiliate"
+      order_status:
+        | "placed"
+        | "accepted"
+        | "preparing"
+        | "shipped"
+        | "delivered"
+        | "cancelled"
+        | "refunded"
+      partner_type: "affiliate" | "ondc" | "own"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +853,21 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["user", "vendor", "admin", "super_admin"],
+      conversion_status: ["pending", "approved", "rejected", "paid"],
+      kyc_status: ["pending", "approved", "rejected"],
+      order_source: ["own", "ondc", "affiliate"],
+      order_status: [
+        "placed",
+        "accepted",
+        "preparing",
+        "shipped",
+        "delivered",
+        "cancelled",
+        "refunded",
+      ],
+      partner_type: ["affiliate", "ondc", "own"],
+    },
   },
 } as const
