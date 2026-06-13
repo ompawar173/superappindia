@@ -9,38 +9,338 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VendorRouteImport } from './routes/vendor'
+import { Route as SearchRouteImport } from './routes/search'
+import { Route as RewardsRouteImport } from './routes/rewards'
+import { Route as OrdersRouteImport } from './routes/orders'
+import { Route as CategoriesRouteImport } from './routes/categories'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as RShortCodeRouteImport } from './routes/r.$shortCode'
+import { Route as PPartnerRouteImport } from './routes/p.$partner'
+import { Route as CCategoryRouteImport } from './routes/c.$category'
+import { Route as AdminVendorsRouteImport } from './routes/admin.vendors'
+import { Route as AdminUsersRouteImport } from './routes/admin.users'
+import { Route as AdminPartnersRouteImport } from './routes/admin.partners'
+import { Route as AdminOndcRouteImport } from './routes/admin.ondc'
+import { Route as AdminLinksRouteImport } from './routes/admin.links'
+import { Route as ApiPublicPostbacksNetworkRouteImport } from './routes/api/public/postbacks.$network'
+import { Route as ApiPublicOndcSplatRouteImport } from './routes/api/public/ondc.$'
 
+const VendorRoute = VendorRouteImport.update({
+  id: '/vendor',
+  path: '/vendor',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RewardsRoute = RewardsRouteImport.update({
+  id: '/rewards',
+  path: '/rewards',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OrdersRoute = OrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CategoriesRoute = CategoriesRouteImport.update({
+  id: '/categories',
+  path: '/categories',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccountRoute = AccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const RShortCodeRoute = RShortCodeRouteImport.update({
+  id: '/r/$shortCode',
+  path: '/r/$shortCode',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PPartnerRoute = PPartnerRouteImport.update({
+  id: '/p/$partner',
+  path: '/p/$partner',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CCategoryRoute = CCategoryRouteImport.update({
+  id: '/c/$category',
+  path: '/c/$category',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminVendorsRoute = AdminVendorsRouteImport.update({
+  id: '/vendors',
+  path: '/vendors',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPartnersRoute = AdminPartnersRouteImport.update({
+  id: '/partners',
+  path: '/partners',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminOndcRoute = AdminOndcRouteImport.update({
+  id: '/ondc',
+  path: '/ondc',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminLinksRoute = AdminLinksRouteImport.update({
+  id: '/links',
+  path: '/links',
+  getParentRoute: () => AdminRoute,
+} as any)
+const ApiPublicPostbacksNetworkRoute =
+  ApiPublicPostbacksNetworkRouteImport.update({
+    id: '/api/public/postbacks/$network',
+    path: '/api/public/postbacks/$network',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicOndcSplatRoute = ApiPublicOndcSplatRouteImport.update({
+  id: '/api/public/ondc/$',
+  path: '/api/public/ondc/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/account': typeof AccountRoute
+  '/admin': typeof AdminRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/categories': typeof CategoriesRoute
+  '/orders': typeof OrdersRoute
+  '/rewards': typeof RewardsRoute
+  '/search': typeof SearchRoute
+  '/vendor': typeof VendorRoute
+  '/admin/links': typeof AdminLinksRoute
+  '/admin/ondc': typeof AdminOndcRoute
+  '/admin/partners': typeof AdminPartnersRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/admin/vendors': typeof AdminVendorsRoute
+  '/c/$category': typeof CCategoryRoute
+  '/p/$partner': typeof PPartnerRoute
+  '/r/$shortCode': typeof RShortCodeRoute
+  '/admin/': typeof AdminIndexRoute
+  '/api/public/ondc/$': typeof ApiPublicOndcSplatRoute
+  '/api/public/postbacks/$network': typeof ApiPublicPostbacksNetworkRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/account': typeof AccountRoute
+  '/auth': typeof AuthRoute
+  '/categories': typeof CategoriesRoute
+  '/orders': typeof OrdersRoute
+  '/rewards': typeof RewardsRoute
+  '/search': typeof SearchRoute
+  '/vendor': typeof VendorRoute
+  '/admin/links': typeof AdminLinksRoute
+  '/admin/ondc': typeof AdminOndcRoute
+  '/admin/partners': typeof AdminPartnersRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/admin/vendors': typeof AdminVendorsRoute
+  '/c/$category': typeof CCategoryRoute
+  '/p/$partner': typeof PPartnerRoute
+  '/r/$shortCode': typeof RShortCodeRoute
+  '/admin': typeof AdminIndexRoute
+  '/api/public/ondc/$': typeof ApiPublicOndcSplatRoute
+  '/api/public/postbacks/$network': typeof ApiPublicPostbacksNetworkRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/account': typeof AccountRoute
+  '/admin': typeof AdminRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/categories': typeof CategoriesRoute
+  '/orders': typeof OrdersRoute
+  '/rewards': typeof RewardsRoute
+  '/search': typeof SearchRoute
+  '/vendor': typeof VendorRoute
+  '/admin/links': typeof AdminLinksRoute
+  '/admin/ondc': typeof AdminOndcRoute
+  '/admin/partners': typeof AdminPartnersRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/admin/vendors': typeof AdminVendorsRoute
+  '/c/$category': typeof CCategoryRoute
+  '/p/$partner': typeof PPartnerRoute
+  '/r/$shortCode': typeof RShortCodeRoute
+  '/admin/': typeof AdminIndexRoute
+  '/api/public/ondc/$': typeof ApiPublicOndcSplatRoute
+  '/api/public/postbacks/$network': typeof ApiPublicPostbacksNetworkRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/account'
+    | '/admin'
+    | '/auth'
+    | '/categories'
+    | '/orders'
+    | '/rewards'
+    | '/search'
+    | '/vendor'
+    | '/admin/links'
+    | '/admin/ondc'
+    | '/admin/partners'
+    | '/admin/users'
+    | '/admin/vendors'
+    | '/c/$category'
+    | '/p/$partner'
+    | '/r/$shortCode'
+    | '/admin/'
+    | '/api/public/ondc/$'
+    | '/api/public/postbacks/$network'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/account'
+    | '/auth'
+    | '/categories'
+    | '/orders'
+    | '/rewards'
+    | '/search'
+    | '/vendor'
+    | '/admin/links'
+    | '/admin/ondc'
+    | '/admin/partners'
+    | '/admin/users'
+    | '/admin/vendors'
+    | '/c/$category'
+    | '/p/$partner'
+    | '/r/$shortCode'
+    | '/admin'
+    | '/api/public/ondc/$'
+    | '/api/public/postbacks/$network'
+  id:
+    | '__root__'
+    | '/'
+    | '/account'
+    | '/admin'
+    | '/auth'
+    | '/categories'
+    | '/orders'
+    | '/rewards'
+    | '/search'
+    | '/vendor'
+    | '/admin/links'
+    | '/admin/ondc'
+    | '/admin/partners'
+    | '/admin/users'
+    | '/admin/vendors'
+    | '/c/$category'
+    | '/p/$partner'
+    | '/r/$shortCode'
+    | '/admin/'
+    | '/api/public/ondc/$'
+    | '/api/public/postbacks/$network'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AccountRoute: typeof AccountRoute
+  AdminRoute: typeof AdminRouteWithChildren
+  AuthRoute: typeof AuthRoute
+  CategoriesRoute: typeof CategoriesRoute
+  OrdersRoute: typeof OrdersRoute
+  RewardsRoute: typeof RewardsRoute
+  SearchRoute: typeof SearchRoute
+  VendorRoute: typeof VendorRoute
+  CCategoryRoute: typeof CCategoryRoute
+  PPartnerRoute: typeof PPartnerRoute
+  RShortCodeRoute: typeof RShortCodeRoute
+  ApiPublicOndcSplatRoute: typeof ApiPublicOndcSplatRoute
+  ApiPublicPostbacksNetworkRoute: typeof ApiPublicPostbacksNetworkRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/vendor': {
+      id: '/vendor'
+      path: '/vendor'
+      fullPath: '/vendor'
+      preLoaderRoute: typeof VendorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rewards': {
+      id: '/rewards'
+      path: '/rewards'
+      fullPath: '/rewards'
+      preLoaderRoute: typeof RewardsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/orders': {
+      id: '/orders'
+      path: '/orders'
+      fullPath: '/orders'
+      preLoaderRoute: typeof OrdersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/categories': {
+      id: '/categories'
+      path: '/categories'
+      fullPath: '/categories'
+      preLoaderRoute: typeof CategoriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/account': {
+      id: '/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AccountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +348,122 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/r/$shortCode': {
+      id: '/r/$shortCode'
+      path: '/r/$shortCode'
+      fullPath: '/r/$shortCode'
+      preLoaderRoute: typeof RShortCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/p/$partner': {
+      id: '/p/$partner'
+      path: '/p/$partner'
+      fullPath: '/p/$partner'
+      preLoaderRoute: typeof PPartnerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/c/$category': {
+      id: '/c/$category'
+      path: '/c/$category'
+      fullPath: '/c/$category'
+      preLoaderRoute: typeof CCategoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/vendors': {
+      id: '/admin/vendors'
+      path: '/vendors'
+      fullPath: '/admin/vendors'
+      preLoaderRoute: typeof AdminVendorsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/partners': {
+      id: '/admin/partners'
+      path: '/partners'
+      fullPath: '/admin/partners'
+      preLoaderRoute: typeof AdminPartnersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/ondc': {
+      id: '/admin/ondc'
+      path: '/ondc'
+      fullPath: '/admin/ondc'
+      preLoaderRoute: typeof AdminOndcRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/links': {
+      id: '/admin/links'
+      path: '/links'
+      fullPath: '/admin/links'
+      preLoaderRoute: typeof AdminLinksRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/api/public/postbacks/$network': {
+      id: '/api/public/postbacks/$network'
+      path: '/api/public/postbacks/$network'
+      fullPath: '/api/public/postbacks/$network'
+      preLoaderRoute: typeof ApiPublicPostbacksNetworkRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/ondc/$': {
+      id: '/api/public/ondc/$'
+      path: '/api/public/ondc/$'
+      fullPath: '/api/public/ondc/$'
+      preLoaderRoute: typeof ApiPublicOndcSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
+interface AdminRouteChildren {
+  AdminLinksRoute: typeof AdminLinksRoute
+  AdminOndcRoute: typeof AdminOndcRoute
+  AdminPartnersRoute: typeof AdminPartnersRoute
+  AdminUsersRoute: typeof AdminUsersRoute
+  AdminVendorsRoute: typeof AdminVendorsRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminLinksRoute: AdminLinksRoute,
+  AdminOndcRoute: AdminOndcRoute,
+  AdminPartnersRoute: AdminPartnersRoute,
+  AdminUsersRoute: AdminUsersRoute,
+  AdminVendorsRoute: AdminVendorsRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AccountRoute: AccountRoute,
+  AdminRoute: AdminRouteWithChildren,
+  AuthRoute: AuthRoute,
+  CategoriesRoute: CategoriesRoute,
+  OrdersRoute: OrdersRoute,
+  RewardsRoute: RewardsRoute,
+  SearchRoute: SearchRoute,
+  VendorRoute: VendorRoute,
+  CCategoryRoute: CCategoryRoute,
+  PPartnerRoute: PPartnerRoute,
+  RShortCodeRoute: RShortCodeRoute,
+  ApiPublicOndcSplatRoute: ApiPublicOndcSplatRoute,
+  ApiPublicPostbacksNetworkRoute: ApiPublicPostbacksNetworkRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
