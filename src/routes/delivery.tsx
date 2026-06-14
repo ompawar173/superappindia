@@ -1,8 +1,9 @@
 import { Link, Outlet, createFileRoute, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { Bike, Home as HomeIcon, ListChecks, Wallet, User } from "lucide-react";
+import { Home as HomeIcon, ListChecks, Wallet, User } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
+import logoAsset from "@/assets/logo.png.asset.json";
 
 export const Route = createFileRoute("/delivery")({ component: DeliveryLayout });
 
@@ -27,10 +28,8 @@ function DeliveryLayout() {
       <header className="sticky top-0 z-30 border-b border-border/60 bg-background/90 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-3xl items-center justify-between px-4">
           <Link to="/delivery" className="flex items-center gap-2">
-            <span className="grid h-8 w-8 place-items-center rounded-xl bg-primary text-primary-foreground">
-              <Bike className="h-4 w-4" />
-            </span>
-            <span className="font-display font-bold">Rider</span>
+            <img src={logoAsset.url} alt="SuperApp India" className="h-7 w-auto" />
+            <span className="rounded-full bg-primary-soft px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary">Rider</span>
           </Link>
           <Link to="/" className="text-xs text-muted-foreground hover:underline">App ↗</Link>
         </div>

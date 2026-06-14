@@ -70,6 +70,30 @@ function RiderHome() {
     return () => { supabase.removeChannel(ch); };
   }, [user, qc]);
 
+  // Live geolocation push while online (every ~20s)
+  useEffect(() => {
+    if (!user || !partner?.is_online || typeof navigator === "undefined" || !navigator.geolocation) return;
+    let cancelled = false;
+    const push = () => {
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          if (cancelled) return;
+          await supabase.from("delivery_partners").update({
+            current_lat: pos.coords.latitude,
+            current_lng: pos.coords.longitude,
+            last_location_at: new Date().toISOString(),
+            last_seen_at: new Date().toISOString(),
+          }).eq("user_id", user.id);
+        },
+        () => { /* permission denied — silently skip */ },
+        { enableHighAccuracy: true, maximumAge: 15000, timeout: 10000 },
+      );
+    };
+    push();
+    const id = setInterval(push, 20000);
+    return () => { cancelled = true; clearInterval(id); };
+  }, [user, partner?.is_online]);
+
   if (isLoading) return <div className="py-10 text-center text-sm text-muted-foreground">Loading…</div>;
   if (!partner) {
     return (

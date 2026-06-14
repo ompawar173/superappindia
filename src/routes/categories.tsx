@@ -7,8 +7,8 @@ import { supabase } from "@/integrations/supabase/client";
 export const Route = createFileRoute("/categories")({
   head: () => ({
     meta: [
-      { title: "Explore categories — SuperApp" },
-      { name: "description", content: "Browse all SuperApp categories: food, grocery, travel, hotels, cabs, pharmacy, recharges and own services." },
+      { title: "Explore categories — SuperApp India" },
+      { name: "description", content: "Browse all SuperApp India categories: food, grocery, travel, hotels, cabs, pharmacy, recharges and home services." },
     ],
   }),
   component: CategoriesPage,
@@ -20,7 +20,7 @@ function CategoriesPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("categories")
-        .select("id,slug,name,icon,color")
+        .select("id,slug,name,icon,image_url,color")
         .eq("active", true)
         .order("sort_order");
       if (error) throw error;
@@ -41,17 +41,19 @@ function CategoriesPage() {
                 key={c.id}
                 to="/c/$category"
                 params={{ category: c.slug }}
-                className="group flex items-center gap-3 rounded-2xl border border-border/60 bg-card p-4 transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-soft"
+                className="group relative aspect-[4/3] overflow-hidden rounded-2xl border border-border/60 bg-card transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-soft"
               >
-                <span
-                  className="grid h-12 w-12 place-items-center rounded-xl"
-                  style={{ backgroundColor: (c.color ?? "#16a34a") + "22", color: c.color ?? undefined }}
-                >
-                  <Icon className="h-6 w-6" />
-                </span>
-                <div>
-                  <h3 className="font-semibold">{c.name}</h3>
-                  <p className="text-xs text-muted-foreground">View partners</p>
+                {c.image_url ? (
+                  <img src={c.image_url} alt={c.name} className="absolute inset-0 h-full w-full object-cover transition group-hover:scale-105" loading="lazy" />
+                ) : (
+                  <span className="absolute inset-0 grid place-items-center" style={{ backgroundColor: (c.color ?? "#16a34a") + "22", color: c.color ?? undefined }}>
+                    <Icon className="h-10 w-10" />
+                  </span>
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                <div className="absolute inset-x-0 bottom-0 p-3">
+                  <h3 className="font-display text-base font-bold text-white drop-shadow">{c.name}</h3>
+                  <p className="text-[11px] text-white/80">View partners →</p>
                 </div>
               </Link>
             );

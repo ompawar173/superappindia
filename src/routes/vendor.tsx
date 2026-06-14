@@ -1,25 +1,33 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
-import { Store, ShieldCheck, Package, Wallet } from "lucide-react";
-import { AppShell } from "@/components/app-shell";
+import { Link, Outlet, createFileRoute, useNavigate, useRouterState } from "@tanstack/react-router";
+import { useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { BarChart3, Package, ReceiptText, Store, Wallet, Wrench, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
+import logoAsset from "@/assets/logo.png.asset.json";
 
-export const Route = createFileRoute("/vendor")({ component: VendorPage });
+export const Route = createFileRoute("/vendor")({ component: VendorLayout });
 
-function VendorPage() {
+const NAV = [
+  { to: "/vendor", label: "Overview", icon: BarChart3, exact: true },
+  { to: "/vendor/products", label: "Products", icon: Package },
+  { to: "/vendor/services", label: "Services", icon: Wrench },
+  { to: "/vendor/orders", label: "Orders", icon: ReceiptText },
+  { to: "/vendor/payouts", label: "Payouts", icon: Wallet },
+];
+
+function VendorLayout() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const path = useRouterState({ select: (s) => s.location.pathname });
+
   useEffect(() => {
-    if (!loading && !user) navigate({ to: "/auth" });
+    if (loading) return;
+    if (!user) navigate({ to: "/seller/auth" });
   }, [user, loading, navigate]);
 
-  const { data: vendor, refetch } = useQuery({
+  const { data: vendor } = useQuery({
     queryKey: ["vendor", user?.id],
     enabled: !!user,
     queryFn: async () => {
@@ -28,107 +36,85 @@ function VendorPage() {
     },
   });
 
-  if (!user) return null;
-  if (!vendor) return <VendorOnboarding onCreated={refetch} />;
-  return <VendorDashboard vendor={vendor} />;
-}
-
-function VendorOnboarding({ onCreated }: { onCreated: () => void }) {
-  const { user } = useAuth();
-  const [business, setBusiness] = useState("");
-  const [city, setCity] = useState("");
-  const [gstin, setGstin] = useState("");
-  const [loading, setLoading] = useState(false);
-  const qc = useQueryClient();
-
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    const { error } = await supabase.from("vendors").insert({
-      user_id: user!.id, business_name: business, city, gstin: gstin || null,
-    });
-    setLoading(false);
-    if (error) return toast.error(error.message);
-    toast.success("Vendor profile submitted. KYC pending admin review.");
-    qc.invalidateQueries({ queryKey: ["vendor"] });
-    onCreated();
-  };
+  if (loading || !user) {
+    return <div className="grid min-h-screen place-items-center text-sm text-muted-foreground">Loading…</div>;
+  }
 
   return (
-    <AppShell>
-      <div className="mx-auto max-w-xl px-4 py-8">
-        <div className="mb-6 flex items-center gap-3">
-          <span className="grid h-12 w-12 place-items-center rounded-2xl bg-primary-soft text-primary"><Store className="h-6 w-6" /></span>
-          <div>
-            <h1 className="font-display text-2xl font-bold">Sell on SuperApp</h1>
-            <p className="text-sm text-muted-foreground">List your business and reach millions of customers.</p>
+    <div className="min-h-screen bg-muted/30">
+      <header className="border-b border-border/60 bg-background">
+        <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4">
+          <Link to="/vendor" className="flex items-center gap-2">
+            <img src={logoAsset.url} alt="SuperApp India" className="h-7 w-auto" />
+            <span className="rounded-full bg-primary-soft px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary">Seller</span>
+          </Link>
+          <div className="flex items-center gap-3">
+            {vendor && (
+              <span className={cn(
+                "inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold capitalize",
+                vendor.kyc_status === "approved" ? "bg-success/15 text-success" :
+                vendor.kyc_status === "rejected" ? "bg-destructive/15 text-destructive" :
+                "bg-warning/15 text-warning-foreground"
+              )}>
+                <ShieldCheck className="h-3 w-3" /> KYC {vendor.kyc_status}
+              </span>
+            )}
+            <Link to="/" className="text-xs text-muted-foreground hover:underline">← Back to app</Link>
           </div>
         </div>
-        <form onSubmit={submit} className="space-y-4 rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
-          <div>
-            <Label htmlFor="business">Business name</Label>
-            <Input id="business" value={business} onChange={(e) => setBusiness(e.target.value)} required />
-          </div>
-          <div>
-            <Label htmlFor="city">City</Label>
-            <Input id="city" value={city} onChange={(e) => setCity(e.target.value)} required />
-          </div>
-          <div>
-            <Label htmlFor="gstin">GSTIN (optional)</Label>
-            <Input id="gstin" value={gstin} onChange={(e) => setGstin(e.target.value)} />
-          </div>
-          <Button disabled={loading} type="submit" className="w-full rounded-full">
-            {loading ? "Submitting…" : "Submit application"}
-          </Button>
-        </form>
+      </header>
+      <div className="mx-auto flex max-w-7xl">
+        <aside className="hidden w-56 shrink-0 border-r border-border/60 bg-background p-3 md:block">
+          <nav className="space-y-1">
+            {NAV.map((n) => {
+              const active = n.exact ? path === n.to : path.startsWith(n.to);
+              return (
+                <Link key={n.to} to={n.to}
+                  className={cn(
+                    "flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition",
+                    active ? "bg-primary-soft text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                  )}
+                >
+                  <n.icon className="h-4 w-4" /> {n.label}
+                </Link>
+              );
+            })}
+          </nav>
+        </aside>
+        <main className="min-w-0 flex-1 p-4 md:p-6"><Outlet /></main>
       </div>
-    </AppShell>
-  );
-}
-
-function VendorDashboard({ vendor }: { vendor: any }) {
-  const statusColor =
-    vendor.kyc_status === "approved" ? "bg-success text-success-foreground"
-    : vendor.kyc_status === "rejected" ? "bg-destructive text-destructive-foreground"
-    : "bg-warning text-warning-foreground";
-
-  return (
-    <AppShell>
-      <div className="mx-auto max-w-5xl px-4 py-6">
-        <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <p className="text-xs uppercase tracking-wider text-muted-foreground">Vendor</p>
-              <h1 className="font-display text-2xl font-bold">{vendor.business_name}</h1>
-              <p className="text-sm text-muted-foreground">{vendor.city}</p>
-            </div>
-            <span className={`rounded-full px-3 py-1 text-xs font-semibold capitalize ${statusColor}`}>
-              KYC: {vendor.kyc_status}
-            </span>
-          </div>
-        </div>
-
-        <div className="mt-5 grid gap-3 sm:grid-cols-3">
-          <StatTile icon={Package} label="Products" value="0" />
-          <StatTile icon={ShieldCheck} label="Orders" value="0" />
-          <StatTile icon={Wallet} label="Payout (₹)" value="0" />
-        </div>
-
-        <div className="mt-6 rounded-2xl border border-dashed border-border bg-muted/30 p-6 text-sm text-muted-foreground">
-          <p>Catalog and order management UI launches once KYC is approved by admin.</p>
-          <Link to="/account" className="mt-2 inline-block text-primary hover:underline">← Back to account</Link>
-        </div>
-      </div>
-    </AppShell>
-  );
-}
-
-function StatTile({ icon: Icon, label, value }: { icon: any; label: string; value: string }) {
-  return (
-    <div className="rounded-2xl border border-border/60 bg-card p-4">
-      <Icon className="h-5 w-5 text-primary" />
-      <p className="mt-2 text-xs uppercase tracking-wider text-muted-foreground">{label}</p>
-      <p className="font-display text-xl font-bold">{value}</p>
+      <MobileBottomNav path={path} />
     </div>
+  );
+}
+
+function MobileBottomNav({ path }: { path: string }) {
+  const items = [
+    { to: "/vendor", icon: BarChart3, label: "Home", exact: true },
+    { to: "/vendor/products", icon: Package, label: "Products" },
+    { to: "/vendor/services", icon: Wrench, label: "Services" },
+    { to: "/vendor/orders", icon: ReceiptText, label: "Orders" },
+    { to: "/vendor/payouts", icon: Wallet, label: "Payouts" },
+  ];
+  return (
+    <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-border/60 bg-background/95 backdrop-blur md:hidden">
+      <ul className="mx-auto grid max-w-3xl grid-cols-5">
+        {items.map((it) => {
+          const active = it.exact ? path === it.to : path.startsWith(it.to);
+          const Icon = it.icon;
+          return (
+            <li key={it.to}>
+              <Link to={it.to} className={cn(
+                "flex flex-col items-center gap-0.5 py-2 text-[10px] font-medium transition",
+                active ? "text-primary" : "text-muted-foreground",
+              )}>
+                <Icon className={cn("h-4 w-4", active && "scale-110")} />
+                {it.label}
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </nav>
   );
 }

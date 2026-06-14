@@ -116,6 +116,7 @@ export type Database = {
           created_at: string
           icon: string | null
           id: string
+          image_url: string | null
           name: string
           slug: string
           sort_order: number
@@ -126,6 +127,7 @@ export type Database = {
           created_at?: string
           icon?: string | null
           id?: string
+          image_url?: string | null
           name: string
           slug: string
           sort_order?: number
@@ -136,6 +138,7 @@ export type Database = {
           created_at?: string
           icon?: string | null
           id?: string
+          image_url?: string | null
           name?: string
           slug?: string
           sort_order?: number
@@ -362,6 +365,7 @@ export type Database = {
           is_online: boolean
           kyc_rejection_reason: string | null
           kyc_status: Database["public"]["Enums"]["kyc_status_t"]
+          last_location_at: string | null
           last_seen_at: string | null
           phone: string
           rating: number | null
@@ -380,6 +384,7 @@ export type Database = {
           is_online?: boolean
           kyc_rejection_reason?: string | null
           kyc_status?: Database["public"]["Enums"]["kyc_status_t"]
+          last_location_at?: string | null
           last_seen_at?: string | null
           phone: string
           rating?: number | null
@@ -398,6 +403,7 @@ export type Database = {
           is_online?: boolean
           kyc_rejection_reason?: string | null
           kyc_status?: Database["public"]["Enums"]["kyc_status_t"]
+          last_location_at?: string | null
           last_seen_at?: string | null
           phone?: string
           rating?: number | null
@@ -775,6 +781,48 @@ export type Database = {
         }
         Relationships: []
       }
+      services: {
+        Row: {
+          active: boolean
+          base_price: number | null
+          created_at: string
+          icon: string | null
+          id: string
+          image_url: string | null
+          name: string
+          short_desc: string | null
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          base_price?: number | null
+          created_at?: string
+          icon?: string | null
+          id?: string
+          image_url?: string | null
+          name: string
+          short_desc?: string | null
+          slug: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          base_price?: number | null
+          created_at?: string
+          icon?: string | null
+          id?: string
+          image_url?: string | null
+          name?: string
+          short_desc?: string | null
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -802,10 +850,14 @@ export type Database = {
           category_id: string | null
           created_at: string
           description: string | null
+          duration_minutes: number | null
           id: string
           images: string[] | null
+          kind: string
+          mrp: number | null
           ondc_attrs: Json | null
           price: number
+          service_area: string | null
           sku: string | null
           stock: number
           title: string
@@ -817,10 +869,14 @@ export type Database = {
           category_id?: string | null
           created_at?: string
           description?: string | null
+          duration_minutes?: number | null
           id?: string
           images?: string[] | null
+          kind?: string
+          mrp?: number | null
           ondc_attrs?: Json | null
           price?: number
+          service_area?: string | null
           sku?: string | null
           stock?: number
           title: string
@@ -832,10 +888,14 @@ export type Database = {
           category_id?: string | null
           created_at?: string
           description?: string | null
+          duration_minutes?: number | null
           id?: string
           images?: string[] | null
+          kind?: string
+          mrp?: number | null
           ondc_attrs?: Json | null
           price?: number
+          service_area?: string | null
           sku?: string | null
           stock?: number
           title?: string

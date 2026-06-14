@@ -1,7 +1,8 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, Search, ShoppingBag, User, Sparkles, LayoutGrid } from "lucide-react";
+import { Home, Search, ShoppingBag, User, LayoutGrid } from "lucide-react";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import logoAsset from "@/assets/logo.png.asset.json";
 
 export function AppShell({ children }: { children: ReactNode }) {
   return (
@@ -18,19 +19,13 @@ function TopBar() {
     <header className="sticky top-0 z-30 border-b border-border/60 bg-background/80 backdrop-blur">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
         <Link to="/" className="flex items-center gap-2">
-          <span className="grid h-8 w-8 place-items-center rounded-xl gradient-brand text-primary-foreground shadow-glow">
-            <Sparkles className="h-4 w-4" />
-          </span>
-          <span className="font-display text-lg font-bold tracking-tight">
-            Super<span className="text-primary">App</span>
-          </span>
-          <span className="hidden text-xs text-muted-foreground sm:inline">India</span>
+          <img src={logoAsset.url} alt="SuperApp India" className="h-8 w-auto" />
         </Link>
         <nav className="hidden items-center gap-1 md:flex">
           <TopLink to="/" label="Home" />
           <TopLink to="/categories" label="Explore" />
           <TopLink to="/rewards" label="Rewards" />
-          <TopLink to="/vendor" label="Sell with us" />
+          <TopLink to="/seller/auth" label="Sell with us" />
           <TopLink to="/delivery" label="Ride with us" />
         </nav>
         <Link
