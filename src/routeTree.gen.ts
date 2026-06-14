@@ -19,8 +19,14 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as VendorIndexRouteImport } from './routes/vendor.index'
 import { Route as DeliveryIndexRouteImport } from './routes/delivery.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as VendorServicesRouteImport } from './routes/vendor.services'
+import { Route as VendorProductsRouteImport } from './routes/vendor.products'
+import { Route as VendorPayoutsRouteImport } from './routes/vendor.payouts'
+import { Route as VendorOrdersRouteImport } from './routes/vendor.orders'
+import { Route as ServicesSlugRouteImport } from './routes/services.$slug'
 import { Route as SellerAuthRouteImport } from './routes/seller.auth'
 import { Route as RShortCodeRouteImport } from './routes/r.$shortCode'
 import { Route as PPartnerRouteImport } from './routes/p.$partner'
@@ -32,10 +38,12 @@ import { Route as DeliveryAssignmentsRouteImport } from './routes/delivery.assig
 import { Route as CCategoryRouteImport } from './routes/c.$category'
 import { Route as AdminVendorsRouteImport } from './routes/admin.vendors'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
+import { Route as AdminServicesRouteImport } from './routes/admin.services'
 import { Route as AdminPartnersRouteImport } from './routes/admin.partners'
 import { Route as AdminOndcRouteImport } from './routes/admin.ondc'
 import { Route as AdminLinksRouteImport } from './routes/admin.links'
 import { Route as AdminDeliveryRouteImport } from './routes/admin.delivery'
+import { Route as AdminBannersRouteImport } from './routes/admin.banners'
 import { Route as ApiPublicPostbacksNetworkRouteImport } from './routes/api/public/postbacks.$network'
 import { Route as ApiPublicOndcSplatRouteImport } from './routes/api/public/ondc.$'
 
@@ -89,6 +97,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VendorIndexRoute = VendorIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => VendorRoute,
+} as any)
 const DeliveryIndexRoute = DeliveryIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -98,6 +111,31 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminRoute,
+} as any)
+const VendorServicesRoute = VendorServicesRouteImport.update({
+  id: '/services',
+  path: '/services',
+  getParentRoute: () => VendorRoute,
+} as any)
+const VendorProductsRoute = VendorProductsRouteImport.update({
+  id: '/products',
+  path: '/products',
+  getParentRoute: () => VendorRoute,
+} as any)
+const VendorPayoutsRoute = VendorPayoutsRouteImport.update({
+  id: '/payouts',
+  path: '/payouts',
+  getParentRoute: () => VendorRoute,
+} as any)
+const VendorOrdersRoute = VendorOrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
+  getParentRoute: () => VendorRoute,
+} as any)
+const ServicesSlugRoute = ServicesSlugRouteImport.update({
+  id: '/services/$slug',
+  path: '/services/$slug',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const SellerAuthRoute = SellerAuthRouteImport.update({
   id: '/seller/auth',
@@ -154,6 +192,11 @@ const AdminUsersRoute = AdminUsersRouteImport.update({
   path: '/users',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminServicesRoute = AdminServicesRouteImport.update({
+  id: '/services',
+  path: '/services',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminPartnersRoute = AdminPartnersRouteImport.update({
   id: '/partners',
   path: '/partners',
@@ -172,6 +215,11 @@ const AdminLinksRoute = AdminLinksRouteImport.update({
 const AdminDeliveryRoute = AdminDeliveryRouteImport.update({
   id: '/delivery',
   path: '/delivery',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminBannersRoute = AdminBannersRouteImport.update({
+  id: '/banners',
+  path: '/banners',
   getParentRoute: () => AdminRoute,
 } as any)
 const ApiPublicPostbacksNetworkRoute =
@@ -196,11 +244,13 @@ export interface FileRoutesByFullPath {
   '/orders': typeof OrdersRoute
   '/rewards': typeof RewardsRoute
   '/search': typeof SearchRoute
-  '/vendor': typeof VendorRoute
+  '/vendor': typeof VendorRouteWithChildren
+  '/admin/banners': typeof AdminBannersRoute
   '/admin/delivery': typeof AdminDeliveryRoute
   '/admin/links': typeof AdminLinksRoute
   '/admin/ondc': typeof AdminOndcRoute
   '/admin/partners': typeof AdminPartnersRoute
+  '/admin/services': typeof AdminServicesRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/vendors': typeof AdminVendorsRoute
   '/c/$category': typeof CCategoryRoute
@@ -212,8 +262,14 @@ export interface FileRoutesByFullPath {
   '/p/$partner': typeof PPartnerRoute
   '/r/$shortCode': typeof RShortCodeRoute
   '/seller/auth': typeof SellerAuthRoute
+  '/services/$slug': typeof ServicesSlugRoute
+  '/vendor/orders': typeof VendorOrdersRoute
+  '/vendor/payouts': typeof VendorPayoutsRoute
+  '/vendor/products': typeof VendorProductsRoute
+  '/vendor/services': typeof VendorServicesRoute
   '/admin/': typeof AdminIndexRoute
   '/delivery/': typeof DeliveryIndexRoute
+  '/vendor/': typeof VendorIndexRoute
   '/api/public/ondc/$': typeof ApiPublicOndcSplatRoute
   '/api/public/postbacks/$network': typeof ApiPublicPostbacksNetworkRoute
 }
@@ -225,11 +281,12 @@ export interface FileRoutesByTo {
   '/orders': typeof OrdersRoute
   '/rewards': typeof RewardsRoute
   '/search': typeof SearchRoute
-  '/vendor': typeof VendorRoute
+  '/admin/banners': typeof AdminBannersRoute
   '/admin/delivery': typeof AdminDeliveryRoute
   '/admin/links': typeof AdminLinksRoute
   '/admin/ondc': typeof AdminOndcRoute
   '/admin/partners': typeof AdminPartnersRoute
+  '/admin/services': typeof AdminServicesRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/vendors': typeof AdminVendorsRoute
   '/c/$category': typeof CCategoryRoute
@@ -241,8 +298,14 @@ export interface FileRoutesByTo {
   '/p/$partner': typeof PPartnerRoute
   '/r/$shortCode': typeof RShortCodeRoute
   '/seller/auth': typeof SellerAuthRoute
+  '/services/$slug': typeof ServicesSlugRoute
+  '/vendor/orders': typeof VendorOrdersRoute
+  '/vendor/payouts': typeof VendorPayoutsRoute
+  '/vendor/products': typeof VendorProductsRoute
+  '/vendor/services': typeof VendorServicesRoute
   '/admin': typeof AdminIndexRoute
   '/delivery': typeof DeliveryIndexRoute
+  '/vendor': typeof VendorIndexRoute
   '/api/public/ondc/$': typeof ApiPublicOndcSplatRoute
   '/api/public/postbacks/$network': typeof ApiPublicPostbacksNetworkRoute
 }
@@ -257,11 +320,13 @@ export interface FileRoutesById {
   '/orders': typeof OrdersRoute
   '/rewards': typeof RewardsRoute
   '/search': typeof SearchRoute
-  '/vendor': typeof VendorRoute
+  '/vendor': typeof VendorRouteWithChildren
+  '/admin/banners': typeof AdminBannersRoute
   '/admin/delivery': typeof AdminDeliveryRoute
   '/admin/links': typeof AdminLinksRoute
   '/admin/ondc': typeof AdminOndcRoute
   '/admin/partners': typeof AdminPartnersRoute
+  '/admin/services': typeof AdminServicesRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/vendors': typeof AdminVendorsRoute
   '/c/$category': typeof CCategoryRoute
@@ -273,8 +338,14 @@ export interface FileRoutesById {
   '/p/$partner': typeof PPartnerRoute
   '/r/$shortCode': typeof RShortCodeRoute
   '/seller/auth': typeof SellerAuthRoute
+  '/services/$slug': typeof ServicesSlugRoute
+  '/vendor/orders': typeof VendorOrdersRoute
+  '/vendor/payouts': typeof VendorPayoutsRoute
+  '/vendor/products': typeof VendorProductsRoute
+  '/vendor/services': typeof VendorServicesRoute
   '/admin/': typeof AdminIndexRoute
   '/delivery/': typeof DeliveryIndexRoute
+  '/vendor/': typeof VendorIndexRoute
   '/api/public/ondc/$': typeof ApiPublicOndcSplatRoute
   '/api/public/postbacks/$network': typeof ApiPublicPostbacksNetworkRoute
 }
@@ -291,10 +362,12 @@ export interface FileRouteTypes {
     | '/rewards'
     | '/search'
     | '/vendor'
+    | '/admin/banners'
     | '/admin/delivery'
     | '/admin/links'
     | '/admin/ondc'
     | '/admin/partners'
+    | '/admin/services'
     | '/admin/users'
     | '/admin/vendors'
     | '/c/$category'
@@ -306,8 +379,14 @@ export interface FileRouteTypes {
     | '/p/$partner'
     | '/r/$shortCode'
     | '/seller/auth'
+    | '/services/$slug'
+    | '/vendor/orders'
+    | '/vendor/payouts'
+    | '/vendor/products'
+    | '/vendor/services'
     | '/admin/'
     | '/delivery/'
+    | '/vendor/'
     | '/api/public/ondc/$'
     | '/api/public/postbacks/$network'
   fileRoutesByTo: FileRoutesByTo
@@ -319,11 +398,12 @@ export interface FileRouteTypes {
     | '/orders'
     | '/rewards'
     | '/search'
-    | '/vendor'
+    | '/admin/banners'
     | '/admin/delivery'
     | '/admin/links'
     | '/admin/ondc'
     | '/admin/partners'
+    | '/admin/services'
     | '/admin/users'
     | '/admin/vendors'
     | '/c/$category'
@@ -335,8 +415,14 @@ export interface FileRouteTypes {
     | '/p/$partner'
     | '/r/$shortCode'
     | '/seller/auth'
+    | '/services/$slug'
+    | '/vendor/orders'
+    | '/vendor/payouts'
+    | '/vendor/products'
+    | '/vendor/services'
     | '/admin'
     | '/delivery'
+    | '/vendor'
     | '/api/public/ondc/$'
     | '/api/public/postbacks/$network'
   id:
@@ -351,10 +437,12 @@ export interface FileRouteTypes {
     | '/rewards'
     | '/search'
     | '/vendor'
+    | '/admin/banners'
     | '/admin/delivery'
     | '/admin/links'
     | '/admin/ondc'
     | '/admin/partners'
+    | '/admin/services'
     | '/admin/users'
     | '/admin/vendors'
     | '/c/$category'
@@ -366,8 +454,14 @@ export interface FileRouteTypes {
     | '/p/$partner'
     | '/r/$shortCode'
     | '/seller/auth'
+    | '/services/$slug'
+    | '/vendor/orders'
+    | '/vendor/payouts'
+    | '/vendor/products'
+    | '/vendor/services'
     | '/admin/'
     | '/delivery/'
+    | '/vendor/'
     | '/api/public/ondc/$'
     | '/api/public/postbacks/$network'
   fileRoutesById: FileRoutesById
@@ -382,11 +476,12 @@ export interface RootRouteChildren {
   OrdersRoute: typeof OrdersRoute
   RewardsRoute: typeof RewardsRoute
   SearchRoute: typeof SearchRoute
-  VendorRoute: typeof VendorRoute
+  VendorRoute: typeof VendorRouteWithChildren
   CCategoryRoute: typeof CCategoryRoute
   PPartnerRoute: typeof PPartnerRoute
   RShortCodeRoute: typeof RShortCodeRoute
   SellerAuthRoute: typeof SellerAuthRoute
+  ServicesSlugRoute: typeof ServicesSlugRoute
   ApiPublicOndcSplatRoute: typeof ApiPublicOndcSplatRoute
   ApiPublicPostbacksNetworkRoute: typeof ApiPublicPostbacksNetworkRoute
 }
@@ -463,6 +558,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/vendor/': {
+      id: '/vendor/'
+      path: '/'
+      fullPath: '/vendor/'
+      preLoaderRoute: typeof VendorIndexRouteImport
+      parentRoute: typeof VendorRoute
+    }
     '/delivery/': {
       id: '/delivery/'
       path: '/'
@@ -476,6 +578,41 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/vendor/services': {
+      id: '/vendor/services'
+      path: '/services'
+      fullPath: '/vendor/services'
+      preLoaderRoute: typeof VendorServicesRouteImport
+      parentRoute: typeof VendorRoute
+    }
+    '/vendor/products': {
+      id: '/vendor/products'
+      path: '/products'
+      fullPath: '/vendor/products'
+      preLoaderRoute: typeof VendorProductsRouteImport
+      parentRoute: typeof VendorRoute
+    }
+    '/vendor/payouts': {
+      id: '/vendor/payouts'
+      path: '/payouts'
+      fullPath: '/vendor/payouts'
+      preLoaderRoute: typeof VendorPayoutsRouteImport
+      parentRoute: typeof VendorRoute
+    }
+    '/vendor/orders': {
+      id: '/vendor/orders'
+      path: '/orders'
+      fullPath: '/vendor/orders'
+      preLoaderRoute: typeof VendorOrdersRouteImport
+      parentRoute: typeof VendorRoute
+    }
+    '/services/$slug': {
+      id: '/services/$slug'
+      path: '/services/$slug'
+      fullPath: '/services/$slug'
+      preLoaderRoute: typeof ServicesSlugRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/seller/auth': {
       id: '/seller/auth'
@@ -554,6 +691,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminUsersRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/services': {
+      id: '/admin/services'
+      path: '/services'
+      fullPath: '/admin/services'
+      preLoaderRoute: typeof AdminServicesRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/partners': {
       id: '/admin/partners'
       path: '/partners'
@@ -582,6 +726,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminDeliveryRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/banners': {
+      id: '/admin/banners'
+      path: '/banners'
+      fullPath: '/admin/banners'
+      preLoaderRoute: typeof AdminBannersRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/api/public/postbacks/$network': {
       id: '/api/public/postbacks/$network'
       path: '/api/public/postbacks/$network'
@@ -600,20 +751,24 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminRouteChildren {
+  AdminBannersRoute: typeof AdminBannersRoute
   AdminDeliveryRoute: typeof AdminDeliveryRoute
   AdminLinksRoute: typeof AdminLinksRoute
   AdminOndcRoute: typeof AdminOndcRoute
   AdminPartnersRoute: typeof AdminPartnersRoute
+  AdminServicesRoute: typeof AdminServicesRoute
   AdminUsersRoute: typeof AdminUsersRoute
   AdminVendorsRoute: typeof AdminVendorsRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminBannersRoute: AdminBannersRoute,
   AdminDeliveryRoute: AdminDeliveryRoute,
   AdminLinksRoute: AdminLinksRoute,
   AdminOndcRoute: AdminOndcRoute,
   AdminPartnersRoute: AdminPartnersRoute,
+  AdminServicesRoute: AdminServicesRoute,
   AdminUsersRoute: AdminUsersRoute,
   AdminVendorsRoute: AdminVendorsRoute,
   AdminIndexRoute: AdminIndexRoute,
@@ -643,6 +798,25 @@ const DeliveryRouteWithChildren = DeliveryRoute._addFileChildren(
   DeliveryRouteChildren,
 )
 
+interface VendorRouteChildren {
+  VendorOrdersRoute: typeof VendorOrdersRoute
+  VendorPayoutsRoute: typeof VendorPayoutsRoute
+  VendorProductsRoute: typeof VendorProductsRoute
+  VendorServicesRoute: typeof VendorServicesRoute
+  VendorIndexRoute: typeof VendorIndexRoute
+}
+
+const VendorRouteChildren: VendorRouteChildren = {
+  VendorOrdersRoute: VendorOrdersRoute,
+  VendorPayoutsRoute: VendorPayoutsRoute,
+  VendorProductsRoute: VendorProductsRoute,
+  VendorServicesRoute: VendorServicesRoute,
+  VendorIndexRoute: VendorIndexRoute,
+}
+
+const VendorRouteWithChildren =
+  VendorRoute._addFileChildren(VendorRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AccountRoute: AccountRoute,
@@ -653,11 +827,12 @@ const rootRouteChildren: RootRouteChildren = {
   OrdersRoute: OrdersRoute,
   RewardsRoute: RewardsRoute,
   SearchRoute: SearchRoute,
-  VendorRoute: VendorRoute,
+  VendorRoute: VendorRouteWithChildren,
   CCategoryRoute: CCategoryRoute,
   PPartnerRoute: PPartnerRoute,
   RShortCodeRoute: RShortCodeRoute,
   SellerAuthRoute: SellerAuthRoute,
+  ServicesSlugRoute: ServicesSlugRoute,
   ApiPublicOndcSplatRoute: ApiPublicOndcSplatRoute,
   ApiPublicPostbacksNetworkRoute: ApiPublicPostbacksNetworkRoute,
 }
