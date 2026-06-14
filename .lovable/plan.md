@@ -1,106 +1,132 @@
-# Delivery Partner Module — Plan
 
-Add a third role alongside User and Vendor: **Delivery Partner** (rider). They self-onboard, upload KYC, get approved by admin, then receive order assignments from own-services orders.
+# Plan — v2 upgrades
 
-## 1. Scope (v1)
+Seven focused changes, grouped so we can ship them in one pass.
 
-- Rider sign up / sign in via **phone OTP** (Supabase phone auth)
-- Onboarding form + document uploads (Aadhaar, PAN, DL, RC, vehicle photo, profile photo)
-- Admin approval / rejection with reason
-- Rider dashboard: availability toggle, current assignment, history, earnings
-- Auto/manual assignment of own-service orders to approved + online riders
-- Status flow: `assigned → accepted → picked_up → delivered` (or `rejected/cancelled`)
-- Admin view of all riders, live status, assignment override
+---
 
-**Out of scope v1:** live GPS tracking on map, route optimization, COD reconciliation, surge pricing, rider chat.
+## 1. Separate sign-in pages for User vs Seller
 
-## 2. New role & auth
+Today `/auth` is shared. Split it:
 
-- Extend `app_role` enum with `delivery` (migration).
-- Phone OTP enabled in Supabase auth config; email/password stays for users/vendors/admin.
-- New route surface `/delivery/*` (separate from `/vendor` and `/admin`) with its own gate using `useRoles().roles.includes('delivery')`.
-- Auth screen `/delivery/auth` — phone + OTP only.
+- **`/auth`** — customer login/signup (email + Google), unchanged copy aimed at shoppers.
+- **`/seller/auth`** — vendor login/signup, branded "Sell on SuperApp India". On signup, auto-redirect to `/vendor` onboarding.
+- Add a small toggle at the bottom of each page ("Are you a seller? → /seller/auth", "Shop instead → /auth").
+- Delivery rider auth stays at `/delivery/auth` (phone OTP) — already separate.
 
-## 3. Database (new tables)
+No new role logic — same `user`/`vendor` roles in `user_roles`; the split is purely UX.
 
-```text
-delivery_partners
-  user_id (PK→auth.users), full_name, phone, city, vehicle_type (bike|scooter|cycle|car),
-  vehicle_number, kyc_status (pending|approved|rejected), kyc_rejection_reason,
-  is_online (bool), current_lat, current_lng, last_seen_at, rating, total_deliveries,
-  created_at, updated_at
+---
 
-delivery_documents
-  id, partner_id→delivery_partners, doc_type (aadhaar|pan|dl|rc|vehicle_photo|selfie),
-  storage_path, verified (bool), uploaded_at
+## 2. Seller can add their own Products & Services
 
-delivery_assignments
-  id, order_id→orders, partner_id→delivery_partners,
-  status (assigned|accepted|rejected|picked_up|delivered|cancelled),
-  assigned_at, accepted_at, picked_up_at, delivered_at,
-  payout_amount, distance_km, notes
+`vendors` exists but there's no catalog UI. Build it on top of the existing `vendor_products` table.
 
-delivery_earnings_ledger
-  id, partner_id, assignment_id, amount, type (delivery_fee|tip|bonus|adjustment),
-  created_at
-```
+New seller dashboard tabs under `/vendor`:
+- **Overview** (current stats, cleaned up)
+- **Products** — list / add / edit / delete. Fields: name, category, price, MRP, stock, description, images (Supabase Storage bucket `vendor-products`, public read), is_active.
+- **Services** — same shape but `kind='service'`, with duration + service area instead of stock.
+- **Orders** (placeholder list, wired to `orders.vendor_id`)
+- **Payouts** (placeholder)
 
-- `orders` gains `delivery_partner_id` + `delivery_status` columns.
-- RLS: rider sees only own rows; admin via `has_role('admin')`; service_role for assignment server fn.
-- Storage bucket `delivery-kyc` (private) with RLS — partner can upload/read own files, admin can read all.
-- GRANT block on every public table per project rules.
+Gated by `kyc_status='approved'` — pending vendors see the form but can't publish.
 
-## 4. Pages
+---
 
-**Rider app (`/delivery/*`)**
-- `/delivery/auth` — phone OTP
-- `/delivery/onboarding` — multi-step: personal → vehicle → documents → submit
-- `/delivery` — dashboard: online toggle, active assignment card, today's earnings, weekly chart
-- `/delivery/assignments` — history list + filters
-- `/delivery/earnings` — ledger + payout summary
-- `/delivery/profile` — edit details, re-upload rejected docs
+## 3. Cleaner Seller Dashboard
 
-**Admin additions**
-- `/admin/delivery` — list riders (filter by KYC status, city, online), approve/reject with reason
-- `/admin/delivery/$id` — partner detail, document viewer, assignment history, manual reassign
-- `/admin/orders` already exists — add assignment column and "assign rider" action
+Redesign `/vendor`:
+- Left sidebar (Overview / Products / Services / Orders / Payouts / Profile) matching admin's pattern.
+- Top header: business name + KYC pill + "Add product" CTA.
+- Stat cards: live counts from DB (products, active services, today's orders, pending payout).
+- Empty states with one clear action each.
 
-## 5. Assignment flow (own-service orders only — affiliate/ONDC excluded in v1)
+---
 
-1. New order with `fulfillment = 'own'` and status `paid` → trigger calls server fn `assignRider(orderId)`.
-2. `assignRider` (service role): picks nearest approved + online + free rider in same city (simple distance sort; falls back to round-robin if no geo).
-3. Inserts `delivery_assignments` row (status `assigned`), updates `orders.delivery_partner_id`, broadcasts via Supabase realtime.
-4. Rider sees push-in-app card → accept/reject (60s timer). Reject → re-run assignment, skip this rider.
-5. State transitions handled by `updateAssignmentStatus` server fn (authenticated, verifies partner owns assignment).
-6. On `delivered` → insert earnings ledger row, increment `total_deliveries`.
+## 4. Real-time Delivery flow with Google Maps + Dijkstra
 
-Realtime channel: `delivery_assignments:partner_id=eq.<uid>` for instant push without polling.
+Replace the toy assignment with a proper routing layer.
 
-## 6. Server functions / routes
+- **Google Maps connector** — connect via `standard_connectors--connect` (`google_maps`). Use the browser key for the rider map; use the gateway for Distance Matrix / Directions.
+- **Rider live location** — rider app pushes `current_lat/lng` every 15s to `delivery_partners` while `is_online=true` (browser geolocation).
+- **Assignment algorithm** — server fn `assignRider(orderId)`:
+  1. Fetch all approved + online + free riders in the same city.
+  2. Build a weighted graph: nodes = pickup, dropoff, candidate riders; edges = road-distance from Google Distance Matrix.
+  3. Run **Dijkstra's shortest path** from pickup → dropoff via each rider, pick the rider with the lowest total ETA cost.
+  4. Insert `delivery_assignments` row + broadcast on Realtime.
+- **Rider screen** — embedded Google Map with pickup pin, drop pin, live polyline from Directions API, turn-by-turn ETA, status buttons (Accept → Picked up → Delivered).
+- **Customer screen** — `/orders/$id/track` shows rider's live marker on the map.
 
-- `src/lib/delivery.functions.ts` — `submitOnboarding`, `uploadKycDoc` (returns signed URL), `setOnlineStatus`, `updateLocation`, `acceptAssignment`, `rejectAssignment`, `updateAssignmentStatus`
-- `src/lib/admin-delivery.functions.ts` — `approvePartner`, `rejectPartner`, `manualAssign`, `listPartners` (admin-gated)
-- `src/lib/assignment.server.ts` — pure helpers (geo, ranking)
-- All protected fns use `requireSupabaseAuth` + role check via `has_role()`.
+Note: Dijkstra here runs over a small graph (rider × stop matrix from Google), not raw map tiles — Google owns the road graph.
 
-## 7. Design
+---
 
-Reuse existing green/white system. Rider shell is a mobile-first, single-column layout with a sticky bottom action bar (accept/picked-up/delivered). Big tap targets, prominent online/offline pill in header.
+## 5. Admin-managed Sliding Banner on Home
 
-## 8. Build order
+`banners` table already exists. Wire it up:
+- **Admin** — new `/admin/banners` page: upload image, title, subtitle, link URL, sort order, active toggle (bucket `banners`, public).
+- **Home** — replace the static promo strip with an auto-sliding carousel (embla, 4s interval, swipeable). Pulls active banners ordered by `sort_order`.
+- Seed 5 starter banners with AI-generated images: delivery rider on scooter, fresh fruits crate, vegetable market, multi-category collage, festive offers.
 
-1. Migration (role enum + tables + storage bucket + RLS + GRANTs)
-2. Phone OTP auth config + `/delivery/auth`
-3. Onboarding form + document upload
-4. Admin approval UI
-5. Rider dashboard + availability toggle
-6. Assignment server fn + realtime push to rider
-7. Status transitions + earnings ledger
-8. Admin order ↔ rider linkage + manual reassign
+---
 
-## Open questions
+## 6. Categories — replace icons with real images
 
-1. **Phone OTP provider** — Supabase needs an SMS provider (Twilio / MSG91 / Textlocal). Do you already have one, or should I use Supabase's built-in test mode for now and you wire the real provider before launch?
-2. **Which orders go to riders?** Confirm: only "own services" orders (e.g., concierge, future grocery), not Swiggy/Zomato affiliate redirects (those use partner's own riders). Correct?
-3. **Payout per delivery** — flat ₹ per order, or distance-based (₹ base + ₹/km)? Needed to seed the earnings calc.
-4. **Auto-assign vs broadcast-to-many** — assign to one nearest rider with 60s accept window (Uber style), or broadcast to all nearby and first-come (Dunzo style)?
+- Add `image_url` to `categories` (already there as `icon_url` — repurpose / rename in UI).
+- Generate photographic tiles for each category (groceries, food, fashion, electronics, pharmacy, beauty, travel, mobility).
+- Home + `/categories` render image tiles (rounded, gradient overlay, label on top) instead of lucide icons.
+
+---
+
+## 7. Replace "PO" section with "SuperApp Services" hub
+
+The home strip currently labeled "Partner Offers / PO" becomes **SuperApp Services** — a horizontally scrollable rail of service names (not opened cards). Tap a service → opens its detail / booking page.
+
+Initial services: Concierge, Home Cleaning, Laundry, Plumber, Electrician, Salon at Home, Tutor, Courier.
+
+Stored in a new `services` table (name, slug, icon, short_desc, base_price, active). Admin gets `/admin/services` to manage.
+
+---
+
+## 8. Rebrand → "SuperApp India"
+
+- All "SuperApp" labels → "SuperApp India" (header, admin header, vendor header, rider header, auth pages, page titles, OG tags).
+- New logo: wordmark "SuperApp" with a small "India" tricolor accent badge. Generate as transparent PNG, swap in `app-shell`, `admin.tsx`, `delivery.tsx`, `vendor.tsx`.
+
+---
+
+## Technical summary
+
+**DB (one migration):**
+- `vendor_products`: add `kind` ('product'|'service'), `images jsonb`, `duration_minutes`, `service_area`.
+- `services` table (+ GRANTs + RLS: public read, admin write).
+- `delivery_partners`: add `last_location_at timestamptz`.
+- `categories.image_url` (text) — backfill from generated images.
+- Storage buckets: `vendor-products` (public), `banners` (public), `services` (public).
+
+**Connectors:**
+- `google_maps` (browser key for map widget; gateway for Distance Matrix + Directions).
+
+**New routes:**
+- `/seller/auth`, `/vendor/products`, `/vendor/services`, `/vendor/orders`, `/vendor/payouts`
+- `/admin/banners`, `/admin/services`
+- `/orders/$id/track`
+
+**New server fns:**
+- `assignRider` (Dijkstra + Distance Matrix)
+- `updateRiderLocation`
+- `getDirections` (proxied through gateway)
+
+**Frontend:**
+- Embla carousel for banners.
+- `@vis.gl/react-google-maps` (or raw JS API) for rider + tracking maps.
+- Image-based category tiles.
+
+---
+
+## Questions before I build
+
+1. **Google Maps** — okay to connect the managed connector now? (Required for routing + live map.)
+2. **Dijkstra choice confirmed?** Alternative is simpler nearest-rider-by-ETA from Distance Matrix (one call, no graph). Dijkstra is meaningful only when we have multi-leg routes (multiple stops). Want me to keep Dijkstra anyway as you asked, or switch to single-call nearest-ETA?
+3. **Seller products** — should they appear in the buyer app search/category pages immediately on publish, or only after admin approves each listing?
+4. **Banner carousel** — autoplay 4s + manual swipe (default), or static grid that user scrolls?
