@@ -21,6 +21,7 @@ import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DeliveryIndexRouteImport } from './routes/delivery.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as SellerAuthRouteImport } from './routes/seller.auth'
 import { Route as RShortCodeRouteImport } from './routes/r.$shortCode'
 import { Route as PPartnerRouteImport } from './routes/p.$partner'
 import { Route as DeliveryProfileRouteImport } from './routes/delivery.profile'
@@ -97,6 +98,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminRoute,
+} as any)
+const SellerAuthRoute = SellerAuthRouteImport.update({
+  id: '/seller/auth',
+  path: '/seller/auth',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const RShortCodeRoute = RShortCodeRouteImport.update({
   id: '/r/$shortCode',
@@ -205,6 +211,7 @@ export interface FileRoutesByFullPath {
   '/delivery/profile': typeof DeliveryProfileRoute
   '/p/$partner': typeof PPartnerRoute
   '/r/$shortCode': typeof RShortCodeRoute
+  '/seller/auth': typeof SellerAuthRoute
   '/admin/': typeof AdminIndexRoute
   '/delivery/': typeof DeliveryIndexRoute
   '/api/public/ondc/$': typeof ApiPublicOndcSplatRoute
@@ -233,6 +240,7 @@ export interface FileRoutesByTo {
   '/delivery/profile': typeof DeliveryProfileRoute
   '/p/$partner': typeof PPartnerRoute
   '/r/$shortCode': typeof RShortCodeRoute
+  '/seller/auth': typeof SellerAuthRoute
   '/admin': typeof AdminIndexRoute
   '/delivery': typeof DeliveryIndexRoute
   '/api/public/ondc/$': typeof ApiPublicOndcSplatRoute
@@ -264,6 +272,7 @@ export interface FileRoutesById {
   '/delivery/profile': typeof DeliveryProfileRoute
   '/p/$partner': typeof PPartnerRoute
   '/r/$shortCode': typeof RShortCodeRoute
+  '/seller/auth': typeof SellerAuthRoute
   '/admin/': typeof AdminIndexRoute
   '/delivery/': typeof DeliveryIndexRoute
   '/api/public/ondc/$': typeof ApiPublicOndcSplatRoute
@@ -296,6 +305,7 @@ export interface FileRouteTypes {
     | '/delivery/profile'
     | '/p/$partner'
     | '/r/$shortCode'
+    | '/seller/auth'
     | '/admin/'
     | '/delivery/'
     | '/api/public/ondc/$'
@@ -324,6 +334,7 @@ export interface FileRouteTypes {
     | '/delivery/profile'
     | '/p/$partner'
     | '/r/$shortCode'
+    | '/seller/auth'
     | '/admin'
     | '/delivery'
     | '/api/public/ondc/$'
@@ -354,6 +365,7 @@ export interface FileRouteTypes {
     | '/delivery/profile'
     | '/p/$partner'
     | '/r/$shortCode'
+    | '/seller/auth'
     | '/admin/'
     | '/delivery/'
     | '/api/public/ondc/$'
@@ -374,6 +386,7 @@ export interface RootRouteChildren {
   CCategoryRoute: typeof CCategoryRoute
   PPartnerRoute: typeof PPartnerRoute
   RShortCodeRoute: typeof RShortCodeRoute
+  SellerAuthRoute: typeof SellerAuthRoute
   ApiPublicOndcSplatRoute: typeof ApiPublicOndcSplatRoute
   ApiPublicPostbacksNetworkRoute: typeof ApiPublicPostbacksNetworkRoute
 }
@@ -463,6 +476,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/seller/auth': {
+      id: '/seller/auth'
+      path: '/seller/auth'
+      fullPath: '/seller/auth'
+      preLoaderRoute: typeof SellerAuthRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/r/$shortCode': {
       id: '/r/$shortCode'
@@ -637,6 +657,7 @@ const rootRouteChildren: RootRouteChildren = {
   CCategoryRoute: CCategoryRoute,
   PPartnerRoute: PPartnerRoute,
   RShortCodeRoute: RShortCodeRoute,
+  SellerAuthRoute: SellerAuthRoute,
   ApiPublicOndcSplatRoute: ApiPublicOndcSplatRoute,
   ApiPublicPostbacksNetworkRoute: ApiPublicPostbacksNetworkRoute,
 }
