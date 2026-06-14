@@ -1,15 +1,18 @@
 import { Link, Outlet, createFileRoute, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect } from "react";
 import {
-  BarChart3, Bike, Building2, Globe2, Link2, ShieldCheck, Sparkles, Store, Users2,
+  BarChart3, Bike, Building2, Globe2, Image, Link2, Sparkles, Store, Users2, Wrench,
 } from "lucide-react";
 import { useRoles } from "@/hooks/use-role";
 import { cn } from "@/lib/utils";
+import logoAsset from "@/assets/logo.png.asset.json";
 
 export const Route = createFileRoute("/admin")({ component: AdminLayout });
 
 const NAV = [
   { to: "/admin", label: "Dashboard", icon: BarChart3, exact: true },
+  { to: "/admin/banners", label: "Banners", icon: Image },
+  { to: "/admin/services", label: "Services", icon: Wrench },
   { to: "/admin/partners", label: "Partners", icon: Building2 },
   { to: "/admin/links", label: "UTM Links", icon: Link2 },
   { to: "/admin/vendors", label: "Vendors", icon: Store },
@@ -38,10 +41,8 @@ function AdminLayout() {
       <header className="border-b border-border/60 bg-background">
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4">
           <Link to="/admin" className="flex items-center gap-2">
-            <span className="grid h-7 w-7 place-items-center rounded-lg gradient-brand text-primary-foreground">
-              <ShieldCheck className="h-3.5 w-3.5" />
-            </span>
-            <span className="font-display font-bold">SuperApp Admin</span>
+            <img src={logoAsset.url} alt="SuperApp India" className="h-7 w-auto" />
+            <span className="rounded-full bg-primary-soft px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary">Admin</span>
           </Link>
           <Link to="/" className="text-xs text-muted-foreground hover:underline">← Back to app</Link>
         </div>
@@ -67,7 +68,7 @@ function AdminLayout() {
           </nav>
           <div className="mt-6 rounded-xl border border-border/60 bg-muted/40 p-3 text-xs text-muted-foreground">
             <Sparkles className="mb-1 h-4 w-4 text-primary" />
-            Two-panel admin: aggregator on the left, ops & ONDC on the right.
+            SuperApp India operations center.
           </div>
         </aside>
         <main className="min-w-0 flex-1 p-4 md:p-6">

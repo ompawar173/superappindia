@@ -1,18 +1,18 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import logoAsset from "@/assets/logo.png.asset.json";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Sign in — SuperApp" },
-      { name: "description", content: "Sign in or create your SuperApp account." },
+      { title: "Sign in — SuperApp India" },
+      { name: "description", content: "Sign in or create your SuperApp India account." },
     ],
   }),
   component: AuthPage,
@@ -59,24 +59,15 @@ function AuthPage() {
   const handleGoogle = async () => {
     setLoading(true);
     const res = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin + "/account" });
-    if (res.error) {
-      toast.error("Google sign-in failed");
-      setLoading(false);
-      return;
-    }
+    if (res.error) { toast.error("Google sign-in failed"); setLoading(false); return; }
     if (!res.redirected) navigate({ to: "/account" });
   };
 
   return (
     <div className="grid min-h-screen place-items-center bg-gradient-to-br from-background via-primary-soft/40 to-background px-4">
       <div className="w-full max-w-sm">
-        <Link to="/" className="mb-6 flex items-center justify-center gap-2">
-          <span className="grid h-9 w-9 place-items-center rounded-xl gradient-brand text-primary-foreground shadow-glow">
-            <Sparkles className="h-4 w-4" />
-          </span>
-          <span className="font-display text-lg font-bold">
-            Super<span className="text-primary">App</span>
-          </span>
+        <Link to="/" className="mb-6 flex items-center justify-center">
+          <img src={logoAsset.url} alt="SuperApp India" className="h-10 w-auto" />
         </Link>
 
         <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
@@ -120,6 +111,15 @@ function AuthPage() {
               {mode === "signin" ? "Create an account" : "Sign in"}
             </button>
           </p>
+        </div>
+
+        <div className="mt-4 grid gap-2 text-center text-xs">
+          <Link to="/seller/auth" className="text-muted-foreground hover:text-primary">
+            Are you a seller? <span className="font-semibold text-primary">Sell on SuperApp India →</span>
+          </Link>
+          <Link to="/delivery/auth" className="text-muted-foreground hover:text-primary">
+            Want to deliver? <span className="font-semibold text-primary">Become a rider →</span>
+          </Link>
         </div>
       </div>
     </div>

@@ -1,16 +1,18 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, MapPin, Search, Sparkles, TrendingUp } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ArrowRight, MapPin, Search, TrendingUp } from "lucide-react";
 import * as Icons from "lucide-react";
+import useEmblaCarousel from "embla-carousel-react";
+import Autoplay from "embla-carousel-autoplay";
 import { AppShell } from "@/components/app-shell";
 import { supabase } from "@/integrations/supabase/client";
-import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "SuperApp — India's all-in-one app" },
-      { name: "description", content: "Food, grocery, travel, hotels, cabs, recharges and more. One app for everything, with cashback on every order." },
+      { title: "SuperApp India — One app for food, grocery, travel & more" },
+      { name: "description", content: "India's all-in-one super app. Order food, groceries, travel, hotels, cabs, recharges and book home services — with live delivery tracking and cashback on every order." },
     ],
   }),
   component: Home,
@@ -19,51 +21,90 @@ export const Route = createFileRoute("/")({
 function Home() {
   return (
     <AppShell>
-      <Hero />
+      <BannerCarousel />
       <CategoriesGrid />
+      <ServicesRail />
       <FeaturedPartners />
-      <PromoStrip />
     </AppShell>
   );
 }
 
-function Hero() {
+function BannerCarousel() {
+  const { data: banners } = useQuery({
+    queryKey: ["banners"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("banners")
+        .select("id,title,subtitle,image_url,cta_label,cta_url,bg_color,sort_order")
+        .eq("active", true)
+        .order("sort_order");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const [emblaRef, embla] = useEmblaCarousel({ loop: true }, [Autoplay({ delay: 4500, stopOnInteraction: false })]);
+  const [selected, setSelected] = useState(0);
+
+  useEffect(() => {
+    if (!embla) return;
+    const onSelect = () => setSelected(embla.selectedScrollSnap());
+    embla.on("select", onSelect); onSelect();
+    return () => { embla.off("select", onSelect); };
+  }, [embla]);
+
+  const slides = banners ?? [];
+
   return (
-    <section className="mx-auto max-w-6xl px-4 pt-6">
-      <div className="relative overflow-hidden rounded-3xl gradient-brand p-6 text-primary-foreground shadow-elevated md:p-10">
-        <div className="absolute -right-12 -top-12 h-48 w-48 rounded-full bg-white/10 blur-2xl" />
-        <div className="absolute -bottom-16 -left-10 h-56 w-56 rounded-full bg-accent/40 blur-3xl" />
-        <div className="relative">
-          <div className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-medium backdrop-blur">
-            <Sparkles className="h-3.5 w-3.5" /> India's first true super app
-          </div>
-          <h1 className="mt-4 max-w-2xl font-display text-3xl font-bold leading-tight md:text-5xl">
-            One app for food, travel, hotels & everything in between.
-          </h1>
-          <p className="mt-3 max-w-xl text-sm/relaxed text-primary-foreground/90 md:text-base">
-            Order from Swiggy, Zomato, Blinkit. Book on MakeMyTrip, OYO, Agoda. Recharge, ride, shop —
-            all in one place, with SuperCoins cashback on every order.
-          </p>
-          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <div className="flex flex-1 items-center gap-2 rounded-full bg-white/95 px-4 py-2.5 text-foreground shadow-soft">
-              <MapPin className="h-4 w-4 text-primary" />
-              <span className="text-sm font-medium">Mumbai, MH</span>
-              <span className="text-xs text-muted-foreground">· change</span>
-              <div className="mx-2 h-5 w-px bg-border" />
-              <Search className="h-4 w-4 text-muted-foreground" />
-              <input
-                className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-                placeholder='Search "pizza", "MMT flights", "OYO Goa"'
-              />
-            </div>
-            <Link
-              to="/categories"
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-foreground px-5 py-2.5 text-sm font-semibold text-background transition hover:bg-foreground/85"
+    <section className="mx-auto max-w-6xl px-4 pt-4">
+      <div className="overflow-hidden rounded-3xl shadow-elevated" ref={emblaRef}>
+        <div className="flex">
+          {slides.map((b: any) => (
+            <a
+              key={b.id}
+              href={b.cta_url ?? "#"}
+              className="relative flex min-w-0 flex-[0_0_100%] aspect-[16/8] md:aspect-[16/6]"
+              style={{ backgroundColor: b.bg_color ?? "#0a1f17" }}
             >
-              Explore <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
+              {b.image_url && (
+                <img src={b.image_url} alt={b.title} className="absolute inset-0 h-full w-full object-cover opacity-90" loading="lazy" />
+              )}
+              <div className="absolute inset-0 bg-gradient-to-r from-black/65 via-black/30 to-transparent" />
+              <div className="relative z-10 flex flex-col justify-end gap-2 p-5 text-white md:p-10">
+                <h2 className="font-display text-2xl font-bold leading-tight md:text-4xl max-w-xl">{b.title}</h2>
+                {b.subtitle && <p className="max-w-md text-sm text-white/90 md:text-base">{b.subtitle}</p>}
+                {b.cta_label && (
+                  <span className="mt-2 inline-flex w-fit items-center gap-1 rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-foreground">
+                    {b.cta_label} <ArrowRight className="h-3.5 w-3.5" />
+                  </span>
+                )}
+              </div>
+            </a>
+          ))}
         </div>
+      </div>
+      {slides.length > 1 && (
+        <div className="mt-3 flex justify-center gap-1.5">
+          {slides.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => embla?.scrollTo(i)}
+              className={`h-1.5 rounded-full transition-all ${i === selected ? "w-6 bg-primary" : "w-1.5 bg-muted-foreground/40"}`}
+              aria-label={`Slide ${i + 1}`}
+            />
+          ))}
+        </div>
+      )}
+      <div className="mt-4 flex items-center gap-2 rounded-full border border-border/60 bg-card px-4 py-2.5 shadow-soft">
+        <MapPin className="h-4 w-4 text-primary" />
+        <span className="text-sm font-medium">Mumbai, MH</span>
+        <span className="text-xs text-muted-foreground">· change</span>
+        <div className="mx-2 h-5 w-px bg-border" />
+        <Search className="h-4 w-4 text-muted-foreground" />
+        <input
+          className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+          placeholder='Search "biryani", "groceries", "OYO Goa"'
+        />
       </div>
     </section>
   );
@@ -75,7 +116,7 @@ function CategoriesGrid() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("categories")
-        .select("id, slug, name, icon, color, sort_order")
+        .select("id, slug, name, icon, image_url, color, sort_order")
         .eq("active", true)
         .order("sort_order");
       if (error) throw error;
@@ -89,7 +130,7 @@ function CategoriesGrid() {
         <h2 className="font-display text-lg font-bold">What's on your mind?</h2>
         <Link to="/categories" className="text-sm font-medium text-primary hover:underline">View all</Link>
       </div>
-      <div className="grid grid-cols-4 gap-3 md:grid-cols-8">
+      <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-8">
         {(categories ?? []).map((c) => {
           const Icon = (Icons as Record<string, any>)[c.icon ?? "Sparkles"] ?? Icons.Sparkles;
           return (
@@ -97,18 +138,76 @@ function CategoriesGrid() {
               key={c.id}
               to="/c/$category"
               params={{ category: c.slug }}
-              className="group flex flex-col items-center gap-2 rounded-2xl border border-border/60 bg-card p-3 transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-soft"
+              className="group relative overflow-hidden rounded-2xl border border-border/60 bg-card aspect-square transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-soft"
             >
-              <span
-                className="grid h-12 w-12 place-items-center rounded-2xl transition group-hover:scale-105"
-                style={{ backgroundColor: (c.color ?? "#dcfce7") + "22", color: c.color ?? undefined }}
-              >
-                <Icon className="h-6 w-6" />
-              </span>
-              <span className="text-center text-xs font-medium leading-tight">{c.name}</span>
+              {c.image_url ? (
+                <img src={c.image_url} alt={c.name} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
+              ) : (
+                <span
+                  className="absolute inset-0 grid place-items-center"
+                  style={{ backgroundColor: (c.color ?? "#dcfce7") + "22", color: c.color ?? undefined }}
+                >
+                  <Icon className="h-8 w-8" />
+                </span>
+              )}
+              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-2 pt-6">
+                <p className="text-center text-[11px] font-semibold text-white leading-tight">{c.name}</p>
+              </div>
             </Link>
           );
         })}
+      </div>
+    </section>
+  );
+}
+
+function ServicesRail() {
+  const { data: services } = useQuery({
+    queryKey: ["services"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("services")
+        .select("id, slug, name, icon, short_desc, base_price")
+        .eq("active", true)
+        .order("sort_order");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  return (
+    <section className="mx-auto max-w-6xl px-4 pt-10">
+      <div className="mb-3 flex items-end justify-between">
+        <div>
+          <h2 className="font-display text-lg font-bold">SuperApp India Services</h2>
+          <p className="text-xs text-muted-foreground">Book home services in minutes</p>
+        </div>
+        <Link to="/categories" className="text-sm font-medium text-primary hover:underline">All services</Link>
+      </div>
+      <div className="-mx-4 overflow-x-auto px-4 pb-2">
+        <div className="flex gap-2 min-w-max">
+          {(services ?? []).map((s) => {
+            const Icon = (Icons as Record<string, any>)[s.icon ?? "Sparkles"] ?? Icons.Sparkles;
+            return (
+              <Link
+                key={s.id}
+                to="/services/$slug"
+                params={{ slug: s.slug }}
+                className="group flex items-center gap-2.5 rounded-full border border-border/60 bg-card px-4 py-2.5 transition hover:border-primary/40 hover:bg-primary-soft/40"
+              >
+                <span className="grid h-8 w-8 place-items-center rounded-full bg-primary-soft text-primary">
+                  <Icon className="h-4 w-4" />
+                </span>
+                <div className="text-left">
+                  <p className="text-sm font-semibold leading-tight">{s.name}</p>
+                  {s.base_price && (
+                    <p className="text-[10px] text-muted-foreground">from ₹{Number(s.base_price)}</p>
+                  )}
+                </div>
+              </Link>
+            );
+          })}
+        </div>
       </div>
     </section>
   );
@@ -130,11 +229,11 @@ function FeaturedPartners() {
   });
 
   return (
-    <section className="mx-auto max-w-6xl px-4 pt-10">
+    <section className="mx-auto max-w-6xl px-4 py-10">
       <div className="mb-3 flex items-end justify-between">
         <div>
           <h2 className="font-display text-lg font-bold">Featured partners</h2>
-          <p className="text-xs text-muted-foreground">Top brands, exclusive cashback for SuperApp users</p>
+          <p className="text-xs text-muted-foreground">Top brands, exclusive cashback for SuperApp India users</p>
         </div>
         <span className="inline-flex items-center gap-1 rounded-full bg-primary-soft px-3 py-1 text-xs font-medium text-primary">
           <TrendingUp className="h-3 w-3" /> Trending
@@ -174,45 +273,6 @@ function FeaturedPartners() {
             </Link>
           );
         })}
-      </div>
-    </section>
-  );
-}
-
-function PromoStrip() {
-  const { data: banners } = useQuery({
-    queryKey: ["banners"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("banners")
-        .select("id,title,subtitle,cta_label,cta_url,bg_color,sort_order")
-        .eq("active", true)
-        .order("sort_order");
-      if (error) throw error;
-      return data;
-    },
-  });
-  return (
-    <section className="mx-auto max-w-6xl px-4 py-10">
-      <div className="grid gap-3 sm:grid-cols-2">
-        {(banners ?? []).map((b) => (
-          <a
-            key={b.id}
-            href={b.cta_url ?? "#"}
-            className={cn(
-              "group relative overflow-hidden rounded-2xl border border-border/60 p-5 transition hover:-translate-y-0.5 hover:shadow-soft",
-            )}
-            style={{ backgroundColor: b.bg_color ?? undefined }}
-          >
-            <h3 className="font-display text-lg font-bold text-foreground">{b.title}</h3>
-            <p className="mt-1 text-sm text-foreground/70">{b.subtitle}</p>
-            {b.cta_label && (
-              <span className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-primary">
-                {b.cta_label} <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
-              </span>
-            )}
-          </a>
-        ))}
       </div>
     </section>
   );
