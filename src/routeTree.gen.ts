@@ -44,6 +44,7 @@ import { Route as AdminOndcRouteImport } from './routes/admin.ondc'
 import { Route as AdminLinksRouteImport } from './routes/admin.links'
 import { Route as AdminDeliveryRouteImport } from './routes/admin.delivery'
 import { Route as AdminBannersRouteImport } from './routes/admin.banners'
+import { Route as OrdersIdTrackRouteImport } from './routes/orders.$id.track'
 import { Route as ApiPublicPostbacksNetworkRouteImport } from './routes/api/public/postbacks.$network'
 import { Route as ApiPublicOndcSplatRouteImport } from './routes/api/public/ondc.$'
 
@@ -222,6 +223,11 @@ const AdminBannersRoute = AdminBannersRouteImport.update({
   path: '/banners',
   getParentRoute: () => AdminRoute,
 } as any)
+const OrdersIdTrackRoute = OrdersIdTrackRouteImport.update({
+  id: '/$id/track',
+  path: '/$id/track',
+  getParentRoute: () => OrdersRoute,
+} as any)
 const ApiPublicPostbacksNetworkRoute =
   ApiPublicPostbacksNetworkRouteImport.update({
     id: '/api/public/postbacks/$network',
@@ -241,7 +247,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/categories': typeof CategoriesRoute
   '/delivery': typeof DeliveryRouteWithChildren
-  '/orders': typeof OrdersRoute
+  '/orders': typeof OrdersRouteWithChildren
   '/rewards': typeof RewardsRoute
   '/search': typeof SearchRoute
   '/vendor': typeof VendorRouteWithChildren
@@ -270,6 +276,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/delivery/': typeof DeliveryIndexRoute
   '/vendor/': typeof VendorIndexRoute
+  '/orders/$id/track': typeof OrdersIdTrackRoute
   '/api/public/ondc/$': typeof ApiPublicOndcSplatRoute
   '/api/public/postbacks/$network': typeof ApiPublicPostbacksNetworkRoute
 }
@@ -278,7 +285,7 @@ export interface FileRoutesByTo {
   '/account': typeof AccountRoute
   '/auth': typeof AuthRoute
   '/categories': typeof CategoriesRoute
-  '/orders': typeof OrdersRoute
+  '/orders': typeof OrdersRouteWithChildren
   '/rewards': typeof RewardsRoute
   '/search': typeof SearchRoute
   '/admin/banners': typeof AdminBannersRoute
@@ -306,6 +313,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/delivery': typeof DeliveryIndexRoute
   '/vendor': typeof VendorIndexRoute
+  '/orders/$id/track': typeof OrdersIdTrackRoute
   '/api/public/ondc/$': typeof ApiPublicOndcSplatRoute
   '/api/public/postbacks/$network': typeof ApiPublicPostbacksNetworkRoute
 }
@@ -317,7 +325,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/categories': typeof CategoriesRoute
   '/delivery': typeof DeliveryRouteWithChildren
-  '/orders': typeof OrdersRoute
+  '/orders': typeof OrdersRouteWithChildren
   '/rewards': typeof RewardsRoute
   '/search': typeof SearchRoute
   '/vendor': typeof VendorRouteWithChildren
@@ -346,6 +354,7 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/delivery/': typeof DeliveryIndexRoute
   '/vendor/': typeof VendorIndexRoute
+  '/orders/$id/track': typeof OrdersIdTrackRoute
   '/api/public/ondc/$': typeof ApiPublicOndcSplatRoute
   '/api/public/postbacks/$network': typeof ApiPublicPostbacksNetworkRoute
 }
@@ -387,6 +396,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/delivery/'
     | '/vendor/'
+    | '/orders/$id/track'
     | '/api/public/ondc/$'
     | '/api/public/postbacks/$network'
   fileRoutesByTo: FileRoutesByTo
@@ -423,6 +433,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/delivery'
     | '/vendor'
+    | '/orders/$id/track'
     | '/api/public/ondc/$'
     | '/api/public/postbacks/$network'
   id:
@@ -462,6 +473,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/delivery/'
     | '/vendor/'
+    | '/orders/$id/track'
     | '/api/public/ondc/$'
     | '/api/public/postbacks/$network'
   fileRoutesById: FileRoutesById
@@ -473,7 +485,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   CategoriesRoute: typeof CategoriesRoute
   DeliveryRoute: typeof DeliveryRouteWithChildren
-  OrdersRoute: typeof OrdersRoute
+  OrdersRoute: typeof OrdersRouteWithChildren
   RewardsRoute: typeof RewardsRoute
   SearchRoute: typeof SearchRoute
   VendorRoute: typeof VendorRouteWithChildren
@@ -733,6 +745,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBannersRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/orders/$id/track': {
+      id: '/orders/$id/track'
+      path: '/$id/track'
+      fullPath: '/orders/$id/track'
+      preLoaderRoute: typeof OrdersIdTrackRouteImport
+      parentRoute: typeof OrdersRoute
+    }
     '/api/public/postbacks/$network': {
       id: '/api/public/postbacks/$network'
       path: '/api/public/postbacks/$network'
@@ -798,6 +817,17 @@ const DeliveryRouteWithChildren = DeliveryRoute._addFileChildren(
   DeliveryRouteChildren,
 )
 
+interface OrdersRouteChildren {
+  OrdersIdTrackRoute: typeof OrdersIdTrackRoute
+}
+
+const OrdersRouteChildren: OrdersRouteChildren = {
+  OrdersIdTrackRoute: OrdersIdTrackRoute,
+}
+
+const OrdersRouteWithChildren =
+  OrdersRoute._addFileChildren(OrdersRouteChildren)
+
 interface VendorRouteChildren {
   VendorOrdersRoute: typeof VendorOrdersRoute
   VendorPayoutsRoute: typeof VendorPayoutsRoute
@@ -824,7 +854,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   CategoriesRoute: CategoriesRoute,
   DeliveryRoute: DeliveryRouteWithChildren,
-  OrdersRoute: OrdersRoute,
+  OrdersRoute: OrdersRouteWithChildren,
   RewardsRoute: RewardsRoute,
   SearchRoute: SearchRoute,
   VendorRoute: VendorRouteWithChildren,

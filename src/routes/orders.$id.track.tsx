@@ -135,7 +135,7 @@ function TrackOrder() {
               <p className="mt-4 text-xs text-muted-foreground">Waiting for rider's first location ping…</p>
             )}
           </div>
-        ) : status === "pending" ? (
+        ) : !order.delivery_partner_id ? (
           <div className="mt-4 rounded-3xl border border-dashed border-border bg-muted/20 p-6 text-center">
             <Package className="mx-auto h-7 w-7 text-muted-foreground" />
             <p className="mt-2 text-sm text-muted-foreground">Finding a rider near you…</p>
