@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VendorRouteImport } from './routes/vendor'
+import { Route as ShopsRouteImport } from './routes/shops'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as RewardsRouteImport } from './routes/rewards'
 import { Route as OrdersRouteImport } from './routes/orders'
@@ -26,6 +27,7 @@ import { Route as VendorServicesRouteImport } from './routes/vendor.services'
 import { Route as VendorProductsRouteImport } from './routes/vendor.products'
 import { Route as VendorPayoutsRouteImport } from './routes/vendor.payouts'
 import { Route as VendorOrdersRouteImport } from './routes/vendor.orders'
+import { Route as ShopVendorIdRouteImport } from './routes/shop.$vendorId'
 import { Route as ServicesSlugRouteImport } from './routes/services.$slug'
 import { Route as SellerAuthRouteImport } from './routes/seller.auth'
 import { Route as RShortCodeRouteImport } from './routes/r.$shortCode'
@@ -51,6 +53,11 @@ import { Route as ApiPublicOndcSplatRouteImport } from './routes/api/public/ondc
 const VendorRoute = VendorRouteImport.update({
   id: '/vendor',
   path: '/vendor',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShopsRoute = ShopsRouteImport.update({
+  id: '/shops',
+  path: '/shops',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SearchRoute = SearchRouteImport.update({
@@ -132,6 +139,11 @@ const VendorOrdersRoute = VendorOrdersRouteImport.update({
   id: '/orders',
   path: '/orders',
   getParentRoute: () => VendorRoute,
+} as any)
+const ShopVendorIdRoute = ShopVendorIdRouteImport.update({
+  id: '/shop/$vendorId',
+  path: '/shop/$vendorId',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ServicesSlugRoute = ServicesSlugRouteImport.update({
   id: '/services/$slug',
@@ -250,6 +262,7 @@ export interface FileRoutesByFullPath {
   '/orders': typeof OrdersRouteWithChildren
   '/rewards': typeof RewardsRoute
   '/search': typeof SearchRoute
+  '/shops': typeof ShopsRoute
   '/vendor': typeof VendorRouteWithChildren
   '/admin/banners': typeof AdminBannersRoute
   '/admin/delivery': typeof AdminDeliveryRoute
@@ -269,6 +282,7 @@ export interface FileRoutesByFullPath {
   '/r/$shortCode': typeof RShortCodeRoute
   '/seller/auth': typeof SellerAuthRoute
   '/services/$slug': typeof ServicesSlugRoute
+  '/shop/$vendorId': typeof ShopVendorIdRoute
   '/vendor/orders': typeof VendorOrdersRoute
   '/vendor/payouts': typeof VendorPayoutsRoute
   '/vendor/products': typeof VendorProductsRoute
@@ -288,6 +302,7 @@ export interface FileRoutesByTo {
   '/orders': typeof OrdersRouteWithChildren
   '/rewards': typeof RewardsRoute
   '/search': typeof SearchRoute
+  '/shops': typeof ShopsRoute
   '/admin/banners': typeof AdminBannersRoute
   '/admin/delivery': typeof AdminDeliveryRoute
   '/admin/links': typeof AdminLinksRoute
@@ -306,6 +321,7 @@ export interface FileRoutesByTo {
   '/r/$shortCode': typeof RShortCodeRoute
   '/seller/auth': typeof SellerAuthRoute
   '/services/$slug': typeof ServicesSlugRoute
+  '/shop/$vendorId': typeof ShopVendorIdRoute
   '/vendor/orders': typeof VendorOrdersRoute
   '/vendor/payouts': typeof VendorPayoutsRoute
   '/vendor/products': typeof VendorProductsRoute
@@ -328,6 +344,7 @@ export interface FileRoutesById {
   '/orders': typeof OrdersRouteWithChildren
   '/rewards': typeof RewardsRoute
   '/search': typeof SearchRoute
+  '/shops': typeof ShopsRoute
   '/vendor': typeof VendorRouteWithChildren
   '/admin/banners': typeof AdminBannersRoute
   '/admin/delivery': typeof AdminDeliveryRoute
@@ -347,6 +364,7 @@ export interface FileRoutesById {
   '/r/$shortCode': typeof RShortCodeRoute
   '/seller/auth': typeof SellerAuthRoute
   '/services/$slug': typeof ServicesSlugRoute
+  '/shop/$vendorId': typeof ShopVendorIdRoute
   '/vendor/orders': typeof VendorOrdersRoute
   '/vendor/payouts': typeof VendorPayoutsRoute
   '/vendor/products': typeof VendorProductsRoute
@@ -370,6 +388,7 @@ export interface FileRouteTypes {
     | '/orders'
     | '/rewards'
     | '/search'
+    | '/shops'
     | '/vendor'
     | '/admin/banners'
     | '/admin/delivery'
@@ -389,6 +408,7 @@ export interface FileRouteTypes {
     | '/r/$shortCode'
     | '/seller/auth'
     | '/services/$slug'
+    | '/shop/$vendorId'
     | '/vendor/orders'
     | '/vendor/payouts'
     | '/vendor/products'
@@ -408,6 +428,7 @@ export interface FileRouteTypes {
     | '/orders'
     | '/rewards'
     | '/search'
+    | '/shops'
     | '/admin/banners'
     | '/admin/delivery'
     | '/admin/links'
@@ -426,6 +447,7 @@ export interface FileRouteTypes {
     | '/r/$shortCode'
     | '/seller/auth'
     | '/services/$slug'
+    | '/shop/$vendorId'
     | '/vendor/orders'
     | '/vendor/payouts'
     | '/vendor/products'
@@ -447,6 +469,7 @@ export interface FileRouteTypes {
     | '/orders'
     | '/rewards'
     | '/search'
+    | '/shops'
     | '/vendor'
     | '/admin/banners'
     | '/admin/delivery'
@@ -466,6 +489,7 @@ export interface FileRouteTypes {
     | '/r/$shortCode'
     | '/seller/auth'
     | '/services/$slug'
+    | '/shop/$vendorId'
     | '/vendor/orders'
     | '/vendor/payouts'
     | '/vendor/products'
@@ -488,12 +512,14 @@ export interface RootRouteChildren {
   OrdersRoute: typeof OrdersRouteWithChildren
   RewardsRoute: typeof RewardsRoute
   SearchRoute: typeof SearchRoute
+  ShopsRoute: typeof ShopsRoute
   VendorRoute: typeof VendorRouteWithChildren
   CCategoryRoute: typeof CCategoryRoute
   PPartnerRoute: typeof PPartnerRoute
   RShortCodeRoute: typeof RShortCodeRoute
   SellerAuthRoute: typeof SellerAuthRoute
   ServicesSlugRoute: typeof ServicesSlugRoute
+  ShopVendorIdRoute: typeof ShopVendorIdRoute
   ApiPublicOndcSplatRoute: typeof ApiPublicOndcSplatRoute
   ApiPublicPostbacksNetworkRoute: typeof ApiPublicPostbacksNetworkRoute
 }
@@ -505,6 +531,13 @@ declare module '@tanstack/react-router' {
       path: '/vendor'
       fullPath: '/vendor'
       preLoaderRoute: typeof VendorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shops': {
+      id: '/shops'
+      path: '/shops'
+      fullPath: '/shops'
+      preLoaderRoute: typeof ShopsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/search': {
@@ -618,6 +651,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/vendor/orders'
       preLoaderRoute: typeof VendorOrdersRouteImport
       parentRoute: typeof VendorRoute
+    }
+    '/shop/$vendorId': {
+      id: '/shop/$vendorId'
+      path: '/shop/$vendorId'
+      fullPath: '/shop/$vendorId'
+      preLoaderRoute: typeof ShopVendorIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/services/$slug': {
       id: '/services/$slug'
@@ -857,12 +897,14 @@ const rootRouteChildren: RootRouteChildren = {
   OrdersRoute: OrdersRouteWithChildren,
   RewardsRoute: RewardsRoute,
   SearchRoute: SearchRoute,
+  ShopsRoute: ShopsRoute,
   VendorRoute: VendorRouteWithChildren,
   CCategoryRoute: CCategoryRoute,
   PPartnerRoute: PPartnerRoute,
   RShortCodeRoute: RShortCodeRoute,
   SellerAuthRoute: SellerAuthRoute,
   ServicesSlugRoute: ServicesSlugRoute,
+  ShopVendorIdRoute: ShopVendorIdRoute,
   ApiPublicOndcSplatRoute: ApiPublicOndcSplatRoute,
   ApiPublicPostbacksNetworkRoute: ApiPublicPostbacksNetworkRoute,
 }
