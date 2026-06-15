@@ -923,39 +923,57 @@ export type Database = {
         Row: {
           address: string | null
           business_name: string
+          category: string | null
           city: string | null
+          cover_url: string | null
           created_at: string
           gstin: string | null
           id: string
+          is_active: boolean
           kyc_status: Database["public"]["Enums"]["kyc_status"]
+          logo_url: string | null
           pan: string | null
           payout_account: Json | null
+          rating: number
+          tagline: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
           address?: string | null
           business_name: string
+          category?: string | null
           city?: string | null
+          cover_url?: string | null
           created_at?: string
           gstin?: string | null
           id?: string
+          is_active?: boolean
           kyc_status?: Database["public"]["Enums"]["kyc_status"]
+          logo_url?: string | null
           pan?: string | null
           payout_account?: Json | null
+          rating?: number
+          tagline?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
           address?: string | null
           business_name?: string
+          category?: string | null
           city?: string | null
+          cover_url?: string | null
           created_at?: string
           gstin?: string | null
           id?: string
+          is_active?: boolean
           kyc_status?: Database["public"]["Enums"]["kyc_status"]
+          logo_url?: string | null
           pan?: string | null
           payout_account?: Json | null
+          rating?: number
+          tagline?: string | null
           updated_at?: string
           user_id?: string
         }
