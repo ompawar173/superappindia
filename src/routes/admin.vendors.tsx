@@ -13,7 +13,7 @@ function VendorsAdmin() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("vendors")
-        .select("id,business_name,city,gstin,kyc_status,user_id,created_at")
+        .select("id,business_name,city,gstin,kyc_status,is_active,user_id,created_at")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
@@ -27,6 +27,13 @@ function VendorsAdmin() {
     qc.invalidateQueries({ queryKey: ["admin-vendors"] });
   };
 
+  const toggleActive = async (id: string, is_active: boolean) => {
+    const { error } = await supabase.from("vendors").update({ is_active }).eq("id", id);
+    if (error) return toast.error(error.message);
+    toast.success(is_active ? "Vendor enabled" : "Vendor hidden");
+    qc.invalidateQueries({ queryKey: ["admin-vendors"] });
+  };
+
   return (
     <div>
       <h1 className="font-display text-2xl font-bold">Vendors</h1>
@@ -35,7 +42,7 @@ function VendorsAdmin() {
       <div className="mt-5 overflow-hidden rounded-2xl border border-border/60 bg-card">
         <table className="w-full text-sm">
           <thead className="bg-muted/50 text-left text-xs uppercase tracking-wider text-muted-foreground">
-            <tr><th className="p-3">Business</th><th>City</th><th>GSTIN</th><th>Status</th><th></th></tr>
+            <tr><th className="p-3">Business</th><th>City</th><th>GSTIN</th><th>Status</th><th>Visible</th><th></th></tr>
           </thead>
           <tbody>
             {(vendors ?? []).map((v: any) => (
@@ -44,6 +51,11 @@ function VendorsAdmin() {
                 <td>{v.city ?? "—"}</td>
                 <td className="font-mono text-xs">{v.gstin ?? "—"}</td>
                 <td className="capitalize">{v.kyc_status}</td>
+                <td>
+                  <Button size="sm" variant={v.is_active ? "outline" : "ghost"} onClick={() => toggleActive(v.id, !v.is_active)}>
+                    {v.is_active ? "Active" : "Hidden"}
+                  </Button>
+                </td>
                 <td className="p-3 text-right">
                   <div className="inline-flex gap-1">
                     <Button size="sm" variant="outline" onClick={() => setStatus(v.id, "approved")}>Approve</Button>
@@ -53,7 +65,7 @@ function VendorsAdmin() {
               </tr>
             ))}
             {(vendors ?? []).length === 0 && (
-              <tr><td colSpan={5} className="p-6 text-center text-sm text-muted-foreground">No vendors yet.</td></tr>
+              <tr><td colSpan={6} className="p-6 text-center text-sm text-muted-foreground">No vendors yet.</td></tr>
             )}
           </tbody>
         </table>

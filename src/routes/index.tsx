@@ -210,18 +210,31 @@ function BannerCarousel() {
           ))}
         </div>
       )}
-      <div className="mt-4 flex items-center gap-2 rounded-full border border-border/60 bg-card px-4 py-2.5 shadow-soft">
-        <MapPin className="h-4 w-4 text-primary" />
-        <span className="text-sm font-medium">Mumbai, MH</span>
-        <span className="text-xs text-muted-foreground">· change</span>
-        <div className="mx-2 h-5 w-px bg-border" />
-        <Search className="h-4 w-4 text-muted-foreground" />
-        <input
-          className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-          placeholder='Search "biryani", "groceries", "OYO Goa"'
-        />
-      </div>
+      <HomeSearchBar />
     </section>
+  );
+}
+
+function HomeSearchBar() {
+  const navigate = useNavigate();
+  const [q, setQ] = useState("");
+  return (
+    <form
+      onSubmit={(e) => { e.preventDefault(); navigate({ to: "/search", search: { q } }); }}
+      className="mt-4 flex items-center gap-2 rounded-full border border-border/60 bg-card px-4 py-2.5 shadow-soft"
+    >
+      <MapPin className="h-4 w-4 text-primary" />
+      <span className="text-sm font-medium">Mumbai, MH</span>
+      <span className="text-xs text-muted-foreground">· change</span>
+      <div className="mx-2 h-5 w-px bg-border" />
+      <Search className="h-4 w-4 text-muted-foreground" />
+      <input
+        value={q}
+        onChange={(e) => setQ(e.target.value)}
+        className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+        placeholder='Search shops, products, services…'
+      />
+    </form>
   );
 }
 

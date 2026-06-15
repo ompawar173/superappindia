@@ -23,6 +23,7 @@ function TopBar() {
         </Link>
         <nav className="hidden items-center gap-1 md:flex">
           <TopLink to="/" label="Home" />
+          <TopLink to="/shops" label="Shops" />
           <TopLink to="/categories" label="Explore" />
           <TopLink to="/rewards" label="Rewards" />
           <TopLink to="/seller/auth" label="Sell with us" />
