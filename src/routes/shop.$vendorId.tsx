@@ -1,10 +1,16 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { MapPin, Share2, Star, Store } from "lucide-react";
+import { MapPin, Share2, Star, Store, Clock } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { cart } from "@/lib/cart";
+import { isShopOpen, formatHours } from "@/lib/open-hours";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/shop/$vendorId")({
   component: ShopPage,
@@ -19,13 +25,14 @@ export const Route = createFileRoute("/shop/$vendorId")({
 function ShopPage() {
   const { vendorId } = Route.useParams();
   const [tab, setTab] = useState<"products" | "services" | "about">("products");
+  const [conflict, setConflict] = useState<null | { item: any; vendorName: string; current: string }>(null);
 
   const { data: shop, isLoading } = useQuery({
     queryKey: ["shop", vendorId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("vendors")
-        .select("id,business_name,city,address,tagline,category,logo_url,cover_url,rating")
+        .select("id,business_name,city,address,tagline,category,logo_url,cover_url,rating,open_hours")
         .eq("id", vendorId)
         .maybeSingle();
       if (error) throw error;
@@ -62,9 +69,23 @@ function ShopPage() {
     }
   };
 
+  const handleAdd = (it: any) => {
+    if (!shop) return;
+    const img = Array.isArray(it.images) && it.images.length > 0 ? it.images[0] : null;
+    const payload = { productId: it.id, vendorId: shop.id, title: it.title, price: Number(it.price), image: img };
+    const res = cart.add(payload, shop.business_name);
+    if ("conflict" in res) {
+      setConflict({ item: payload, vendorName: shop.business_name, current: res.currentVendor });
+    } else {
+      toast.success("Added to cart");
+    }
+  };
+
   if (isLoading || !shop) {
     return <AppShell><div className="mx-auto max-w-5xl px-4 py-12 text-center text-sm text-muted-foreground">Loading…</div></AppShell>;
   }
+
+  const open = isShopOpen(shop.open_hours as any);
 
   return (
     <AppShell>
@@ -90,7 +111,12 @@ function ShopPage() {
           <div className="flex-1">
             <div className="flex items-start justify-between gap-2">
               <div>
-                <h1 className="font-display text-2xl font-bold leading-tight">{shop.business_name}</h1>
+                <div className="flex items-center gap-2">
+                  <h1 className="font-display text-2xl font-bold leading-tight">{shop.business_name}</h1>
+                  <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ${open ? "bg-success/15 text-success" : "bg-muted text-muted-foreground"}`}>
+                    <Clock className="h-3 w-3" /> {open ? "Open now" : "Closed"}
+                  </span>
+                </div>
                 {shop.tagline && <p className="text-sm text-muted-foreground">{shop.tagline}</p>}
               </div>
               <button onClick={share} className="rounded-full border border-border bg-card p-2 hover:border-primary/40" aria-label="Share">
@@ -100,6 +126,7 @@ function ShopPage() {
             <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
               {shop.category && <span className="capitalize">{shop.category}</span>}
               {shop.city && <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" /> {shop.city}</span>}
+              <span className="inline-flex items-center gap-1"><Clock className="h-3 w-3" /> {formatHours(shop.open_hours as any)}</span>
               {Number(shop.rating) > 0 && (
                 <span className="inline-flex items-center gap-0.5 text-primary"><Star className="h-3 w-3 fill-current" /> {Number(shop.rating).toFixed(1)}</span>
               )}
@@ -122,25 +149,47 @@ function ShopPage() {
         </div>
 
         <div className="py-6">
-          {tab === "products" && <ItemGrid items={products} kind="product" />}
-          {tab === "services" && <ItemGrid items={services} kind="service" />}
+          {tab === "products" && <ItemGrid items={products} kind="product" onAdd={handleAdd} disabled={!open} />}
+          {tab === "services" && <ItemGrid items={services} kind="service" onAdd={handleAdd} disabled={false} />}
           {tab === "about" && (
             <div className="space-y-2 rounded-2xl border border-border bg-card p-5 text-sm">
               <p><strong>About:</strong> {shop.tagline ?? shop.business_name}</p>
               {shop.address && <p><strong>Address:</strong> {shop.address}</p>}
               {shop.city && <p><strong>City:</strong> {shop.city}</p>}
               {shop.category && <p><strong>Category:</strong> <span className="capitalize">{shop.category}</span></p>}
+              <p><strong>Hours:</strong> {formatHours(shop.open_hours as any)}</p>
             </div>
           )}
         </div>
 
         <Link to="/shops" className="text-sm text-primary hover:underline">← All shops</Link>
       </section>
+
+      <AlertDialog open={!!conflict} onOpenChange={(o) => !o && setConflict(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Start a new cart?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Your cart has items from <strong>{conflict?.current}</strong>. We can only fulfil from one shop at a time. Replace cart with items from <strong>{conflict?.vendorName}</strong>?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep current cart</AlertDialogCancel>
+            <AlertDialogAction onClick={() => {
+              if (conflict) {
+                cart.replaceVendor(conflict.item, conflict.vendorName);
+                toast.success("Cart replaced");
+              }
+              setConflict(null);
+            }}>Start new cart</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AppShell>
   );
 }
 
-function ItemGrid({ items, kind }: { items: any[]; kind: "product" | "service" }) {
+function ItemGrid({ items, kind, onAdd, disabled }: { items: any[]; kind: "product" | "service"; onAdd: (i: any) => void; disabled: boolean }) {
   if (items.length === 0) {
     return <div className="rounded-2xl border border-dashed border-border bg-card p-10 text-center text-sm text-muted-foreground">No {kind}s listed yet.</div>;
   }
@@ -165,8 +214,12 @@ function ItemGrid({ items, kind }: { items: any[]; kind: "product" | "service" }
               {kind === "service" && it.duration_minutes && (
                 <p className="text-[10px] text-muted-foreground">{it.duration_minutes} min</p>
               )}
-              <button className="mt-2 w-full rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-primary-glow">
-                {kind === "service" ? "Book" : "Add"}
+              <button
+                onClick={() => onAdd(it)}
+                disabled={disabled}
+                className="mt-2 w-full rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-primary-glow disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {disabled ? "Closed" : kind === "service" ? "Book" : "Add"}
               </button>
             </div>
           </div>
