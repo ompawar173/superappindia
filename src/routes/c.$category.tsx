@@ -69,11 +69,6 @@ function CategoryPage() {
                   )}
                 </div>
                 <p className="line-clamp-2 text-xs text-muted-foreground">{p.description}</p>
-                {p.commission_pct > 0 && (
-                  <span className="mt-2 inline-flex rounded-full bg-primary-soft px-2 py-0.5 text-[11px] font-semibold text-primary">
-                    Up to {pct(Number(p.commission_pct))} SuperCoins back
-                  </span>
-                )}
               </div>
               <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground transition group-hover:translate-x-0.5 group-hover:text-primary" />
             </Link>

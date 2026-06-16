@@ -46,11 +46,6 @@ function PartnerPage() {
             <h1 className="font-display text-3xl font-bold">{data.partner.name}</h1>
             <p className="mt-2 max-w-2xl text-sm/relaxed text-primary-foreground/90">{data.partner.description}</p>
             <div className="mt-4 flex flex-wrap items-center gap-2">
-              {data.partner.commission_pct > 0 && (
-                <span className="rounded-full bg-white/20 px-3 py-1 text-xs font-semibold backdrop-blur">
-                  {pct(Number(data.partner.commission_pct))} SuperCoins back
-                </span>
-              )}
               <span className="rounded-full bg-white/20 px-3 py-1 text-xs font-medium backdrop-blur capitalize">
                 {data.partner.type}
               </span>
