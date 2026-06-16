@@ -347,7 +347,7 @@ function FeaturedPartners() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("partners")
-        .select("id, slug, name, description, commission_pct, type, categories(slug,name,color,icon)")
+        .select("id, slug, name, description, type, categories(slug,name,color,icon)")
         .eq("active", true)
         .eq("featured", true)
         .limit(8);
@@ -392,11 +392,6 @@ function FeaturedPartners() {
                   )}
                 </div>
                 <p className="line-clamp-2 text-xs text-muted-foreground">{p.description}</p>
-                {p.commission_pct > 0 && (
-                  <span className="mt-2 inline-flex rounded-full bg-primary-soft px-2 py-0.5 text-[11px] font-semibold text-primary">
-                    Up to {p.commission_pct}% back
-                  </span>
-                )}
               </div>
             </Link>
           );

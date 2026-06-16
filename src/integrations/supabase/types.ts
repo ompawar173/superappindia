@@ -355,6 +355,48 @@ export type Database = {
           },
         ]
       }
+      delivery_partner_applications: {
+        Row: {
+          city: string
+          created_at: string
+          email: string | null
+          full_name: string
+          id: string
+          notes: string | null
+          phone: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          vehicle_type: string
+        }
+        Insert: {
+          city: string
+          created_at?: string
+          email?: string | null
+          full_name: string
+          id?: string
+          notes?: string | null
+          phone: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          vehicle_type: string
+        }
+        Update: {
+          city?: string
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          id?: string
+          notes?: string | null
+          phone?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          vehicle_type?: string
+        }
+        Relationships: []
+      }
       delivery_partners: {
         Row: {
           city: string
@@ -932,6 +974,7 @@ export type Database = {
           is_active: boolean
           kyc_status: Database["public"]["Enums"]["kyc_status"]
           logo_url: string | null
+          open_hours: Json | null
           pan: string | null
           payout_account: Json | null
           rating: number
@@ -951,6 +994,7 @@ export type Database = {
           is_active?: boolean
           kyc_status?: Database["public"]["Enums"]["kyc_status"]
           logo_url?: string | null
+          open_hours?: Json | null
           pan?: string | null
           payout_account?: Json | null
           rating?: number
@@ -970,6 +1014,7 @@ export type Database = {
           is_active?: boolean
           kyc_status?: Database["public"]["Enums"]["kyc_status"]
           logo_url?: string | null
+          open_hours?: Json | null
           pan?: string | null
           payout_account?: Json | null
           rating?: number

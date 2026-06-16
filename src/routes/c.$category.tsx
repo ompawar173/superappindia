@@ -24,7 +24,7 @@ function CategoryPage() {
       if (!cat) throw notFound();
       const { data: partners, error: e2 } = await supabase
         .from("partners")
-        .select("id,slug,name,description,commission_pct,type,logo_url")
+        .select("id,slug,name,description,type,logo_url")
         .eq("active", true)
         .eq("category_id", cat.id)
         .order("featured", { ascending: false });
@@ -69,11 +69,6 @@ function CategoryPage() {
                   )}
                 </div>
                 <p className="line-clamp-2 text-xs text-muted-foreground">{p.description}</p>
-                {p.commission_pct > 0 && (
-                  <span className="mt-2 inline-flex rounded-full bg-primary-soft px-2 py-0.5 text-[11px] font-semibold text-primary">
-                    Up to {pct(Number(p.commission_pct))} SuperCoins back
-                  </span>
-                )}
               </div>
               <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground transition group-hover:translate-x-0.5 group-hover:text-primary" />
             </Link>

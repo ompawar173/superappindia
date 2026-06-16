@@ -1,255 +1,178 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { CheckCircle2, Clock, MapPin, Package, ShieldAlert, Truck, Wallet } from "lucide-react";
+import { Bike, Clock, IndianRupee, MapPinned, ShieldCheck, Truck, Wallet } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { inr } from "@/lib/format";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-export const Route = createFileRoute("/delivery/")({ component: RiderHome });
+export const Route = createFileRoute("/delivery/")({ component: DeliveryLanding });
 
-function RiderHome() {
-  const { user } = useAuth();
-  const qc = useQueryClient();
+function DeliveryLanding() {
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
 
-  const { data: partner, isLoading } = useQuery({
-    queryKey: ["rider", user?.id],
+  // If a signed-in user already has a partner row, send them to the dashboard.
+  const { data: partner } = useQuery({
+    queryKey: ["rider-existing", user?.id],
     enabled: !!user,
     queryFn: async () => {
-      const { data } = await supabase.from("delivery_partners").select("*").eq("user_id", user!.id).maybeSingle();
+      const { data } = await supabase.from("delivery_partners").select("id,kyc_status").eq("user_id", user!.id).maybeSingle();
       return data;
     },
   });
 
-  const { data: active } = useQuery({
-    queryKey: ["rider-active", user?.id],
-    enabled: !!partner && partner.kyc_status === "approved",
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("delivery_assignments")
-        .select("*, orders(id,total,shipping_address,items)")
-        .eq("partner_id", user!.id)
-        .in("status", ["assigned", "accepted", "picked_up"])
-        .order("assigned_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      return data as any;
-    },
-  });
-
-  const { data: todayEarnings } = useQuery({
-    queryKey: ["rider-today", user?.id],
-    enabled: !!partner,
-    queryFn: async () => {
-      const since = new Date(); since.setHours(0,0,0,0);
-      const { data } = await supabase
-        .from("delivery_earnings_ledger")
-        .select("amount")
-        .eq("partner_id", user!.id)
-        .gte("created_at", since.toISOString());
-      return (data ?? []).reduce((s, r: any) => s + Number(r.amount), 0);
-    },
-  });
-
-  // Realtime: refetch active assignment when row changes
-  useEffect(() => {
-    if (!user) return;
-    const ch = supabase
-      .channel(`rider-${user.id}`)
-      .on("postgres_changes", {
-        event: "*", schema: "public", table: "delivery_assignments",
-        filter: `partner_id=eq.${user.id}`,
-      }, () => {
-        qc.invalidateQueries({ queryKey: ["rider-active", user.id] });
-        qc.invalidateQueries({ queryKey: ["rider-trips", user.id] });
-      })
-      .subscribe();
-    return () => { supabase.removeChannel(ch); };
-  }, [user, qc]);
-
-  // Live geolocation push while online (every ~20s)
-  useEffect(() => {
-    if (!user || !partner?.is_online || typeof navigator === "undefined" || !navigator.geolocation) return;
-    let cancelled = false;
-    const push = () => {
-      navigator.geolocation.getCurrentPosition(
-        async (pos) => {
-          if (cancelled) return;
-          await supabase.from("delivery_partners").update({
-            current_lat: pos.coords.latitude,
-            current_lng: pos.coords.longitude,
-            last_location_at: new Date().toISOString(),
-            last_seen_at: new Date().toISOString(),
-          }).eq("user_id", user.id);
-        },
-        () => { /* permission denied — silently skip */ },
-        { enableHighAccuracy: true, maximumAge: 15000, timeout: 10000 },
-      );
-    };
-    push();
-    const id = setInterval(push, 20000);
-    return () => { cancelled = true; clearInterval(id); };
-  }, [user, partner?.is_online]);
-
-  if (isLoading) return <div className="py-10 text-center text-sm text-muted-foreground">Loading…</div>;
-  if (!partner) {
-    return (
-      <div className="rounded-3xl border border-border/60 bg-card p-6 text-center shadow-soft">
-        <Truck className="mx-auto h-10 w-10 text-primary" />
-        <h2 className="mt-3 font-display text-lg font-bold">Welcome, future SuperApp rider</h2>
-        <p className="mt-1 text-sm text-muted-foreground">Complete a short onboarding to start earning.</p>
-        <Link to="/delivery/onboarding" className="mt-4 inline-block">
-          <Button className="rounded-full">Start onboarding</Button>
-        </Link>
-      </div>
-    );
+  if (!loading && user && partner) {
+    navigate({ to: "/delivery/dashboard" });
+    return null;
   }
 
   return (
-    <div className="space-y-4">
-      <KycBanner status={partner.kyc_status} reason={partner.kyc_rejection_reason} />
-      <OnlineCard partner={partner} disabled={partner.kyc_status !== "approved"} onChanged={() => qc.invalidateQueries({ queryKey: ["rider", user?.id] })} />
-
-      <div className="grid grid-cols-3 gap-3">
-        <Stat icon={Wallet} label="Today" value={inr(todayEarnings ?? 0)} />
-        <Stat icon={Package} label="Trips" value={String(partner.total_deliveries)} />
-        <Stat icon={CheckCircle2} label="Rating" value={Number(partner.rating ?? 5).toFixed(1)} />
-      </div>
-
-      <ActiveAssignment assignment={active} />
-    </div>
-  );
-}
-
-function KycBanner({ status, reason }: { status: string; reason: string | null }) {
-  if (status === "approved") return null;
-  const variant =
-    status === "rejected" ? "bg-destructive/10 text-destructive border-destructive/30"
-    : "bg-warning/10 text-warning-foreground border-warning/30";
-  return (
-    <div className={`flex items-start gap-3 rounded-2xl border p-4 ${variant}`}>
-      <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0" />
-      <div className="text-sm">
-        <p className="font-semibold capitalize">KYC {status}</p>
-        <p className="text-xs opacity-90">
-          {status === "pending" ? "Your documents are under review (usually within 24h)."
-            : reason || "Some documents need attention. Please re-upload."}
-        </p>
-        {status === "rejected" && (
-          <Link to="/delivery/onboarding" className="mt-2 inline-block text-xs font-semibold underline">
-            Re-upload documents →
-          </Link>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function OnlineCard({ partner, disabled, onChanged }: { partner: any; disabled: boolean; onChanged: () => void }) {
-  const [busy, setBusy] = useState(false);
-  const toggle = async (val: boolean) => {
-    setBusy(true);
-    const { error } = await supabase.from("delivery_partners")
-      .update({ is_online: val, last_seen_at: new Date().toISOString() })
-      .eq("user_id", partner.user_id);
-    setBusy(false);
-    if (error) return toast.error(error.message);
-    toast.success(val ? "You're online — orders will start coming" : "You're offline");
-    onChanged();
-  };
-  return (
-    <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-soft">
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <p className="text-xs uppercase tracking-wider text-muted-foreground">Status</p>
-          <p className="font-display text-lg font-bold">{partner.is_online ? "Online" : "Offline"}</p>
-          <p className="text-xs text-muted-foreground">{partner.city} • {partner.vehicle_type}</p>
+    <div className="min-h-screen bg-gradient-to-b from-primary-soft/40 to-background">
+      <header className="border-b border-border/60 bg-background/80 backdrop-blur">
+        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
+          <Link to="/" className="font-display text-lg font-bold">SuperApp India</Link>
+          <Link to="/delivery/auth" className="text-sm font-medium text-primary hover:underline">Already a partner? Sign in →</Link>
         </div>
-        <Switch checked={partner.is_online} disabled={disabled || busy} onCheckedChange={toggle} />
-      </div>
-    </div>
-  );
-}
+      </header>
 
-function Stat({ icon: Icon, label, value }: { icon: any; label: string; value: string }) {
-  return (
-    <div className="rounded-2xl border border-border/60 bg-card p-3">
-      <Icon className="h-4 w-4 text-primary" />
-      <p className="mt-1 text-[10px] uppercase tracking-wider text-muted-foreground">{label}</p>
-      <p className="font-display text-base font-bold">{value}</p>
-    </div>
-  );
-}
-
-function ActiveAssignment({ assignment }: { assignment: any }) {
-  const qc = useQueryClient();
-  if (!assignment) {
-    return (
-      <div className="rounded-3xl border border-dashed border-border bg-muted/20 p-6 text-center">
-        <Clock className="mx-auto h-7 w-7 text-muted-foreground" />
-        <p className="mt-2 text-sm text-muted-foreground">No active trip. Stay online — new orders appear here instantly.</p>
-      </div>
-    );
-  }
-
-  const update = async (status: string, extra: Record<string, any> = {}) => {
-    const stamps: Record<string, string> = {
-      accepted: "accepted_at", picked_up: "picked_up_at", delivered: "delivered_at",
-    };
-    const patch: any = { status, ...extra };
-    if (stamps[status]) patch[stamps[status]] = new Date().toISOString();
-    const { error } = await supabase.from("delivery_assignments").update(patch).eq("id", assignment.id);
-    if (error) return toast.error(error.message);
-
-    if (status === "delivered") {
-      await supabase.from("delivery_earnings_ledger").insert({
-        partner_id: assignment.partner_id,
-        assignment_id: assignment.id,
-        amount: Number(assignment.payout_amount ?? 50),
-        type: "delivery_fee",
-      });
-    }
-    toast.success(`Marked ${status.replace("_", " ")}`);
-    qc.invalidateQueries({ queryKey: ["rider-active"] });
-    qc.invalidateQueries({ queryKey: ["rider-today"] });
-  };
-
-  const addr = assignment.orders?.shipping_address ?? {};
-  return (
-    <div className="rounded-3xl border border-primary/30 bg-gradient-to-br from-primary-soft/40 to-background p-5 shadow-soft">
-      <div className="flex items-center justify-between">
-        <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-semibold uppercase text-primary">
-          {assignment.status.replace("_", " ")}
-        </span>
-        <span className="text-xs text-muted-foreground">Order #{String(assignment.order_id).slice(0, 6)}</span>
-      </div>
-      <p className="mt-3 font-display text-lg font-bold">{inr(Number(assignment.orders?.total ?? 0))}</p>
-      <div className="mt-3 space-y-2 text-sm">
-        <div className="flex items-start gap-2">
-          <MapPin className="mt-0.5 h-4 w-4 text-primary" />
+      <section className="mx-auto max-w-6xl px-4 py-10">
+        <div className="grid items-start gap-10 md:grid-cols-2">
           <div>
-            <p className="font-medium">Drop</p>
-            <p className="text-muted-foreground">{addr.line1 || "Customer address"} {addr.city ? `, ${addr.city}` : ""}</p>
+            <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-3 py-1 text-xs font-semibold text-primary">
+              <Bike className="h-3.5 w-3.5" /> Earn with SuperApp India
+            </span>
+            <h1 className="mt-4 font-display text-4xl font-bold leading-tight md:text-5xl">
+              Ride, deliver, <span className="text-primary">earn weekly.</span>
+            </h1>
+            <p className="mt-4 max-w-md text-muted-foreground">
+              Join thousands of riders earning on SuperApp India. Flexible hours, instant orders, transparent payouts straight to your bank.
+            </p>
+
+            <ul className="mt-6 grid gap-3 sm:grid-cols-2">
+              <Highlight icon={IndianRupee} title="₹500–₹1,200 / day" desc="Average rider take-home" />
+              <Highlight icon={Wallet} title="Weekly payouts" desc="Every Monday, no waiting" />
+              <Highlight icon={Clock} title="Choose your hours" desc="Work mornings, evenings or all day" />
+              <Highlight icon={ShieldCheck} title="Free insurance" desc="On-trip cover included" />
+            </ul>
+          </div>
+
+          <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-elevated">
+            <h2 className="font-display text-xl font-bold">Apply in 60 seconds</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Our team reviews every application within 24 hours.</p>
+            <ApplyForm />
           </div>
         </div>
-      </div>
-      <div className="mt-4 grid grid-cols-2 gap-2">
-        {assignment.status === "assigned" && (
-          <>
-            <Button variant="outline" className="rounded-full" onClick={() => update("rejected")}>Reject</Button>
-            <Button className="rounded-full" onClick={() => update("accepted")}>Accept</Button>
-          </>
-        )}
-        {assignment.status === "accepted" && (
-          <Button className="col-span-2 rounded-full" onClick={() => update("picked_up")}>Mark picked up</Button>
-        )}
-        {assignment.status === "picked_up" && (
-          <Button className="col-span-2 rounded-full" onClick={() => update("delivered")}>Mark delivered</Button>
-        )}
-      </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-4 pb-16">
+        <h2 className="font-display text-2xl font-bold">How it works</h2>
+        <div className="mt-4 grid gap-4 sm:grid-cols-3">
+          <Step n={1} icon={MapPinned} title="Apply" desc="Fill the form. We'll call you for a quick verification." />
+          <Step n={2} icon={Truck} title="Onboard" desc="Upload your documents. Get your rider kit." />
+          <Step n={3} icon={IndianRupee} title="Start earning" desc="Go online from the rider app and accept orders." />
+        </div>
+      </section>
     </div>
+  );
+}
+
+function Highlight({ icon: Icon, title, desc }: { icon: any; title: string; desc: string }) {
+  return (
+    <li className="flex gap-3 rounded-2xl border border-border/60 bg-card p-3">
+      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary"><Icon className="h-4 w-4" /></span>
+      <div>
+        <p className="text-sm font-semibold">{title}</p>
+        <p className="text-xs text-muted-foreground">{desc}</p>
+      </div>
+    </li>
+  );
+}
+
+function Step({ n, icon: Icon, title, desc }: { n: number; icon: any; title: string; desc: string }) {
+  return (
+    <div className="rounded-2xl border border-border/60 bg-card p-5">
+      <div className="flex items-center gap-2">
+        <span className="grid h-7 w-7 place-items-center rounded-full bg-primary text-xs font-bold text-primary-foreground">{n}</span>
+        <Icon className="h-4 w-4 text-primary" />
+      </div>
+      <h3 className="mt-2 font-display font-semibold">{title}</h3>
+      <p className="mt-1 text-sm text-muted-foreground">{desc}</p>
+    </div>
+  );
+}
+
+function ApplyForm() {
+  const [form, setForm] = useState({ full_name: "", phone: "", email: "", city: "", vehicle_type: "bike", notes: "" });
+  const [done, setDone] = useState(false);
+
+  const mut = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.from("delivery_partner_applications").insert(form);
+      if (error) throw error;
+    },
+    onSuccess: () => { setDone(true); toast.success("Application received! We'll reach out within 24h."); },
+    onError: (e: any) => toast.error(e.message ?? "Could not submit"),
+  });
+
+  if (done) {
+    return (
+      <div className="mt-4 rounded-2xl border border-success/30 bg-success/10 p-6 text-center">
+        <ShieldCheck className="mx-auto h-10 w-10 text-success" />
+        <p className="mt-2 font-semibold">You're on the list!</p>
+        <p className="text-sm text-muted-foreground">We'll call {form.phone} within 24 hours.</p>
+        <Link to="/" className="mt-3 inline-block text-sm text-primary hover:underline">← Back to app</Link>
+      </div>
+    );
+  }
+
+  return (
+    <form className="mt-4 space-y-3" onSubmit={(e) => { e.preventDefault(); mut.mutate(); }}>
+      <div>
+        <Label htmlFor="full_name">Full name</Label>
+        <Input id="full_name" required value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} />
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <Label htmlFor="phone">Phone</Label>
+          <Input id="phone" required value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+        </div>
+        <div>
+          <Label htmlFor="city">City</Label>
+          <Input id="city" required value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} />
+        </div>
+      </div>
+      <div>
+        <Label htmlFor="email">Email (optional)</Label>
+        <Input id="email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+      </div>
+      <div>
+        <Label>Vehicle</Label>
+        <Select value={form.vehicle_type} onValueChange={(v) => setForm({ ...form, vehicle_type: v })}>
+          <SelectTrigger><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="bike">Motorbike</SelectItem>
+            <SelectItem value="scooter">Scooter</SelectItem>
+            <SelectItem value="bicycle">Bicycle</SelectItem>
+            <SelectItem value="car">Car</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <div>
+        <Label htmlFor="notes">Anything we should know? (optional)</Label>
+        <Textarea id="notes" rows={2} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
+      </div>
+      <Button type="submit" disabled={mut.isPending} className="w-full rounded-full">
+        {mut.isPending ? "Submitting…" : "Apply now"}
+      </Button>
+      <p className="text-center text-[11px] text-muted-foreground">
+        Already approved? <Link to="/delivery/auth" className="text-primary hover:underline">Sign in to rider app</Link>
+      </p>
+    </form>
   );
 }

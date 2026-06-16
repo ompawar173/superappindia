@@ -35,6 +35,7 @@ import { Route as PPartnerRouteImport } from './routes/p.$partner'
 import { Route as DeliveryProfileRouteImport } from './routes/delivery.profile'
 import { Route as DeliveryOnboardingRouteImport } from './routes/delivery.onboarding'
 import { Route as DeliveryEarningsRouteImport } from './routes/delivery.earnings'
+import { Route as DeliveryDashboardRouteImport } from './routes/delivery.dashboard'
 import { Route as DeliveryAuthRouteImport } from './routes/delivery.auth'
 import { Route as DeliveryAssignmentsRouteImport } from './routes/delivery.assignments'
 import { Route as CCategoryRouteImport } from './routes/c.$category'
@@ -44,6 +45,7 @@ import { Route as AdminServicesRouteImport } from './routes/admin.services'
 import { Route as AdminPartnersRouteImport } from './routes/admin.partners'
 import { Route as AdminOndcRouteImport } from './routes/admin.ondc'
 import { Route as AdminLinksRouteImport } from './routes/admin.links'
+import { Route as AdminDeliveryApplicationsRouteImport } from './routes/admin.delivery-applications'
 import { Route as AdminDeliveryRouteImport } from './routes/admin.delivery'
 import { Route as AdminBannersRouteImport } from './routes/admin.banners'
 import { Route as OrdersIdTrackRouteImport } from './routes/orders.$id.track'
@@ -180,6 +182,11 @@ const DeliveryEarningsRoute = DeliveryEarningsRouteImport.update({
   path: '/earnings',
   getParentRoute: () => DeliveryRoute,
 } as any)
+const DeliveryDashboardRoute = DeliveryDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => DeliveryRoute,
+} as any)
 const DeliveryAuthRoute = DeliveryAuthRouteImport.update({
   id: '/auth',
   path: '/auth',
@@ -225,6 +232,12 @@ const AdminLinksRoute = AdminLinksRouteImport.update({
   path: '/links',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminDeliveryApplicationsRoute =
+  AdminDeliveryApplicationsRouteImport.update({
+    id: '/delivery-applications',
+    path: '/delivery-applications',
+    getParentRoute: () => AdminRoute,
+  } as any)
 const AdminDeliveryRoute = AdminDeliveryRouteImport.update({
   id: '/delivery',
   path: '/delivery',
@@ -266,6 +279,7 @@ export interface FileRoutesByFullPath {
   '/vendor': typeof VendorRouteWithChildren
   '/admin/banners': typeof AdminBannersRoute
   '/admin/delivery': typeof AdminDeliveryRoute
+  '/admin/delivery-applications': typeof AdminDeliveryApplicationsRoute
   '/admin/links': typeof AdminLinksRoute
   '/admin/ondc': typeof AdminOndcRoute
   '/admin/partners': typeof AdminPartnersRoute
@@ -275,6 +289,7 @@ export interface FileRoutesByFullPath {
   '/c/$category': typeof CCategoryRoute
   '/delivery/assignments': typeof DeliveryAssignmentsRoute
   '/delivery/auth': typeof DeliveryAuthRoute
+  '/delivery/dashboard': typeof DeliveryDashboardRoute
   '/delivery/earnings': typeof DeliveryEarningsRoute
   '/delivery/onboarding': typeof DeliveryOnboardingRoute
   '/delivery/profile': typeof DeliveryProfileRoute
@@ -305,6 +320,7 @@ export interface FileRoutesByTo {
   '/shops': typeof ShopsRoute
   '/admin/banners': typeof AdminBannersRoute
   '/admin/delivery': typeof AdminDeliveryRoute
+  '/admin/delivery-applications': typeof AdminDeliveryApplicationsRoute
   '/admin/links': typeof AdminLinksRoute
   '/admin/ondc': typeof AdminOndcRoute
   '/admin/partners': typeof AdminPartnersRoute
@@ -314,6 +330,7 @@ export interface FileRoutesByTo {
   '/c/$category': typeof CCategoryRoute
   '/delivery/assignments': typeof DeliveryAssignmentsRoute
   '/delivery/auth': typeof DeliveryAuthRoute
+  '/delivery/dashboard': typeof DeliveryDashboardRoute
   '/delivery/earnings': typeof DeliveryEarningsRoute
   '/delivery/onboarding': typeof DeliveryOnboardingRoute
   '/delivery/profile': typeof DeliveryProfileRoute
@@ -348,6 +365,7 @@ export interface FileRoutesById {
   '/vendor': typeof VendorRouteWithChildren
   '/admin/banners': typeof AdminBannersRoute
   '/admin/delivery': typeof AdminDeliveryRoute
+  '/admin/delivery-applications': typeof AdminDeliveryApplicationsRoute
   '/admin/links': typeof AdminLinksRoute
   '/admin/ondc': typeof AdminOndcRoute
   '/admin/partners': typeof AdminPartnersRoute
@@ -357,6 +375,7 @@ export interface FileRoutesById {
   '/c/$category': typeof CCategoryRoute
   '/delivery/assignments': typeof DeliveryAssignmentsRoute
   '/delivery/auth': typeof DeliveryAuthRoute
+  '/delivery/dashboard': typeof DeliveryDashboardRoute
   '/delivery/earnings': typeof DeliveryEarningsRoute
   '/delivery/onboarding': typeof DeliveryOnboardingRoute
   '/delivery/profile': typeof DeliveryProfileRoute
@@ -392,6 +411,7 @@ export interface FileRouteTypes {
     | '/vendor'
     | '/admin/banners'
     | '/admin/delivery'
+    | '/admin/delivery-applications'
     | '/admin/links'
     | '/admin/ondc'
     | '/admin/partners'
@@ -401,6 +421,7 @@ export interface FileRouteTypes {
     | '/c/$category'
     | '/delivery/assignments'
     | '/delivery/auth'
+    | '/delivery/dashboard'
     | '/delivery/earnings'
     | '/delivery/onboarding'
     | '/delivery/profile'
@@ -431,6 +452,7 @@ export interface FileRouteTypes {
     | '/shops'
     | '/admin/banners'
     | '/admin/delivery'
+    | '/admin/delivery-applications'
     | '/admin/links'
     | '/admin/ondc'
     | '/admin/partners'
@@ -440,6 +462,7 @@ export interface FileRouteTypes {
     | '/c/$category'
     | '/delivery/assignments'
     | '/delivery/auth'
+    | '/delivery/dashboard'
     | '/delivery/earnings'
     | '/delivery/onboarding'
     | '/delivery/profile'
@@ -473,6 +496,7 @@ export interface FileRouteTypes {
     | '/vendor'
     | '/admin/banners'
     | '/admin/delivery'
+    | '/admin/delivery-applications'
     | '/admin/links'
     | '/admin/ondc'
     | '/admin/partners'
@@ -482,6 +506,7 @@ export interface FileRouteTypes {
     | '/c/$category'
     | '/delivery/assignments'
     | '/delivery/auth'
+    | '/delivery/dashboard'
     | '/delivery/earnings'
     | '/delivery/onboarding'
     | '/delivery/profile'
@@ -708,6 +733,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DeliveryEarningsRouteImport
       parentRoute: typeof DeliveryRoute
     }
+    '/delivery/dashboard': {
+      id: '/delivery/dashboard'
+      path: '/dashboard'
+      fullPath: '/delivery/dashboard'
+      preLoaderRoute: typeof DeliveryDashboardRouteImport
+      parentRoute: typeof DeliveryRoute
+    }
     '/delivery/auth': {
       id: '/delivery/auth'
       path: '/auth'
@@ -771,6 +803,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLinksRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/delivery-applications': {
+      id: '/admin/delivery-applications'
+      path: '/delivery-applications'
+      fullPath: '/admin/delivery-applications'
+      preLoaderRoute: typeof AdminDeliveryApplicationsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/delivery': {
       id: '/admin/delivery'
       path: '/delivery'
@@ -812,6 +851,7 @@ declare module '@tanstack/react-router' {
 interface AdminRouteChildren {
   AdminBannersRoute: typeof AdminBannersRoute
   AdminDeliveryRoute: typeof AdminDeliveryRoute
+  AdminDeliveryApplicationsRoute: typeof AdminDeliveryApplicationsRoute
   AdminLinksRoute: typeof AdminLinksRoute
   AdminOndcRoute: typeof AdminOndcRoute
   AdminPartnersRoute: typeof AdminPartnersRoute
@@ -824,6 +864,7 @@ interface AdminRouteChildren {
 const AdminRouteChildren: AdminRouteChildren = {
   AdminBannersRoute: AdminBannersRoute,
   AdminDeliveryRoute: AdminDeliveryRoute,
+  AdminDeliveryApplicationsRoute: AdminDeliveryApplicationsRoute,
   AdminLinksRoute: AdminLinksRoute,
   AdminOndcRoute: AdminOndcRoute,
   AdminPartnersRoute: AdminPartnersRoute,
@@ -838,6 +879,7 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 interface DeliveryRouteChildren {
   DeliveryAssignmentsRoute: typeof DeliveryAssignmentsRoute
   DeliveryAuthRoute: typeof DeliveryAuthRoute
+  DeliveryDashboardRoute: typeof DeliveryDashboardRoute
   DeliveryEarningsRoute: typeof DeliveryEarningsRoute
   DeliveryOnboardingRoute: typeof DeliveryOnboardingRoute
   DeliveryProfileRoute: typeof DeliveryProfileRoute
@@ -847,6 +889,7 @@ interface DeliveryRouteChildren {
 const DeliveryRouteChildren: DeliveryRouteChildren = {
   DeliveryAssignmentsRoute: DeliveryAssignmentsRoute,
   DeliveryAuthRoute: DeliveryAuthRoute,
+  DeliveryDashboardRoute: DeliveryDashboardRoute,
   DeliveryEarningsRoute: DeliveryEarningsRoute,
   DeliveryOnboardingRoute: DeliveryOnboardingRoute,
   DeliveryProfileRoute: DeliveryProfileRoute,
@@ -911,13 +954,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
