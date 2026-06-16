@@ -3,6 +3,7 @@ import { Home, Search, ShoppingBag, User, LayoutGrid } from "lucide-react";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import logoAsset from "@/assets/logo.png.asset.json";
+import { CartButton } from "@/components/cart-drawer";
 
 export function AppShell({ children }: { children: ReactNode }) {
   return (
@@ -29,16 +30,20 @@ function TopBar() {
           <TopLink to="/seller/auth" label="Sell with us" />
           <TopLink to="/delivery" label="Ride with us" />
         </nav>
-        <Link
-          to="/account"
-          className="rounded-full bg-primary px-4 py-1.5 text-sm font-medium text-primary-foreground shadow-soft transition hover:bg-primary-glow"
-        >
-          Sign in
-        </Link>
+        <div className="flex items-center gap-2">
+          <CartButton />
+          <Link
+            to="/account"
+            className="rounded-full bg-primary px-4 py-1.5 text-sm font-medium text-primary-foreground shadow-soft transition hover:bg-primary-glow"
+          >
+            Sign in
+          </Link>
+        </div>
       </div>
     </header>
   );
 }
+
 
 function TopLink({ to, label }: { to: string; label: string }) {
   const path = useRouterState({ select: (s) => s.location.pathname });
