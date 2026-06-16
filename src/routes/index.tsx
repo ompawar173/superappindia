@@ -347,7 +347,7 @@ function FeaturedPartners() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("partners")
-        .select("id, slug, name, description, commission_pct, type, categories(slug,name,color,icon)")
+        .select("id, slug, name, description, type, categories(slug,name,color,icon)")
         .eq("active", true)
         .eq("featured", true)
         .limit(8);

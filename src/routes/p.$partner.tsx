@@ -16,7 +16,7 @@ function PartnerPage() {
     queryFn: async () => {
       const { data: p, error } = await supabase
         .from("partners")
-        .select("id,slug,name,description,commission_pct,type,base_url,categories(slug,name,color)")
+        .select("id,slug,name,description,type,base_url,categories(slug,name,color)")
         .eq("slug", partner)
         .maybeSingle();
       if (error) throw error;

@@ -24,7 +24,7 @@ function CategoryPage() {
       if (!cat) throw notFound();
       const { data: partners, error: e2 } = await supabase
         .from("partners")
-        .select("id,slug,name,description,commission_pct,type,logo_url")
+        .select("id,slug,name,description,type,logo_url")
         .eq("active", true)
         .eq("category_id", cat.id)
         .order("featured", { ascending: false });
