@@ -68,6 +68,13 @@ export type Database = {
             referencedRelation: "partners"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "affiliate_links_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       banners: {
@@ -207,10 +214,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "conversions_link_id_fkey"
+            columns: ["link_id"]
+            isOneToOne: false
+            referencedRelation: "affiliate_links_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "conversions_partner_id_fkey"
             columns: ["partner_id"]
             isOneToOne: false
             referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversions_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners_public"
             referencedColumns: ["id"]
           },
         ]
@@ -355,6 +376,48 @@ export type Database = {
           },
         ]
       }
+      delivery_partner_applications: {
+        Row: {
+          city: string
+          created_at: string
+          email: string | null
+          full_name: string
+          id: string
+          notes: string | null
+          phone: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          vehicle_type: string
+        }
+        Insert: {
+          city: string
+          created_at?: string
+          email?: string | null
+          full_name: string
+          id?: string
+          notes?: string | null
+          phone: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          vehicle_type: string
+        }
+        Update: {
+          city?: string
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          id?: string
+          notes?: string | null
+          phone?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          vehicle_type?: string
+        }
+        Relationships: []
+      }
       delivery_partners: {
         Row: {
           city: string
@@ -452,6 +515,13 @@ export type Database = {
             columns: ["link_id"]
             isOneToOne: false
             referencedRelation: "affiliate_links"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "link_clicks_link_id_fkey"
+            columns: ["link_id"]
+            isOneToOne: false
+            referencedRelation: "affiliate_links_public"
             referencedColumns: ["id"]
           },
         ]
@@ -619,6 +689,13 @@ export type Database = {
             referencedRelation: "vendors"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "orders_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       partner_offers: {
@@ -658,6 +735,13 @@ export type Database = {
             columns: ["partner_id"]
             isOneToOne: false
             referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_offers_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners_public"
             referencedColumns: ["id"]
           },
         ]
@@ -917,6 +1001,13 @@ export type Database = {
             referencedRelation: "vendors"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "vendor_products_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       vendors: {
@@ -932,6 +1023,7 @@ export type Database = {
           is_active: boolean
           kyc_status: Database["public"]["Enums"]["kyc_status"]
           logo_url: string | null
+          open_hours: Json | null
           pan: string | null
           payout_account: Json | null
           rating: number
@@ -951,6 +1043,7 @@ export type Database = {
           is_active?: boolean
           kyc_status?: Database["public"]["Enums"]["kyc_status"]
           logo_url?: string | null
+          open_hours?: Json | null
           pan?: string | null
           payout_account?: Json | null
           rating?: number
@@ -970,6 +1063,7 @@ export type Database = {
           is_active?: boolean
           kyc_status?: Database["public"]["Enums"]["kyc_status"]
           logo_url?: string | null
+          open_hours?: Json | null
           pan?: string | null
           payout_account?: Json | null
           rating?: number
@@ -1011,7 +1105,113 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      affiliate_links_public: {
+        Row: {
+          id: string | null
+          short_code: string | null
+          target_url: string | null
+        }
+        Insert: {
+          id?: string | null
+          short_code?: string | null
+          target_url?: string | null
+        }
+        Update: {
+          id?: string | null
+          short_code?: string | null
+          target_url?: string | null
+        }
+        Relationships: []
+      }
+      partners_public: {
+        Row: {
+          base_url: string | null
+          category_id: string | null
+          description: string | null
+          id: string | null
+          logo_url: string | null
+          name: string | null
+          slug: string | null
+          type: Database["public"]["Enums"]["partner_type"] | null
+        }
+        Insert: {
+          base_url?: string | null
+          category_id?: string | null
+          description?: string | null
+          id?: string | null
+          logo_url?: string | null
+          name?: string | null
+          slug?: string | null
+          type?: Database["public"]["Enums"]["partner_type"] | null
+        }
+        Update: {
+          base_url?: string | null
+          category_id?: string | null
+          description?: string | null
+          id?: string | null
+          logo_url?: string | null
+          name?: string | null
+          slug?: string | null
+          type?: Database["public"]["Enums"]["partner_type"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partners_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendors_public: {
+        Row: {
+          address: string | null
+          business_name: string | null
+          category: string | null
+          city: string | null
+          cover_url: string | null
+          created_at: string | null
+          id: string | null
+          is_active: boolean | null
+          kyc_status: Database["public"]["Enums"]["kyc_status"] | null
+          logo_url: string | null
+          open_hours: Json | null
+          rating: number | null
+          tagline: string | null
+        }
+        Insert: {
+          address?: string | null
+          business_name?: string | null
+          category?: string | null
+          city?: string | null
+          cover_url?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          kyc_status?: Database["public"]["Enums"]["kyc_status"] | null
+          logo_url?: string | null
+          open_hours?: Json | null
+          rating?: number | null
+          tagline?: string | null
+        }
+        Update: {
+          address?: string | null
+          business_name?: string | null
+          category?: string | null
+          city?: string | null
+          cover_url?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          kyc_status?: Database["public"]["Enums"]["kyc_status"] | null
+          logo_url?: string | null
+          open_hours?: Json | null
+          rating?: number | null
+          tagline?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {
