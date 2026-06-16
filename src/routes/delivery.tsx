@@ -55,7 +55,7 @@ function RiderBottomNav({ path }: { path: string }) {
     <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-border/60 bg-background/95 backdrop-blur">
       <ul className="mx-auto grid max-w-3xl grid-cols-4">
         {items.map((it) => {
-          const active = it.exact ? path === it.to : path.startsWith(it.to);
+          const active = path.startsWith(it.to);
           const Icon = it.icon;
           return (
             <li key={it.to}>
