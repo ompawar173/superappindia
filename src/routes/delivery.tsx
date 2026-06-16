@@ -11,14 +11,18 @@ function DeliveryLayout() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const path = useRouterState({ select: (s) => s.location.pathname });
-  const isAuthRoute = path === "/delivery/auth";
+
+  // Public routes inside /delivery: the landing page and the auth screen.
+  const isPublic = path === "/delivery" || path === "/delivery/auth";
 
   useEffect(() => {
     if (loading) return;
-    if (!user && !isAuthRoute) navigate({ to: "/delivery/auth" });
-  }, [user, loading, isAuthRoute, navigate]);
+    if (!user && !isPublic) navigate({ to: "/delivery/auth" });
+  }, [user, loading, isPublic, navigate]);
 
-  if (isAuthRoute) return <Outlet />;
+  // Public pages render with no chrome (the landing has its own header).
+  if (isPublic) return <Outlet />;
+
   if (loading || !user) {
     return <div className="grid min-h-screen place-items-center text-sm text-muted-foreground">Loading…</div>;
   }
@@ -27,7 +31,7 @@ function DeliveryLayout() {
     <div className="min-h-screen bg-muted/20 pb-20">
       <header className="sticky top-0 z-30 border-b border-border/60 bg-background/90 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-3xl items-center justify-between px-4">
-          <Link to="/delivery" className="flex items-center gap-2">
+          <Link to="/delivery/dashboard" className="flex items-center gap-2">
             <img src={logoAsset.url} alt="SuperApp India" className="h-7 w-auto" />
             <span className="rounded-full bg-primary-soft px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary">Rider</span>
           </Link>
@@ -42,7 +46,7 @@ function DeliveryLayout() {
 
 function RiderBottomNav({ path }: { path: string }) {
   const items = [
-    { to: "/delivery", icon: HomeIcon, label: "Home", exact: true },
+    { to: "/delivery/dashboard", icon: HomeIcon, label: "Home" },
     { to: "/delivery/assignments", icon: ListChecks, label: "Trips" },
     { to: "/delivery/earnings", icon: Wallet, label: "Earnings" },
     { to: "/delivery/profile", icon: User, label: "Profile" },

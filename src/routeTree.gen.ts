@@ -35,6 +35,7 @@ import { Route as PPartnerRouteImport } from './routes/p.$partner'
 import { Route as DeliveryProfileRouteImport } from './routes/delivery.profile'
 import { Route as DeliveryOnboardingRouteImport } from './routes/delivery.onboarding'
 import { Route as DeliveryEarningsRouteImport } from './routes/delivery.earnings'
+import { Route as DeliveryDashboardRouteImport } from './routes/delivery.dashboard'
 import { Route as DeliveryAuthRouteImport } from './routes/delivery.auth'
 import { Route as DeliveryAssignmentsRouteImport } from './routes/delivery.assignments'
 import { Route as CCategoryRouteImport } from './routes/c.$category'
@@ -180,6 +181,11 @@ const DeliveryEarningsRoute = DeliveryEarningsRouteImport.update({
   path: '/earnings',
   getParentRoute: () => DeliveryRoute,
 } as any)
+const DeliveryDashboardRoute = DeliveryDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => DeliveryRoute,
+} as any)
 const DeliveryAuthRoute = DeliveryAuthRouteImport.update({
   id: '/auth',
   path: '/auth',
@@ -275,6 +281,7 @@ export interface FileRoutesByFullPath {
   '/c/$category': typeof CCategoryRoute
   '/delivery/assignments': typeof DeliveryAssignmentsRoute
   '/delivery/auth': typeof DeliveryAuthRoute
+  '/delivery/dashboard': typeof DeliveryDashboardRoute
   '/delivery/earnings': typeof DeliveryEarningsRoute
   '/delivery/onboarding': typeof DeliveryOnboardingRoute
   '/delivery/profile': typeof DeliveryProfileRoute
@@ -314,6 +321,7 @@ export interface FileRoutesByTo {
   '/c/$category': typeof CCategoryRoute
   '/delivery/assignments': typeof DeliveryAssignmentsRoute
   '/delivery/auth': typeof DeliveryAuthRoute
+  '/delivery/dashboard': typeof DeliveryDashboardRoute
   '/delivery/earnings': typeof DeliveryEarningsRoute
   '/delivery/onboarding': typeof DeliveryOnboardingRoute
   '/delivery/profile': typeof DeliveryProfileRoute
@@ -357,6 +365,7 @@ export interface FileRoutesById {
   '/c/$category': typeof CCategoryRoute
   '/delivery/assignments': typeof DeliveryAssignmentsRoute
   '/delivery/auth': typeof DeliveryAuthRoute
+  '/delivery/dashboard': typeof DeliveryDashboardRoute
   '/delivery/earnings': typeof DeliveryEarningsRoute
   '/delivery/onboarding': typeof DeliveryOnboardingRoute
   '/delivery/profile': typeof DeliveryProfileRoute
@@ -401,6 +410,7 @@ export interface FileRouteTypes {
     | '/c/$category'
     | '/delivery/assignments'
     | '/delivery/auth'
+    | '/delivery/dashboard'
     | '/delivery/earnings'
     | '/delivery/onboarding'
     | '/delivery/profile'
@@ -440,6 +450,7 @@ export interface FileRouteTypes {
     | '/c/$category'
     | '/delivery/assignments'
     | '/delivery/auth'
+    | '/delivery/dashboard'
     | '/delivery/earnings'
     | '/delivery/onboarding'
     | '/delivery/profile'
@@ -482,6 +493,7 @@ export interface FileRouteTypes {
     | '/c/$category'
     | '/delivery/assignments'
     | '/delivery/auth'
+    | '/delivery/dashboard'
     | '/delivery/earnings'
     | '/delivery/onboarding'
     | '/delivery/profile'
@@ -708,6 +720,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DeliveryEarningsRouteImport
       parentRoute: typeof DeliveryRoute
     }
+    '/delivery/dashboard': {
+      id: '/delivery/dashboard'
+      path: '/dashboard'
+      fullPath: '/delivery/dashboard'
+      preLoaderRoute: typeof DeliveryDashboardRouteImport
+      parentRoute: typeof DeliveryRoute
+    }
     '/delivery/auth': {
       id: '/delivery/auth'
       path: '/auth'
@@ -838,6 +857,7 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 interface DeliveryRouteChildren {
   DeliveryAssignmentsRoute: typeof DeliveryAssignmentsRoute
   DeliveryAuthRoute: typeof DeliveryAuthRoute
+  DeliveryDashboardRoute: typeof DeliveryDashboardRoute
   DeliveryEarningsRoute: typeof DeliveryEarningsRoute
   DeliveryOnboardingRoute: typeof DeliveryOnboardingRoute
   DeliveryProfileRoute: typeof DeliveryProfileRoute
@@ -847,6 +867,7 @@ interface DeliveryRouteChildren {
 const DeliveryRouteChildren: DeliveryRouteChildren = {
   DeliveryAssignmentsRoute: DeliveryAssignmentsRoute,
   DeliveryAuthRoute: DeliveryAuthRoute,
+  DeliveryDashboardRoute: DeliveryDashboardRoute,
   DeliveryEarningsRoute: DeliveryEarningsRoute,
   DeliveryOnboardingRoute: DeliveryOnboardingRoute,
   DeliveryProfileRoute: DeliveryProfileRoute,

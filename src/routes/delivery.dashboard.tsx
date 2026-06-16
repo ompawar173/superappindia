@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { inr } from "@/lib/format";
 
-export const Route = createFileRoute("/delivery/")({ component: RiderHome });
+export const Route = createFileRoute("/delivery/dashboard")({ component: RiderHome });
 
 function RiderHome() {
   const { user } = useAuth();
