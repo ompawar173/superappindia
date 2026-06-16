@@ -45,6 +45,7 @@ import { Route as AdminServicesRouteImport } from './routes/admin.services'
 import { Route as AdminPartnersRouteImport } from './routes/admin.partners'
 import { Route as AdminOndcRouteImport } from './routes/admin.ondc'
 import { Route as AdminLinksRouteImport } from './routes/admin.links'
+import { Route as AdminDeliveryApplicationsRouteImport } from './routes/admin.delivery-applications'
 import { Route as AdminDeliveryRouteImport } from './routes/admin.delivery'
 import { Route as AdminBannersRouteImport } from './routes/admin.banners'
 import { Route as OrdersIdTrackRouteImport } from './routes/orders.$id.track'
@@ -231,6 +232,12 @@ const AdminLinksRoute = AdminLinksRouteImport.update({
   path: '/links',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminDeliveryApplicationsRoute =
+  AdminDeliveryApplicationsRouteImport.update({
+    id: '/delivery-applications',
+    path: '/delivery-applications',
+    getParentRoute: () => AdminRoute,
+  } as any)
 const AdminDeliveryRoute = AdminDeliveryRouteImport.update({
   id: '/delivery',
   path: '/delivery',
@@ -272,6 +279,7 @@ export interface FileRoutesByFullPath {
   '/vendor': typeof VendorRouteWithChildren
   '/admin/banners': typeof AdminBannersRoute
   '/admin/delivery': typeof AdminDeliveryRoute
+  '/admin/delivery-applications': typeof AdminDeliveryApplicationsRoute
   '/admin/links': typeof AdminLinksRoute
   '/admin/ondc': typeof AdminOndcRoute
   '/admin/partners': typeof AdminPartnersRoute
@@ -312,6 +320,7 @@ export interface FileRoutesByTo {
   '/shops': typeof ShopsRoute
   '/admin/banners': typeof AdminBannersRoute
   '/admin/delivery': typeof AdminDeliveryRoute
+  '/admin/delivery-applications': typeof AdminDeliveryApplicationsRoute
   '/admin/links': typeof AdminLinksRoute
   '/admin/ondc': typeof AdminOndcRoute
   '/admin/partners': typeof AdminPartnersRoute
@@ -356,6 +365,7 @@ export interface FileRoutesById {
   '/vendor': typeof VendorRouteWithChildren
   '/admin/banners': typeof AdminBannersRoute
   '/admin/delivery': typeof AdminDeliveryRoute
+  '/admin/delivery-applications': typeof AdminDeliveryApplicationsRoute
   '/admin/links': typeof AdminLinksRoute
   '/admin/ondc': typeof AdminOndcRoute
   '/admin/partners': typeof AdminPartnersRoute
@@ -401,6 +411,7 @@ export interface FileRouteTypes {
     | '/vendor'
     | '/admin/banners'
     | '/admin/delivery'
+    | '/admin/delivery-applications'
     | '/admin/links'
     | '/admin/ondc'
     | '/admin/partners'
@@ -441,6 +452,7 @@ export interface FileRouteTypes {
     | '/shops'
     | '/admin/banners'
     | '/admin/delivery'
+    | '/admin/delivery-applications'
     | '/admin/links'
     | '/admin/ondc'
     | '/admin/partners'
@@ -484,6 +496,7 @@ export interface FileRouteTypes {
     | '/vendor'
     | '/admin/banners'
     | '/admin/delivery'
+    | '/admin/delivery-applications'
     | '/admin/links'
     | '/admin/ondc'
     | '/admin/partners'
@@ -790,6 +803,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLinksRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/delivery-applications': {
+      id: '/admin/delivery-applications'
+      path: '/delivery-applications'
+      fullPath: '/admin/delivery-applications'
+      preLoaderRoute: typeof AdminDeliveryApplicationsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/delivery': {
       id: '/admin/delivery'
       path: '/delivery'
@@ -831,6 +851,7 @@ declare module '@tanstack/react-router' {
 interface AdminRouteChildren {
   AdminBannersRoute: typeof AdminBannersRoute
   AdminDeliveryRoute: typeof AdminDeliveryRoute
+  AdminDeliveryApplicationsRoute: typeof AdminDeliveryApplicationsRoute
   AdminLinksRoute: typeof AdminLinksRoute
   AdminOndcRoute: typeof AdminOndcRoute
   AdminPartnersRoute: typeof AdminPartnersRoute
@@ -843,6 +864,7 @@ interface AdminRouteChildren {
 const AdminRouteChildren: AdminRouteChildren = {
   AdminBannersRoute: AdminBannersRoute,
   AdminDeliveryRoute: AdminDeliveryRoute,
+  AdminDeliveryApplicationsRoute: AdminDeliveryApplicationsRoute,
   AdminLinksRoute: AdminLinksRoute,
   AdminOndcRoute: AdminOndcRoute,
   AdminPartnersRoute: AdminPartnersRoute,
