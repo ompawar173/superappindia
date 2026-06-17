@@ -15,6 +15,7 @@ import { Route as SearchRouteImport } from './routes/search'
 import { Route as RewardsRouteImport } from './routes/rewards'
 import { Route as OrdersRouteImport } from './routes/orders'
 import { Route as DeliveryRouteImport } from './routes/delivery'
+import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as CategoriesRouteImport } from './routes/categories'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -80,6 +81,11 @@ const OrdersRoute = OrdersRouteImport.update({
 const DeliveryRoute = DeliveryRouteImport.update({
   id: '/delivery',
   path: '/delivery',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckoutRoute = CheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CategoriesRoute = CategoriesRouteImport.update({
@@ -271,6 +277,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
   '/categories': typeof CategoriesRoute
+  '/checkout': typeof CheckoutRoute
   '/delivery': typeof DeliveryRouteWithChildren
   '/orders': typeof OrdersRouteWithChildren
   '/rewards': typeof RewardsRoute
@@ -314,6 +321,7 @@ export interface FileRoutesByTo {
   '/account': typeof AccountRoute
   '/auth': typeof AuthRoute
   '/categories': typeof CategoriesRoute
+  '/checkout': typeof CheckoutRoute
   '/orders': typeof OrdersRouteWithChildren
   '/rewards': typeof RewardsRoute
   '/search': typeof SearchRoute
@@ -357,6 +365,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
   '/categories': typeof CategoriesRoute
+  '/checkout': typeof CheckoutRoute
   '/delivery': typeof DeliveryRouteWithChildren
   '/orders': typeof OrdersRouteWithChildren
   '/rewards': typeof RewardsRoute
@@ -403,6 +412,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/categories'
+    | '/checkout'
     | '/delivery'
     | '/orders'
     | '/rewards'
@@ -446,6 +456,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/auth'
     | '/categories'
+    | '/checkout'
     | '/orders'
     | '/rewards'
     | '/search'
@@ -488,6 +499,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/categories'
+    | '/checkout'
     | '/delivery'
     | '/orders'
     | '/rewards'
@@ -533,6 +545,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   AuthRoute: typeof AuthRoute
   CategoriesRoute: typeof CategoriesRoute
+  CheckoutRoute: typeof CheckoutRoute
   DeliveryRoute: typeof DeliveryRouteWithChildren
   OrdersRoute: typeof OrdersRouteWithChildren
   RewardsRoute: typeof RewardsRoute
@@ -591,6 +604,13 @@ declare module '@tanstack/react-router' {
       path: '/delivery'
       fullPath: '/delivery'
       preLoaderRoute: typeof DeliveryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checkout': {
+      id: '/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof CheckoutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/categories': {
@@ -936,6 +956,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   AuthRoute: AuthRoute,
   CategoriesRoute: CategoriesRoute,
+  CheckoutRoute: CheckoutRoute,
   DeliveryRoute: DeliveryRouteWithChildren,
   OrdersRoute: OrdersRouteWithChildren,
   RewardsRoute: RewardsRoute,
