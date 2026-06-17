@@ -1,6 +1,6 @@
 import { Link, Outlet, createFileRoute, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { Home as HomeIcon, ListChecks, Wallet, User } from "lucide-react";
+import { Home as HomeIcon, ListChecks, Wallet, User, Bike } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
 import logoAsset from "@/assets/logo.png.asset.json";
@@ -47,13 +47,14 @@ function DeliveryLayout() {
 function RiderBottomNav({ path }: { path: string }) {
   const items = [
     { to: "/delivery/dashboard", icon: HomeIcon, label: "Home" },
+    { to: "/delivery/available", icon: Bike, label: "Pickups" },
     { to: "/delivery/assignments", icon: ListChecks, label: "Trips" },
     { to: "/delivery/earnings", icon: Wallet, label: "Earnings" },
     { to: "/delivery/profile", icon: User, label: "Profile" },
   ];
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-border/60 bg-background/95 backdrop-blur">
-      <ul className="mx-auto grid max-w-3xl grid-cols-4">
+      <ul className="mx-auto grid max-w-3xl grid-cols-5">
         {items.map((it) => {
           const active = path.startsWith(it.to);
           const Icon = it.icon;
