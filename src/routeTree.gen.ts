@@ -37,6 +37,7 @@ import { Route as DeliveryProfileRouteImport } from './routes/delivery.profile'
 import { Route as DeliveryOnboardingRouteImport } from './routes/delivery.onboarding'
 import { Route as DeliveryEarningsRouteImport } from './routes/delivery.earnings'
 import { Route as DeliveryDashboardRouteImport } from './routes/delivery.dashboard'
+import { Route as DeliveryAvailableRouteImport } from './routes/delivery.available'
 import { Route as DeliveryAuthRouteImport } from './routes/delivery.auth'
 import { Route as DeliveryAssignmentsRouteImport } from './routes/delivery.assignments'
 import { Route as CCategoryRouteImport } from './routes/c.$category'
@@ -193,6 +194,11 @@ const DeliveryDashboardRoute = DeliveryDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => DeliveryRoute,
 } as any)
+const DeliveryAvailableRoute = DeliveryAvailableRouteImport.update({
+  id: '/available',
+  path: '/available',
+  getParentRoute: () => DeliveryRoute,
+} as any)
 const DeliveryAuthRoute = DeliveryAuthRouteImport.update({
   id: '/auth',
   path: '/auth',
@@ -296,6 +302,7 @@ export interface FileRoutesByFullPath {
   '/c/$category': typeof CCategoryRoute
   '/delivery/assignments': typeof DeliveryAssignmentsRoute
   '/delivery/auth': typeof DeliveryAuthRoute
+  '/delivery/available': typeof DeliveryAvailableRoute
   '/delivery/dashboard': typeof DeliveryDashboardRoute
   '/delivery/earnings': typeof DeliveryEarningsRoute
   '/delivery/onboarding': typeof DeliveryOnboardingRoute
@@ -338,6 +345,7 @@ export interface FileRoutesByTo {
   '/c/$category': typeof CCategoryRoute
   '/delivery/assignments': typeof DeliveryAssignmentsRoute
   '/delivery/auth': typeof DeliveryAuthRoute
+  '/delivery/available': typeof DeliveryAvailableRoute
   '/delivery/dashboard': typeof DeliveryDashboardRoute
   '/delivery/earnings': typeof DeliveryEarningsRoute
   '/delivery/onboarding': typeof DeliveryOnboardingRoute
@@ -384,6 +392,7 @@ export interface FileRoutesById {
   '/c/$category': typeof CCategoryRoute
   '/delivery/assignments': typeof DeliveryAssignmentsRoute
   '/delivery/auth': typeof DeliveryAuthRoute
+  '/delivery/available': typeof DeliveryAvailableRoute
   '/delivery/dashboard': typeof DeliveryDashboardRoute
   '/delivery/earnings': typeof DeliveryEarningsRoute
   '/delivery/onboarding': typeof DeliveryOnboardingRoute
@@ -431,6 +440,7 @@ export interface FileRouteTypes {
     | '/c/$category'
     | '/delivery/assignments'
     | '/delivery/auth'
+    | '/delivery/available'
     | '/delivery/dashboard'
     | '/delivery/earnings'
     | '/delivery/onboarding'
@@ -473,6 +483,7 @@ export interface FileRouteTypes {
     | '/c/$category'
     | '/delivery/assignments'
     | '/delivery/auth'
+    | '/delivery/available'
     | '/delivery/dashboard'
     | '/delivery/earnings'
     | '/delivery/onboarding'
@@ -518,6 +529,7 @@ export interface FileRouteTypes {
     | '/c/$category'
     | '/delivery/assignments'
     | '/delivery/auth'
+    | '/delivery/available'
     | '/delivery/dashboard'
     | '/delivery/earnings'
     | '/delivery/onboarding'
@@ -760,6 +772,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DeliveryDashboardRouteImport
       parentRoute: typeof DeliveryRoute
     }
+    '/delivery/available': {
+      id: '/delivery/available'
+      path: '/available'
+      fullPath: '/delivery/available'
+      preLoaderRoute: typeof DeliveryAvailableRouteImport
+      parentRoute: typeof DeliveryRoute
+    }
     '/delivery/auth': {
       id: '/delivery/auth'
       path: '/auth'
@@ -899,6 +918,7 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 interface DeliveryRouteChildren {
   DeliveryAssignmentsRoute: typeof DeliveryAssignmentsRoute
   DeliveryAuthRoute: typeof DeliveryAuthRoute
+  DeliveryAvailableRoute: typeof DeliveryAvailableRoute
   DeliveryDashboardRoute: typeof DeliveryDashboardRoute
   DeliveryEarningsRoute: typeof DeliveryEarningsRoute
   DeliveryOnboardingRoute: typeof DeliveryOnboardingRoute
@@ -909,6 +929,7 @@ interface DeliveryRouteChildren {
 const DeliveryRouteChildren: DeliveryRouteChildren = {
   DeliveryAssignmentsRoute: DeliveryAssignmentsRoute,
   DeliveryAuthRoute: DeliveryAuthRoute,
+  DeliveryAvailableRoute: DeliveryAvailableRoute,
   DeliveryDashboardRoute: DeliveryDashboardRoute,
   DeliveryEarningsRoute: DeliveryEarningsRoute,
   DeliveryOnboardingRoute: DeliveryOnboardingRoute,
@@ -975,13 +996,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
