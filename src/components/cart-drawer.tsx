@@ -60,21 +60,25 @@ function CartDrawer({ onClose }: { onClose: () => void }) {
           ) : (
             <ul className="space-y-3">
               {state.items.map((i) => (
-                <li key={i.productId} className="flex gap-3 rounded-2xl border border-border/60 bg-card p-3">
-                  <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-muted">
-                    {i.image && <img src={i.image} alt="" className="h-full w-full object-cover" />}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="line-clamp-1 text-sm font-semibold">{i.title}</p>
-                    <p className="text-xs text-muted-foreground">{inr(i.price)}</p>
-                    <div className="mt-1 flex items-center gap-2">
-                      <button onClick={() => cart.setQty(i.productId, i.qty - 1)} className="grid h-6 w-6 place-items-center rounded-full border border-border hover:border-primary"><Minus className="h-3 w-3" /></button>
-                      <span className="min-w-5 text-center text-sm font-semibold">{i.qty}</span>
-                      <button onClick={() => cart.setQty(i.productId, i.qty + 1)} className="grid h-6 w-6 place-items-center rounded-full border border-border hover:border-primary"><Plus className="h-3 w-3" /></button>
-                      <button onClick={() => cart.remove(i.productId)} className="ml-auto text-muted-foreground hover:text-destructive" aria-label="Remove"><Trash2 className="h-4 w-4" /></button>
+                <li key={i.productId} className="rounded-2xl border border-border/60 bg-card p-3">
+                  <div className="flex gap-3">
+                    <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-muted">
+                      {i.image && <img src={i.image} alt="" className="h-full w-full object-cover" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="line-clamp-1 text-sm font-semibold">{i.title}</p>
+                        <p className="shrink-0 text-sm font-semibold">{inr(i.price * i.qty)}</p>
+                      </div>
+                      <p className="text-xs text-muted-foreground">{inr(i.price)}</p>
+                      <div className="mt-2 flex items-center gap-2">
+                        <button onClick={() => cart.setQty(i.productId, i.qty - 1)} className="grid h-6 w-6 place-items-center rounded-full border border-border hover:border-primary"><Minus className="h-3 w-3" /></button>
+                        <span className="min-w-5 text-center text-sm font-semibold">{i.qty}</span>
+                        <button onClick={() => cart.setQty(i.productId, i.qty + 1)} className="grid h-6 w-6 place-items-center rounded-full border border-border hover:border-primary"><Plus className="h-3 w-3" /></button>
+                        <button onClick={() => cart.remove(i.productId)} className="ml-auto text-muted-foreground hover:text-destructive" aria-label="Remove"><Trash2 className="h-4 w-4" /></button>
+                      </div>
                     </div>
                   </div>
-                  <p className="text-sm font-semibold">{inr(i.price * i.qty)}</p>
                 </li>
               ))}
             </ul>
@@ -88,16 +92,16 @@ function CartDrawer({ onClose }: { onClose: () => void }) {
               <span className="font-display text-lg font-bold">{inr(total)}</span>
             </div>
             <Link
-              to="/shop/$vendorId"
-              params={{ vendorId: state.vendorId! }}
+              to="/checkout"
               onClick={onClose}
               className="block w-full rounded-full bg-primary px-4 py-2.5 text-center text-sm font-semibold text-primary-foreground hover:bg-primary-glow"
             >
-              Continue on shop
+              Proceed to checkout
             </Link>
             <button onClick={() => cart.clear()} className="mt-2 w-full text-xs text-muted-foreground hover:text-destructive">Clear cart</button>
           </footer>
         )}
+
       </aside>
     </div>
   );
