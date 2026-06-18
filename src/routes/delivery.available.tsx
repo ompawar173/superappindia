@@ -1,12 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { MapPin, Package, Bike } from "lucide-react";
+import { MapPin, Package, Bike, BellRing, BellOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { inr } from "@/lib/format";
 import { Button } from "@/components/ui/button";
+import { notificationSound } from "@/lib/notification-sound";
 
 export const Route = createFileRoute("/delivery/available")({ component: AvailableOrders });
 
@@ -22,15 +23,17 @@ function AvailableOrders() {
 
   const approved = partner?.kyc_status === "approved";
 
+  const muted = useRef(false);
+
   const { data: orders, isLoading } = useQuery({
     queryKey: ["available-orders"],
     enabled: !!approved,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("orders")
-        .select("id,total,shipping_address,items,created_at,vendor_id,vendors(name,address)")
+        .select("id,total,shipping_address,items,created_at,vendor_id,vendors(business_name,address)")
         .is("delivery_partner_id", null)
-        .in("status", ["placed", "accepted", "preparing"])
+        .in("status", ["accepted", "preparing", "shipped"])
         .order("created_at", { ascending: false })
         .limit(50);
       if (error) throw error;
@@ -50,6 +53,14 @@ function AvailableOrders() {
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, [approved, qc]);
+
+  // Ringing sound while there are pickups available
+  const count = orders?.length ?? 0;
+  useEffect(() => {
+    if (count > 0 && !muted.current) notificationSound.start();
+    else notificationSound.stop();
+    return () => notificationSound.stop();
+  }, [count]);
 
   const claim = async (orderId: string, payout: number) => {
     if (!user) return;
