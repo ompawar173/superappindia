@@ -82,9 +82,9 @@ function VendorOrders() {
   };
 
   const grouped = useMemo(() => {
-    const map: Record<string, any[]> = { new: [], prep: [], ready: [], done: [] };
+    const map: Record<string, any[]> = Object.fromEntries(BUCKETS.map((b) => [b.key, []]));
     (orders ?? []).forEach((o: any) => {
-      const b = BUCKETS.find((x) => x.statuses.includes(o.status));
+      const b = BUCKETS.find((x) => x.match(o));
       if (b) map[b.key].push(o);
     });
     return map;
