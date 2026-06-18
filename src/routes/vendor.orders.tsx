@@ -11,30 +11,29 @@ import { notificationSound } from "@/lib/notification-sound";
 
 export const Route = createFileRoute("/vendor/orders")({ component: VendorOrders });
 
-type OrderStatus = "placed" | "accepted" | "preparing" | "ready" | "out_for_delivery" | "delivered" | "cancelled";
+type OrderStatus = "placed" | "accepted" | "preparing" | "shipped" | "delivered" | "cancelled" | "refunded";
 
 const BUCKETS: { key: string; title: string; statuses: OrderStatus[] }[] = [
   { key: "new", title: "New", statuses: ["placed"] },
   { key: "prep", title: "Preparing", statuses: ["accepted", "preparing"] },
-  { key: "ready", title: "Ready for pickup", statuses: ["ready", "out_for_delivery"] },
-  { key: "done", title: "Completed", statuses: ["delivered", "cancelled"] },
+  { key: "ready", title: "Ready / Out for delivery", statuses: ["shipped"] },
+  { key: "done", title: "Completed", statuses: ["delivered", "cancelled", "refunded"] },
 ];
 
 function VendorOrders() {
   const { user } = useAuth();
   const qc = useQueryClient();
-  const seenIds = useRef<Set<string>>(new Set());
   const muted = useRef(false);
 
   const { data: vendor } = useQuery({
     queryKey: ["vendor", user?.id],
     enabled: !!user,
-    queryFn: async () => (await supabase.from("vendors").select("id,name").eq("user_id", user!.id).maybeSingle()).data,
+    queryFn: async () => (await supabase.from("vendors").select("id,business_name").eq("user_id", user!.id).maybeSingle()).data,
   });
 
   const { data: orders } = useQuery({
     queryKey: ["vendor-orders", vendor?.id],
-    enabled: !!vendor,
+    enabled: !!vendor?.id,
     queryFn: async () => {
       const { data } = await supabase
         .from("orders")
@@ -47,7 +46,6 @@ function VendorOrders() {
     refetchInterval: 20000,
   });
 
-  // Realtime: new + updated orders for this vendor
   useEffect(() => {
     if (!vendor?.id) return;
     const ch = supabase
@@ -56,9 +54,7 @@ function VendorOrders() {
         "postgres_changes",
         { event: "*", schema: "public", table: "orders", filter: `vendor_id=eq.${vendor.id}` },
         (payload) => {
-          if (payload.eventType === "INSERT") {
-            toast.success("New order received");
-          }
+          if (payload.eventType === "INSERT") toast.success("New order received");
           qc.invalidateQueries({ queryKey: ["vendor-orders", vendor.id] });
         },
       )
@@ -66,19 +62,12 @@ function VendorOrders() {
     return () => { supabase.removeChannel(ch); };
   }, [vendor?.id, qc]);
 
-  // Sound while there is at least one pending order
   const pendingCount = useMemo(
     () => (orders ?? []).filter((o: any) => o.status === "placed").length,
     [orders],
   );
 
   useEffect(() => {
-    // ping once for any newly seen pending order
-    (orders ?? []).forEach((o: any) => {
-      if (o.status === "placed" && !seenIds.current.has(o.id)) {
-        seenIds.current.add(o.id);
-      }
-    });
     if (pendingCount > 0 && !muted.current) notificationSound.start();
     else notificationSound.stop();
     return () => notificationSound.stop();
@@ -87,7 +76,7 @@ function VendorOrders() {
   const setStatus = async (id: string, status: OrderStatus) => {
     const { error } = await supabase.from("orders").update({ status }).eq("id", id);
     if (error) { toast.error(error.message); return; }
-    toast.success(`Order marked ${status.replace("_", " ")}`);
+    toast.success(`Order marked ${status}`);
     qc.invalidateQueries({ queryKey: ["vendor-orders", vendor?.id] });
   };
 
@@ -105,7 +94,7 @@ function VendorOrders() {
       <div className="flex items-start justify-between gap-3">
         <div>
           <h1 className="font-display text-2xl font-bold">Orders</h1>
-          <p className="text-sm text-muted-foreground">Live customer orders for {vendor?.name ?? "your shop"}.</p>
+          <p className="text-sm text-muted-foreground">Live customer orders for {vendor?.business_name ?? "your shop"}.</p>
         </div>
         <button
           onClick={() => {
@@ -134,12 +123,8 @@ function VendorOrders() {
                 <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] text-foreground/70">{grouped[b.key].length}</span>
               </h2>
               <div className="space-y-2">
-                {grouped[b.key].length === 0 && (
-                  <p className="px-1 py-2 text-xs text-muted-foreground/70">—</p>
-                )}
-                {grouped[b.key].map((o: any) => (
-                  <OrderCard key={o.id} o={o} onStatus={setStatus} />
-                ))}
+                {grouped[b.key].length === 0 && <p className="px-1 py-2 text-xs text-muted-foreground/70">—</p>}
+                {grouped[b.key].map((o: any) => <OrderCard key={o.id} o={o} onStatus={setStatus} />)}
               </div>
             </div>
           ))}
@@ -177,25 +162,23 @@ function OrderCard({ o, onStatus }: { o: any; onStatus: (id: string, s: OrderSta
             <Button size="sm" variant="outline" className="h-7 rounded-full px-3 text-xs" onClick={() => onStatus(o.id, "cancelled")}>Reject</Button>
           </>
         )}
-        {(o.status === "accepted" || o.status === "preparing") && (
+        {o.status === "accepted" && (
           <>
-            {o.status === "accepted" && (
-              <Button size="sm" variant="outline" className="h-7 rounded-full px-3 text-xs" onClick={() => onStatus(o.id, "preparing")}>Start prep</Button>
-            )}
-            <Button size="sm" className="h-7 rounded-full px-3 text-xs" onClick={() => onStatus(o.id, "ready")}>Mark ready</Button>
+            <Button size="sm" variant="outline" className="h-7 rounded-full px-3 text-xs" onClick={() => onStatus(o.id, "preparing")}>Start prep</Button>
+            <Button size="sm" className="h-7 rounded-full px-3 text-xs" onClick={() => onStatus(o.id, "shipped")}>Mark ready</Button>
           </>
         )}
-        {o.status === "ready" && (
-          <span className="rounded-full bg-primary-soft px-2.5 py-1 text-[11px] font-medium text-primary">Waiting for rider…</span>
+        {o.status === "preparing" && (
+          <Button size="sm" className="h-7 rounded-full px-3 text-xs" onClick={() => onStatus(o.id, "shipped")}>Mark ready</Button>
         )}
-        {o.status === "out_for_delivery" && (
-          <span className="rounded-full bg-warning/15 px-2.5 py-1 text-[11px] font-medium text-warning-foreground">Out for delivery</span>
+        {o.status === "shipped" && (
+          <span className="rounded-full bg-primary-soft px-2.5 py-1 text-[11px] font-medium text-primary">Waiting for rider…</span>
         )}
         {o.status === "delivered" && (
           <span className="rounded-full bg-success/15 px-2.5 py-1 text-[11px] font-medium text-success">Delivered</span>
         )}
-        {o.status === "cancelled" && (
-          <span className="rounded-full bg-destructive/15 px-2.5 py-1 text-[11px] font-medium text-destructive">Cancelled</span>
+        {(o.status === "cancelled" || o.status === "refunded") && (
+          <span className="rounded-full bg-destructive/15 px-2.5 py-1 text-[11px] font-medium text-destructive capitalize">{o.status}</span>
         )}
       </div>
     </div>
