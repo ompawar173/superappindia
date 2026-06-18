@@ -13,11 +13,12 @@ export const Route = createFileRoute("/vendor/orders")({ component: VendorOrders
 
 type OrderStatus = "placed" | "accepted" | "preparing" | "shipped" | "delivered" | "cancelled" | "refunded";
 
-const BUCKETS: { key: string; title: string; statuses: OrderStatus[] }[] = [
-  { key: "new", title: "New", statuses: ["placed"] },
-  { key: "prep", title: "Preparing", statuses: ["accepted", "preparing"] },
-  { key: "ready", title: "Ready / Out for delivery", statuses: ["shipped"] },
-  { key: "done", title: "Completed", statuses: ["delivered", "cancelled", "refunded"] },
+const BUCKETS: { key: string; title: string; match: (o: any) => boolean }[] = [
+  { key: "new", title: "New", match: (o) => o.status === "placed" },
+  { key: "prep", title: "Preparing", match: (o) => o.status === "accepted" || o.status === "preparing" },
+  { key: "waiting", title: "Waiting for rider", match: (o) => o.status === "shipped" && !o.delivery_partner_id },
+  { key: "out", title: "Out for delivery", match: (o) => o.status === "shipped" && !!o.delivery_partner_id },
+  { key: "done", title: "Completed", match: (o) => ["delivered", "cancelled", "refunded"].includes(o.status) },
 ];
 
 function VendorOrders() {
