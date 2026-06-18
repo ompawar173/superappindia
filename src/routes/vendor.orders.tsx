@@ -172,8 +172,11 @@ function OrderCard({ o, onStatus }: { o: any; onStatus: (id: string, s: OrderSta
         {o.status === "preparing" && (
           <Button size="sm" className="h-7 rounded-full px-3 text-xs" onClick={() => onStatus(o.id, "shipped")}>Mark ready</Button>
         )}
-        {o.status === "shipped" && (
-          <span className="rounded-full bg-primary-soft px-2.5 py-1 text-[11px] font-medium text-primary">Waiting for rider…</span>
+        {o.status === "shipped" && !o.delivery_partner_id && (
+          <span className="rounded-full bg-warning/15 px-2.5 py-1 text-[11px] font-medium text-warning">Waiting for rider…</span>
+        )}
+        {o.status === "shipped" && o.delivery_partner_id && (
+          <span className="rounded-full bg-primary-soft px-2.5 py-1 text-[11px] font-medium text-primary">Rider on the way</span>
         )}
         {o.status === "delivered" && (
           <span className="rounded-full bg-success/15 px-2.5 py-1 text-[11px] font-medium text-success">Delivered</span>
