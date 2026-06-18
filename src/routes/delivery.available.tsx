@@ -108,7 +108,20 @@ function AvailableOrders() {
 
   return (
     <div className="space-y-3">
-      <h1 className="font-display text-xl font-bold">Available pickups</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="font-display text-xl font-bold">Available pickups</h1>
+        <button
+          onClick={() => {
+            muted.current = !muted.current;
+            if (muted.current) notificationSound.stop();
+            else if (count > 0) notificationSound.start();
+          }}
+          className="inline-flex items-center gap-1 rounded-full border border-border bg-background px-3 py-1 text-[11px] font-medium"
+        >
+          {muted.current ? <BellOff className="h-3 w-3" /> : <BellRing className="h-3 w-3 text-primary" />}
+          {muted.current ? "Muted" : "Alerts"}
+        </button>
+      </div>
       {orders.map((o: any) => {
         const addr = o.shipping_address ?? {};
         const itemCount = Array.isArray(o.items) ? o.items.reduce((s: number, i: any) => s + (i.qty ?? 1), 0) : 0;
@@ -118,7 +131,7 @@ function AvailableOrders() {
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <p className="text-xs text-muted-foreground">{new Date(o.created_at).toLocaleString()}</p>
-                <p className="font-semibold">{o.vendors?.name ?? "Vendor"}</p>
+                <p className="font-semibold">{o.vendors?.business_name ?? "Vendor"}</p>
                 <p className="mt-1 flex items-start gap-1 text-xs text-muted-foreground">
                   <MapPin className="mt-0.5 h-3 w-3 shrink-0" />
                   <span className="line-clamp-2">{[addr.line1, addr.city, addr.pincode].filter(Boolean).join(", ")}</span>
