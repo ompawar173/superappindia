@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { inr } from "@/lib/format";
+import { LiveMap } from "@/components/live-map";
 
 export const Route = createFileRoute("/delivery/dashboard")({ component: RiderHome });
 
