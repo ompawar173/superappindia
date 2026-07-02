@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { Loader2 } from "lucide-react";
 import { ShoppingCart, MapPin, ArrowLeft } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { cart, useCart } from "@/lib/cart";
@@ -18,6 +19,7 @@ function CheckoutPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [submitting, setSubmitting] = useState(false);
+  const submittingRef = useRef(false);
   const [addr, setAddr] = useState({ name: "", phone: "", line1: "", city: "", pincode: "" });
 
   const subtotal = state.items.reduce((s, i) => s + i.price * i.qty, 0);
@@ -41,6 +43,7 @@ function CheckoutPage() {
 
   const placeOrder = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submittingRef.current) return;
     if (!user) {
       toast.error("Please sign in to place an order");
       navigate({ to: "/auth" });
@@ -50,23 +53,28 @@ function CheckoutPage() {
       toast.error("Fill all delivery details");
       return;
     }
+    submittingRef.current = true;
     setSubmitting(true);
-    const { data, error } = await supabase.from("orders").insert({
-      user_id: user.id,
-      vendor_id: state.vendorId,
-      source: "own",
-      items: state.items as any,
-      subtotal,
-      tax: 0,
-      total,
-      shipping_address: addr as any,
-      status: "placed",
-    }).select("id").single();
-    setSubmitting(false);
-    if (error) { toast.error(error.message); return; }
-    cart.clear();
-    toast.success("Order placed");
-    navigate({ to: "/orders/$id/track", params: { id: data.id } });
+    try {
+      const { data, error } = await supabase.from("orders").insert({
+        user_id: user.id,
+        vendor_id: state.vendorId,
+        source: "own",
+        items: state.items as any,
+        subtotal,
+        tax: 0,
+        total,
+        shipping_address: addr as any,
+        status: "placed",
+      }).select("id").single();
+      if (error) { toast.error(error.message); return; }
+      cart.clear();
+      toast.success("Order placed");
+      navigate({ to: "/orders/$id/track", params: { id: data.id } });
+    } finally {
+      submittingRef.current = false;
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -95,8 +103,9 @@ function CheckoutPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full rounded-full bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground hover:bg-primary-glow disabled:opacity-60"
+              className="flex w-full items-center justify-center gap-2 rounded-full bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground hover:bg-primary-glow disabled:opacity-60"
             >
+              {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
               {submitting ? "Placing order…" : `Place order · ${inr(total)}`}
             </button>
           </form>

@@ -1,10 +1,11 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Bike, MapPin, Package, Phone } from "lucide-react";
+import { ArrowLeft, Bike, CheckCircle2, MapPin, Package, PackageCheck, Phone, ReceiptText, Truck } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { supabase } from "@/integrations/supabase/client";
 import { inr } from "@/lib/format";
+import { LiveMap } from "@/components/live-map";
 
 export const Route = createFileRoute("/orders/$id/track")({
   component: TrackOrder,
@@ -64,8 +65,15 @@ function TrackOrder() {
   if (!order) return null;
 
   const status = order.delivery_status ?? order.status ?? "pending";
-  const stages = ["pending", "assigned", "accepted", "picked_up", "delivered"];
-  const idx = stages.indexOf(status);
+  const stages = [
+    { key: "pending", label: "Placed", Icon: ReceiptText },
+    { key: "assigned", label: "Assigned", Icon: Package },
+    { key: "accepted", label: "Accepted", Icon: CheckCircle2 },
+    { key: "picked_up", label: "Picked up", Icon: Truck },
+    { key: "delivered", label: "Delivered", Icon: PackageCheck },
+  ];
+  const idx = Math.max(0, stages.findIndex((s) => s.key === status));
+  const pct = (idx / (stages.length - 1)) * 100;
   const addr = (order.shipping_address ?? {}) as any;
 
   return (
@@ -79,15 +87,28 @@ function TrackOrder() {
         <p className="text-sm text-muted-foreground">Order #{String(order.id).slice(0, 8)} · {inr(Number(order.total))}</p>
 
         <div className="mt-5 rounded-3xl border border-border/60 bg-card p-5 shadow-soft">
-          <div className="flex items-center justify-between">
-            {stages.map((s, i) => (
-              <div key={s} className="flex flex-col items-center text-center">
-                <span className={`grid h-7 w-7 place-items-center rounded-full text-xs font-bold ${i <= idx ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
-                  {i + 1}
-                </span>
-                <span className={`mt-1 text-[10px] capitalize ${i <= idx ? "text-foreground" : "text-muted-foreground"}`}>{s.replace("_", " ")}</span>
-              </div>
-            ))}
+          <div className="relative">
+            <div className="absolute left-3.5 right-3.5 top-4 h-1 rounded-full bg-muted" />
+            <div
+              className="absolute left-3.5 top-4 h-1 rounded-full bg-primary transition-all duration-500"
+              style={{ width: `calc(${pct}% - ${pct === 0 ? 0 : pct === 100 ? 28 : 14}px)` }}
+            />
+            <div className="relative flex items-start justify-between">
+              {stages.map((s, i) => {
+                const done = i <= idx;
+                const Icon = s.Icon;
+                return (
+                  <div key={s.key} className="flex w-14 flex-col items-center text-center">
+                    <span className={`grid h-9 w-9 place-items-center rounded-full border-2 transition ${done ? "border-primary bg-primary text-primary-foreground" : "border-muted bg-background text-muted-foreground"}`}>
+                      <Icon className="h-4 w-4" />
+                    </span>
+                    <span className={`mt-1.5 text-[10px] font-medium ${done ? "text-foreground" : "text-muted-foreground"}`}>
+                      {s.label}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
 
@@ -107,29 +128,12 @@ function TrackOrder() {
             </div>
 
             {rider.current_lat && rider.current_lng ? (
-              <div className="mt-4 rounded-2xl border border-border/60 bg-card p-4">
-                <div className="flex items-center gap-2 text-sm">
-                  <MapPin className="h-4 w-4 text-primary" />
-                  <span className="font-medium">Rider live location</span>
+              <div className="mt-4 space-y-2">
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5 text-primary" /> Live location</span>
+                  {rider.last_location_at && <span>Updated {new Date(rider.last_location_at).toLocaleTimeString()}</span>}
                 </div>
-                <p className="mt-1 font-mono text-xs text-muted-foreground">
-                  {rider.current_lat.toFixed(5)}, {rider.current_lng.toFixed(5)}
-                </p>
-                {rider.last_location_at && (
-                  <p className="mt-0.5 text-xs text-muted-foreground">
-                    Updated {new Date(rider.last_location_at).toLocaleTimeString()}
-                  </p>
-                )}
-                <a
-                  href={`https://www.google.com/maps?q=${rider.current_lat},${rider.current_lng}`}
-                  target="_blank" rel="noreferrer"
-                  className="mt-3 inline-flex w-full items-center justify-center rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
-                >
-                  Open in Google Maps
-                </a>
-                <p className="mt-2 text-[11px] text-muted-foreground text-center">
-                  Embedded live map will appear here once Google Maps is connected.
-                </p>
+                <LiveMap lat={rider.current_lat} lng={rider.current_lng} emoji="🛵" height={280} />
               </div>
             ) : (
               <p className="mt-4 text-xs text-muted-foreground">Waiting for rider's first location ping…</p>
