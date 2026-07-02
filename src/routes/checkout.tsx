@@ -19,6 +19,7 @@ function CheckoutPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [submitting, setSubmitting] = useState(false);
+  const submittingRef = useRef(false);
   const [addr, setAddr] = useState({ name: "", phone: "", line1: "", city: "", pincode: "" });
 
   const subtotal = state.items.reduce((s, i) => s + i.price * i.qty, 0);
