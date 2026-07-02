@@ -43,6 +43,7 @@ function CheckoutPage() {
 
   const placeOrder = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submittingRef.current) return;
     if (!user) {
       toast.error("Please sign in to place an order");
       navigate({ to: "/auth" });
@@ -52,23 +53,28 @@ function CheckoutPage() {
       toast.error("Fill all delivery details");
       return;
     }
+    submittingRef.current = true;
     setSubmitting(true);
-    const { data, error } = await supabase.from("orders").insert({
-      user_id: user.id,
-      vendor_id: state.vendorId,
-      source: "own",
-      items: state.items as any,
-      subtotal,
-      tax: 0,
-      total,
-      shipping_address: addr as any,
-      status: "placed",
-    }).select("id").single();
-    setSubmitting(false);
-    if (error) { toast.error(error.message); return; }
-    cart.clear();
-    toast.success("Order placed");
-    navigate({ to: "/orders/$id/track", params: { id: data.id } });
+    try {
+      const { data, error } = await supabase.from("orders").insert({
+        user_id: user.id,
+        vendor_id: state.vendorId,
+        source: "own",
+        items: state.items as any,
+        subtotal,
+        tax: 0,
+        total,
+        shipping_address: addr as any,
+        status: "placed",
+      }).select("id").single();
+      if (error) { toast.error(error.message); return; }
+      cart.clear();
+      toast.success("Order placed");
+      navigate({ to: "/orders/$id/track", params: { id: data.id } });
+    } finally {
+      submittingRef.current = false;
+      setSubmitting(false);
+    }
   };
 
   return (
