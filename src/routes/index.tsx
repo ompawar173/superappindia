@@ -7,12 +7,19 @@ import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
 import { AppShell } from "@/components/app-shell";
 import { supabase } from "@/integrations/supabase/client";
+import { 
+  getVendorCoverUrl, 
+  getVendorLogoUrl, 
+  getProductImageUrl, 
+  getCategoryImageUrl, 
+  getBannerImageUrl 
+} from "@/lib/supabase-storage";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "SuperApp India — One app for food, grocery, travel & more" },
-      { name: "description", content: "India's all-in-one super app. Order food, groceries, travel, hotels, cabs, recharges and book home services — with live delivery tracking and cashback on every order." },
+      { name: "description", content: "India's all-in-one super app. Order food, groceries, travel, hotels, cabs, recharges and book home services — with live delivery tracking and cashback on e[...]
     ],
   }),
   component: Home,
@@ -59,29 +66,33 @@ function ShopsRail() {
       </div>
       <div className="-mx-4 overflow-x-auto px-4 pb-2">
         <div className="flex gap-3 min-w-max">
-          {list.map((s: any) => (
-            <Link
-              key={s.id}
-              to="/shop/$vendorId"
-              params={{ vendorId: s.id }}
-              className="group w-56 shrink-0 overflow-hidden rounded-2xl border border-border/60 bg-card shadow-soft transition hover:-translate-y-0.5 hover:border-primary/40"
-            >
-              <div className="relative aspect-[16/10] bg-muted">
-                {s.cover_url ? (
-                  <img src={s.cover_url} alt={s.business_name} loading="lazy" className="h-full w-full object-cover" />
-                ) : (
-                  <div className="grid h-full w-full place-items-center bg-gradient-to-br from-primary-soft to-muted">
-                    <Icons.Store className="h-8 w-8 text-primary/60" />
-                  </div>
-                )}
-                {s.logo_url && <img src={s.logo_url} alt="" className="absolute bottom-1.5 left-2 h-9 w-9 rounded-lg border-2 border-card object-cover" />}
-              </div>
-              <div className="p-2.5 pl-3">
-                <p className="line-clamp-1 text-sm font-semibold">{s.business_name}</p>
-                <p className="line-clamp-1 text-[11px] text-muted-foreground capitalize">{s.category ?? "Shop"} {s.city ? `· ${s.city}` : ""}</p>
-              </div>
-            </Link>
-          ))}
+          {list.map((s: any) => {
+            const coverUrl = getVendorCoverUrl(s.cover_url);
+            const logoUrl = getVendorLogoUrl(s.logo_url);
+            return (
+              <Link
+                key={s.id}
+                to="/shop/$vendorId"
+                params={{ vendorId: s.id }}
+                className="group w-56 shrink-0 overflow-hidden rounded-2xl border border-border/60 bg-card shadow-soft transition hover:-translate-y-0.5 hover:border-primary/40"
+              >
+                <div className="relative aspect-[16/10] bg-muted">
+                  {coverUrl ? (
+                    <img src={coverUrl} alt={s.business_name} loading="lazy" className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="grid h-full w-full place-items-center bg-gradient-to-br from-primary-soft to-muted">
+                      <Icons.Store className="h-8 w-8 text-primary/60" />
+                    </div>
+                  )}
+                  {logoUrl && <img src={logoUrl} alt="" className="absolute bottom-1.5 left-2 h-9 w-9 rounded-lg border-2 border-card object-cover" />}
+                </div>
+                <div className="p-2.5 pl-3">
+                  <p className="line-clamp-1 text-sm font-semibold">{s.business_name}</p>
+                  <p className="line-clamp-1 text-[11px] text-muted-foreground capitalize">{s.category ?? "Shop"} {s.city ? `· ${s.city}` : ""}</p>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       </div>
     </section>
@@ -115,7 +126,8 @@ function FreshFromShops() {
       <div className="-mx-4 overflow-x-auto px-4 pb-2">
         <div className="flex gap-3 min-w-max">
           {list.map((p: any) => {
-            const img = Array.isArray(p.images) && p.images.length > 0 ? p.images[0] : null;
+            const imgPath = Array.isArray(p.images) && p.images.length > 0 ? p.images[0] : null;
+            const img = getProductImageUrl(imgPath);
             return (
               <Link
                 key={p.id}
@@ -125,7 +137,7 @@ function FreshFromShops() {
                 className="w-40 shrink-0 overflow-hidden rounded-2xl border border-border/60 bg-card transition hover:border-primary/40"
               >
                 <div className="aspect-square bg-muted">
-                  {img ? <img src={img} alt={p.title} loading="lazy" className="h-full w-full object-cover" /> : <div className="grid h-full w-full place-items-center text-muted-foreground/40"><Icons.Store className="h-7 w-7" /></div>}
+                  {img ? <img src={img} alt={p.title} loading="lazy" className="h-full w-full object-cover" /> : <div className="grid h-full w-full place-items-center text-muted-foreground/40"><Icons.Package className="h-8 w-8" /></div>}
                 </div>
                 <div className="p-2">
                   <p className="line-clamp-1 text-xs font-semibold">{p.title}</p>
@@ -174,28 +186,31 @@ function BannerCarousel() {
     <section className="mx-auto max-w-6xl px-4 pt-4">
       <div className="overflow-hidden rounded-3xl shadow-elevated" ref={emblaRef}>
         <div className="flex">
-          {slides.map((b: any) => (
-            <a
-              key={b.id}
-              href={b.cta_url ?? "#"}
-              className="relative flex min-w-0 flex-[0_0_100%] aspect-[16/8] md:aspect-[16/6]"
-              style={{ backgroundColor: b.bg_color ?? "#0a1f17" }}
-            >
-              {b.image_url && (
-                <img src={b.image_url} alt={b.title} className="absolute inset-0 h-full w-full object-cover opacity-90" loading="lazy" />
-              )}
-              <div className="absolute inset-0 bg-gradient-to-r from-black/65 via-black/30 to-transparent" />
-              <div className="relative z-10 flex flex-col justify-end gap-2 p-5 text-white md:p-10">
-                <h2 className="font-display text-2xl font-bold leading-tight md:text-4xl max-w-xl">{b.title}</h2>
-                {b.subtitle && <p className="max-w-md text-sm text-white/90 md:text-base">{b.subtitle}</p>}
-                {b.cta_label && (
-                  <span className="mt-2 inline-flex w-fit items-center gap-1 rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-foreground">
-                    {b.cta_label} <ArrowRight className="h-3.5 w-3.5" />
-                  </span>
+          {slides.map((b: any) => {
+            const bannerImageUrl = getBannerImageUrl(b.image_url);
+            return (
+              <a
+                key={b.id}
+                href={b.cta_url ?? "#"}
+                className="relative flex min-w-0 flex-[0_0_100%] aspect-[16/8] md:aspect-[16/6]"
+                style={{ backgroundColor: b.bg_color ?? "#0a1f17" }}
+              >
+                {bannerImageUrl && (
+                  <img src={bannerImageUrl} alt={b.title} className="absolute inset-0 h-full w-full object-cover opacity-90" loading="lazy" />
                 )}
-              </div>
-            </a>
-          ))}
+                <div className="absolute inset-0 bg-gradient-to-r from-black/65 via-black/30 to-transparent" />
+                <div className="relative z-10 flex flex-col justify-end gap-2 p-5 text-white md:p-10">
+                  <h2 className="font-display text-2xl font-bold leading-tight md:text-4xl max-w-xl">{b.title}</h2>
+                  {b.subtitle && <p className="max-w-md text-sm text-white/90 md:text-base">{b.subtitle}</p>}
+                  {b.cta_label && (
+                    <span className="mt-2 inline-flex w-fit items-center gap-1 rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-foreground">
+                      {b.cta_label} <ArrowRight className="h-3.5 w-3.5" />
+                    </span>
+                  )}
+                </div>
+              </a>
+            );
+          })}
         </div>
       </div>
       {slides.length > 1 && (
@@ -261,6 +276,7 @@ function CategoriesGrid() {
       <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-8">
         {(categories ?? []).map((c) => {
           const Icon = (Icons as Record<string, any>)[c.icon ?? "Sparkles"] ?? Icons.Sparkles;
+          const categoryImageUrl = getCategoryImageUrl(c.image_url);
           return (
             <Link
               key={c.id}
@@ -268,8 +284,8 @@ function CategoriesGrid() {
               params={{ category: c.slug }}
               className="group relative overflow-hidden rounded-2xl border border-border/60 bg-card aspect-square transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-soft"
             >
-              {c.image_url ? (
-                <img src={c.image_url} alt={c.name} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
+              {categoryImageUrl ? (
+                <img src={categoryImageUrl} alt={c.name} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
               ) : (
                 <span
                   className="absolute inset-0 grid place-items-center"
