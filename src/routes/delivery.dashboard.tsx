@@ -120,6 +120,20 @@ function RiderHome() {
         <Stat icon={CheckCircle2} label="Rating" value={Number(partner.rating ?? 5).toFixed(1)} />
       </div>
 
+      {partner.is_online && (
+        <div className="rounded-3xl border border-border/60 bg-card p-3 shadow-soft">
+          <div className="mb-2 flex items-center justify-between text-xs text-muted-foreground">
+            <span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5 text-primary" /> Your live position</span>
+            {partner.last_location_at && <span>Updated {new Date(partner.last_location_at).toLocaleTimeString()}</span>}
+          </div>
+          {partner.current_lat && partner.current_lng ? (
+            <LiveMap lat={partner.current_lat} lng={partner.current_lng} emoji="🛵" height={240} />
+          ) : (
+            <p className="p-6 text-center text-xs text-muted-foreground">Waiting for GPS… allow location permission on your device.</p>
+          )}
+        </div>
+      )}
+
       <ActiveAssignment assignment={active} />
     </div>
   );
