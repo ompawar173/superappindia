@@ -39,12 +39,13 @@ function OrdersPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("orders")
-        .select("id, status, delivery_status, total, items, shipping_address, created_at")
+        .select("id, status, delivery_status, total, items, shipping_address, created_at, delivery_partner_id, vendor_id, vendors(business_name), delivery_partner:delivery_partners!orders_delivery_partner_id_fkey(full_name, phone, current_lat, current_lng, last_location_at, vehicle_type, vehicle_number)")
         .eq("user_id", user!.id)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data ?? [];
     },
+    refetchInterval: 20000,
   });
 
   if (authLoading) {
