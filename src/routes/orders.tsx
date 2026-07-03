@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { MapPin, Package, PackageCheck, ShoppingBag } from "lucide-react";
+import { Bike, MapPin, Package, PackageCheck, Phone, ShoppingBag, Store } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
@@ -39,12 +39,13 @@ function OrdersPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("orders")
-        .select("id, status, delivery_status, total, items, shipping_address, created_at")
+        .select("id, status, delivery_status, total, items, shipping_address, created_at, delivery_partner_id, vendor_id, vendors(business_name), delivery_partner:delivery_partners!orders_delivery_partner_id_fkey(full_name, phone, current_lat, current_lng, last_location_at, vehicle_type, vehicle_number)")
         .eq("user_id", user!.id)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data ?? [];
     },
+    refetchInterval: 20000,
   });
 
   if (authLoading) {
@@ -120,6 +121,11 @@ function OrderCard({ order, showTrack }: { order: any; showTrack?: boolean }) {
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-xs text-muted-foreground">#{String(order.id).slice(0, 8)} · {new Date(order.created_at).toLocaleString()}</p>
+          {order.vendors?.business_name && (
+            <p className="mt-0.5 flex items-center gap-1 text-xs font-medium text-foreground/80">
+              <Store className="h-3 w-3 text-primary" /> {order.vendors.business_name}
+            </p>
+          )}
           <p className="mt-1 truncate text-sm font-medium">{names || "Order"}</p>
           {addr?.line1 && (
             <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
@@ -134,6 +140,32 @@ function OrderCard({ order, showTrack }: { order: any; showTrack?: boolean }) {
           <p className="mt-1 font-display text-base font-bold">{inr(Number(order.total))}</p>
         </div>
       </div>
+
+      {showTrack && order.delivery_partner && (
+        <div className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-primary/20 bg-primary-soft/40 p-2.5">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground">
+              <Bike className="h-4 w-4" />
+            </div>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold">{order.delivery_partner.full_name}</p>
+              <p className="truncate text-[11px] text-muted-foreground">
+                {order.delivery_partner.vehicle_type ?? "Rider"}{order.delivery_partner.vehicle_number ? ` · ${order.delivery_partner.vehicle_number}` : ""}
+                {order.delivery_partner.current_lat && order.delivery_partner.current_lng ? " · Live" : ""}
+              </p>
+            </div>
+          </div>
+          {order.delivery_partner.phone && (
+            <a href={`tel:${order.delivery_partner.phone}`} className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 text-xs font-semibold text-primary shadow-soft">
+              <Phone className="h-3 w-3" /> Call
+            </a>
+          )}
+        </div>
+      )}
+      {showTrack && !order.delivery_partner && ACTIVE.has(status) && (
+        <p className="mt-3 text-xs text-muted-foreground italic">Waiting for a rider to accept your order…</p>
+      )}
+
       {showTrack && (
         <div className="mt-3 flex justify-end">
           <Link
@@ -148,3 +180,4 @@ function OrderCard({ order, showTrack }: { order: any; showTrack?: boolean }) {
     </div>
   );
 }
+
