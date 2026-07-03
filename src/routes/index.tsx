@@ -48,56 +48,76 @@ function ShopsRail() {
         .eq("kyc_status", "approved")
         .eq("is_active", true)
         .order("rating", { ascending: false })
-        .limit(12);
+        .limit(24);
       if (error) throw error;
       return data;
     },
   });
   const list = shops ?? [];
-  if (list.length === 0) return null;
+
   return (
     <section className="mx-auto max-w-6xl px-4 pt-10">
-      <div className="mb-3 flex items-end justify-between">
+      <div className="mb-4 flex items-end justify-between">
         <div>
-          <h2 className="font-display text-lg font-bold">Shops on SuperApp India</h2>
-          <p className="text-xs text-muted-foreground">Local stores, hotels & service providers near you</p>
+          <h2 className="font-display text-xl font-bold">Local shops near you</h2>
+          <p className="text-xs text-muted-foreground">Discover kirana stores, restaurants & hotels in your city</p>
         </div>
         <Link to="/shops" className="text-sm font-medium text-primary hover:underline">View all</Link>
       </div>
-      <div className="-mx-4 overflow-x-auto px-4 pb-2">
-        <div className="flex gap-3 min-w-max">
+
+      {list.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-border bg-muted/20 p-10 text-center">
+          <Icons.Store className="mx-auto h-8 w-8 text-muted-foreground/50" />
+          <p className="mt-2 text-sm text-muted-foreground">No shops onboarded yet in your area.</p>
+          <Link to="/seller/auth" className="mt-3 inline-block rounded-full bg-primary px-4 py-1.5 text-xs font-semibold text-primary-foreground">
+            Become a seller
+          </Link>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           {list.map((s: any) => {
             const coverUrl = getVendorCoverUrl(s.cover_url);
             const logoUrl = getVendorLogoUrl(s.logo_url);
+            const rating = Number(s.rating ?? 4.3).toFixed(1);
             return (
               <Link
                 key={s.id}
                 to="/shop/$vendorId"
                 params={{ vendorId: s.id }}
-                className="group w-56 shrink-0 overflow-hidden rounded-2xl border border-border/60 bg-card shadow-soft transition hover:-translate-y-0.5 hover:border-primary/40"
+                className="group overflow-hidden rounded-2xl border border-border/60 bg-card shadow-soft transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
               >
                 <div className="relative aspect-[16/10] bg-muted">
                   {coverUrl ? (
-                    <img src={coverUrl} alt={s.business_name} loading="lazy" className="h-full w-full object-cover" />
+                    <img src={coverUrl} alt={s.business_name} loading="lazy" className="h-full w-full object-cover transition group-hover:scale-105" />
                   ) : (
                     <div className="grid h-full w-full place-items-center bg-gradient-to-br from-primary-soft to-muted">
                       <Icons.Store className="h-8 w-8 text-primary/60" />
                     </div>
                   )}
-                  {logoUrl && <img src={logoUrl} alt="" className="absolute bottom-1.5 left-2 h-9 w-9 rounded-lg border-2 border-card object-cover" />}
+                  <span className="absolute right-2 top-2 inline-flex items-center gap-1 rounded-full bg-black/70 px-2 py-0.5 text-[10px] font-semibold text-white backdrop-blur">
+                    <Icons.Star className="h-3 w-3 fill-yellow-400 text-yellow-400" /> {rating}
+                  </span>
+                  <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-semibold text-foreground">
+                    <Icons.Clock className="h-3 w-3 text-primary" /> 25–35 min
+                  </span>
+                  {logoUrl && <img src={logoUrl} alt="" className="absolute -bottom-4 left-3 h-10 w-10 rounded-xl border-2 border-card object-cover shadow-soft" />}
                 </div>
-                <div className="p-2.5 pl-3">
+                <div className="p-3 pt-4">
                   <p className="line-clamp-1 text-sm font-semibold">{s.business_name}</p>
-                  <p className="line-clamp-1 text-[11px] text-muted-foreground capitalize">{s.category ?? "Shop"} {s.city ? `· ${s.city}` : ""}</p>
+                  <p className="line-clamp-1 text-[11px] text-muted-foreground capitalize">
+                    {s.category ?? "Local shop"}{s.city ? ` · ${s.city}` : ""}
+                  </p>
+                  {s.tagline && <p className="mt-1 line-clamp-1 text-[11px] text-muted-foreground/80 italic">"{s.tagline}"</p>}
                 </div>
               </Link>
             );
           })}
         </div>
-      </div>
+      )}
     </section>
   );
 }
+
 
 function FreshFromShops() {
   const { data: products } = useQuery({
