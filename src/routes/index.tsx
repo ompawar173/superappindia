@@ -19,7 +19,7 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "SuperApp India — One app for food, grocery, travel & more" },
-      { name: "description", content: "India's all-in-one super app. Order food, groceries, travel, hotels, cabs, recharges and book home services — with live delivery tracking and cashback on e[...]
+      { name: "description", content: "Order from local shops, hotels and home services near you with live delivery tracking on SuperApp India." },
     ],
   }),
   component: Home,
