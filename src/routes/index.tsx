@@ -33,7 +33,7 @@ function Home() {
       <ShopsRail />
       <FreshFromShops />
       <ServicesRail />
-      <FeaturedPartners />
+      
     </AppShell>
   );
 }
