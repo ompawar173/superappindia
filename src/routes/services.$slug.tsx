@@ -73,6 +73,7 @@ function ServiceDetail() {
           >
             Book {service.name}
           </Button>
+          </div>
         </div>
       </div>
     </AppShell>
