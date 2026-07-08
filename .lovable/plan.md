@@ -1,74 +1,60 @@
 
-# Vendor Visibility & Search
+## 1. Remove all third-party vendor UI
 
-Make every approved vendor (shop/hotel/service) and their listings visible on the SuperApp India homepage and searchable across the app.
+Third-party affiliate stuff (Swiggy/Blinkit-style partners) is still on the home and in admin. Strip it end to end so only local shops + services remain.
 
-## 1. Homepage — "Shops on SuperApp India" rail
+- `src/routes/index.tsx`: delete the unused `FeaturedPartners` function (already not rendered) so it can't come back.
+- `src/routes/admin.tsx`: remove **Partners**, **UTM Links**, and **ONDC** nav items.
+- Delete route files: `src/routes/admin.partners.tsx`, `src/routes/admin.links.tsx`, `src/routes/admin.ondc.tsx`, `src/routes/p.$partner.tsx`, `src/routes/r.$shortCode.tsx`.
+- `src/routes/admin.index.tsx`: drop the Partners / Links / Clicks / Conversions / GMV stats block; keep vendor + rider KPIs only.
+- Data stays in DB (partners / affiliate_links / conversions tables) but has no UI surface anymore — no migration needed.
 
-New section on `/` between the Categories grid and the Services hub:
+## 2. Rider email/password login actually works
 
-- Horizontally scrollable rail of vendor cards.
-- Each card: shop logo/cover, business name, category tag, rating, "Open / Closed" pill, delivery ETA estimate.
-- Pulls from `vendors` where `kyc_status = 'approved'` and `is_active = true`, ordered by rating desc, newest first.
-- "View all" link → `/shops`.
+Auth logs show only stale refresh tokens — no failed sign-in. Symptom is probably "signed up but sign-in says invalid" because `auto_confirm_email` was toggled off at some point.
 
-A second rail below it: **"Fresh from local shops"** — latest 12 `vendor_products` where `is_active = true` and the parent vendor is approved. Tapping a product opens its vendor's shop page.
+- Call `supabase--configure_auth` with `auto_confirm_email: true` (rider + customer both benefit; no email verification step).
+- `src/routes/delivery.auth.tsx`: after successful `signUp`, immediately call `signInWithPassword` as a fallback (handles the "session not returned" case), then navigate. Surface the real Supabase error message on failure instead of eating it.
+- After sign-in, if the rider has no `delivery_partners` row yet, redirect to `/delivery/onboarding` instead of `/delivery` (prevents blank dashboard).
 
-## 2. New routes
+## 3. Customer can see the assigned rider + live location
 
-- `/shops` — full grid of approved vendors with filter chips (All, Grocery, Food, Pharmacy, Fashion, Electronics, Services…) and a search box scoped to shops.
-- `/shop/$vendorId` — vendor storefront page:
-  - Header: cover image, logo, business name, category, rating, address, open hours.
-  - Tabs: **Products** | **Services** | **About**.
-  - Product/service grid with add-to-cart (products) or book (services).
-  - "Share shop" button.
-  - `head()` sets title `{businessName} — SuperApp India`, OG image = cover.
+Tracking page already has rider card + `LiveMap`, but it only shows when `delivery_partner_id` is set. Two gaps:
 
-## 3. Global search upgrade (`/search`)
+- `src/routes/orders.tsx` (Active list): each active order card gets a compact rider strip (name · vehicle · Call button) plus a "Live map" toggle that expands the `LiveMap` inline — no need to open Track for a quick glance.
+- `src/routes/orders.$id.track.tsx`: the rider realtime channel currently filters on nothing; scope it to `filter: user_id=eq.<rider_id>` so location pings arrive without flooding. Also show the pickup pin (vendor lat/lng) on the same map alongside the rider emoji.
 
-Single search box, three result groups shown in order:
-1. **Shops** — match on `vendors.business_name`, `vendors.tagline`, `vendors.category` (ILIKE).
-2. **Products** — match on `vendor_products.name`, `description`, `category` where `kind='product'`.
-3. **Services** — match on `vendor_products.name`, `description` where `kind='service'`, plus the platform `services` table.
+## 4. Services admin — proper page with image uploads + preview
 
-Each result card links to `/shop/$vendorId` (shops), `/shop/$vendorId#product-$id` (product), or the service detail. Empty-state suggestions show top shops.
+Services table already has `image_url`. Admin UI never lets you upload one, so home service cards look plain.
 
-Header search bar in `app-shell` posts to `/search?q=...`.
+- Create storage bucket `service-images` (public read, authed write) via migration.
+- `src/routes/admin.services.tsx`: rebuild card layout — larger cover image, upload button (uses `service-images` bucket, stores public URL in `image_url`), edit dialog (name / desc / price / icon / image / sort), delete confirm. Show live count and "Hidden" chip.
+- `src/routes/index.tsx` `ServicesRail`: when `image_url` is set, render an image-forward tile (thumbnail + name + from-price) instead of the icon-only pill. Fallback to icon when no image.
+- `src/routes/services.$slug.tsx`: use `image_url` as the hero banner if present.
 
-## 4. Server functions (in `src/lib/storefront.functions.ts`)
+## Technical details
 
-Public, admin-elevated (no auth required — these are public listings):
+**Files created**
+- `supabase/migrations/<ts>_service_images_bucket.sql` — `insert into storage.buckets` for `service-images` + storage policies (public select, admin insert/update/delete via `has_role`).
 
-- `listApprovedVendors({ limit, category? })` → vendor cards for home rail and `/shops`.
-- `listLatestVendorProducts({ limit })` → "Fresh from local shops" rail.
-- `getVendorStorefront({ vendorId })` → vendor + products + services (only `is_active`).
-- `searchEverything({ q })` → `{ shops, products, services }`.
+**Files edited**
+- `src/routes/index.tsx` (drop FeaturedPartners, service tile redesign)
+- `src/routes/admin.tsx` (nav trim)
+- `src/routes/admin.index.tsx` (KPI trim)
+- `src/routes/admin.services.tsx` (image upload + edit)
+- `src/routes/services.$slug.tsx` (hero image)
+- `src/routes/delivery.auth.tsx` (post-signup auto sign-in + onboarding redirect + surfaced errors)
+- `src/routes/orders.tsx` (inline rider strip + live-map toggle)
+- `src/routes/orders.$id.track.tsx` (realtime filter, pickup pin)
 
-All use `supabaseAdmin` imported inside the handler, projecting only public-safe columns (no KYC, no commission, no contact email/phone unless vendor opted in).
+**Files deleted**
+- `src/routes/admin.partners.tsx`, `src/routes/admin.links.tsx`, `src/routes/admin.ondc.tsx`, `src/routes/p.$partner.tsx`, `src/routes/r.$shortCode.tsx`
 
-## 5. Vendor cover/logo
+**Auth config**
+- `auto_confirm_email: true`, `disable_signup: false`, `external_anonymous_users_enabled: false`, `password_hibp_enabled: false`
 
-`vendors` already has business fields. Add (migration):
-- `cover_url text`
-- `logo_url text`
-- `tagline text`
-- `is_active boolean default true`
-- `rating numeric default 0`
-
-Vendor dashboard `/vendor` → Profile tab gets upload fields for logo + cover (stored in existing `vendor-products` bucket under `vendors/{id}/`).
-
-## 6. Admin
-
-`/admin/vendors` already exists for KYC approve/reject. Add an "Active" toggle column so admin can hide a vendor without un-approving them.
-
-## Technical notes
-
-- All listing queries filter `kyc_status='approved' AND is_active=true` server-side — non-approved vendors never appear publicly.
-- Public route loaders call the public server fns (no `requireSupabaseAuth`) so SSR/prerender works and OG tags render for shop share links.
-- Search uses Postgres `ILIKE '%q%'` initially; can upgrade to `pg_trgm` GIN index later if volume grows.
-- No changes to delivery/assignment logic — orders still flow through the existing rider engine.
-
-## Open questions
-
-1. Should the homepage rail also mix in **service providers** (plumber, salon, etc.) alongside shops, or keep shops-only and let the existing "SuperApp India Services" rail handle services?
-2. For ordering: when a customer adds a product, should the cart be **single-vendor** (one shop per order) or **multi-vendor** (split into sub-orders at checkout)? Multi-vendor is more work on the rider-assignment side.
+**Out of scope**
+- No changes to vendor orders flow (already covered previously).
+- No LiveMap changes for `delivery.dashboard.tsx` — already added.
+- Not deleting the `partners`/`affiliate_links` DB tables (kept in case you re-enable later).
