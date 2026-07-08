@@ -112,11 +112,14 @@ function Section({ title, icon: Icon, orders, showTrack }: { title: string; icon
 }
 
 function OrderCard({ order, showTrack }: { order: any; showTrack?: boolean }) {
+  const [showMap, setShowMap] = useState(false);
   const status = String(order.delivery_status ?? order.status ?? "placed");
   const styles = STATUS_STYLES[status] ?? "bg-muted text-muted-foreground";
   const items = Array.isArray(order.items) ? order.items : [];
   const names = items.map((i: any) => `${i.title ?? i.name ?? "Item"}${i.qty ? ` × ${i.qty}` : ""}`).join(", ");
   const addr = order.shipping_address ?? {};
+  const rider = order.delivery_partner;
+  const hasLive = rider?.current_lat != null && rider?.current_lng != null;
 
   return (
     <div className="rounded-2xl border border-border bg-card p-4 shadow-soft">
@@ -143,28 +146,48 @@ function OrderCard({ order, showTrack }: { order: any; showTrack?: boolean }) {
         </div>
       </div>
 
-      {showTrack && order.delivery_partner && (
-        <div className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-primary/20 bg-primary-soft/40 p-2.5">
-          <div className="flex items-center gap-2 min-w-0">
-            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground">
-              <Bike className="h-4 w-4" />
+      {showTrack && rider && (
+        <div className="mt-3 rounded-xl border border-primary/20 bg-primary-soft/40 p-2.5">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground">
+                <Bike className="h-4 w-4" />
+              </div>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold">{rider.full_name}</p>
+                <p className="truncate text-[11px] text-muted-foreground">
+                  {rider.vehicle_type ?? "Rider"}{rider.vehicle_number ? ` · ${rider.vehicle_number}` : ""}
+                  {hasLive ? " · Live" : ""}
+                </p>
+              </div>
             </div>
-            <div className="min-w-0">
-              <p className="truncate text-sm font-semibold">{order.delivery_partner.full_name}</p>
-              <p className="truncate text-[11px] text-muted-foreground">
-                {order.delivery_partner.vehicle_type ?? "Rider"}{order.delivery_partner.vehicle_number ? ` · ${order.delivery_partner.vehicle_number}` : ""}
-                {order.delivery_partner.current_lat && order.delivery_partner.current_lng ? " · Live" : ""}
-              </p>
+            <div className="flex items-center gap-1.5">
+              {hasLive && (
+                <button
+                  onClick={() => setShowMap((v) => !v)}
+                  className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 text-xs font-semibold text-primary shadow-soft"
+                >
+                  <MapPin className="h-3 w-3" /> {showMap ? "Hide" : "Map"}
+                </button>
+              )}
+              {rider.phone && (
+                <a href={`tel:${rider.phone}`} className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 text-xs font-semibold text-primary shadow-soft">
+                  <Phone className="h-3 w-3" /> Call
+                </a>
+              )}
             </div>
           </div>
-          {order.delivery_partner.phone && (
-            <a href={`tel:${order.delivery_partner.phone}`} className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 text-xs font-semibold text-primary shadow-soft">
-              <Phone className="h-3 w-3" /> Call
-            </a>
+          {showMap && hasLive && (
+            <div className="mt-2">
+              <LiveMap lat={rider.current_lat} lng={rider.current_lng} emoji="🛵" height={200} />
+              {rider.last_location_at && (
+                <p className="mt-1 text-[10px] text-muted-foreground">Updated {new Date(rider.last_location_at).toLocaleTimeString()}</p>
+              )}
+            </div>
           )}
         </div>
       )}
-      {showTrack && !order.delivery_partner && ACTIVE.has(status) && (
+      {showTrack && !rider && ACTIVE.has(status) && (
         <p className="mt-3 text-xs text-muted-foreground italic">Waiting for a rider to accept your order…</p>
       )}
 
