@@ -31,8 +31,6 @@ import { Route as VendorOrdersRouteImport } from './routes/vendor.orders'
 import { Route as ShopVendorIdRouteImport } from './routes/shop.$vendorId'
 import { Route as ServicesSlugRouteImport } from './routes/services.$slug'
 import { Route as SellerAuthRouteImport } from './routes/seller.auth'
-import { Route as RShortCodeRouteImport } from './routes/r.$shortCode'
-import { Route as PPartnerRouteImport } from './routes/p.$partner'
 import { Route as DeliveryProfileRouteImport } from './routes/delivery.profile'
 import { Route as DeliveryOnboardingRouteImport } from './routes/delivery.onboarding'
 import { Route as DeliveryEarningsRouteImport } from './routes/delivery.earnings'
@@ -44,9 +42,6 @@ import { Route as CCategoryRouteImport } from './routes/c.$category'
 import { Route as AdminVendorsRouteImport } from './routes/admin.vendors'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminServicesRouteImport } from './routes/admin.services'
-import { Route as AdminPartnersRouteImport } from './routes/admin.partners'
-import { Route as AdminOndcRouteImport } from './routes/admin.ondc'
-import { Route as AdminLinksRouteImport } from './routes/admin.links'
 import { Route as AdminDeliveryApplicationsRouteImport } from './routes/admin.delivery-applications'
 import { Route as AdminDeliveryRouteImport } from './routes/admin.delivery'
 import { Route as AdminBannersRouteImport } from './routes/admin.banners'
@@ -164,16 +159,6 @@ const SellerAuthRoute = SellerAuthRouteImport.update({
   path: '/seller/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const RShortCodeRoute = RShortCodeRouteImport.update({
-  id: '/r/$shortCode',
-  path: '/r/$shortCode',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PPartnerRoute = PPartnerRouteImport.update({
-  id: '/p/$partner',
-  path: '/p/$partner',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const DeliveryProfileRoute = DeliveryProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -229,21 +214,6 @@ const AdminServicesRoute = AdminServicesRouteImport.update({
   path: '/services',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminPartnersRoute = AdminPartnersRouteImport.update({
-  id: '/partners',
-  path: '/partners',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminOndcRoute = AdminOndcRouteImport.update({
-  id: '/ondc',
-  path: '/ondc',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminLinksRoute = AdminLinksRouteImport.update({
-  id: '/links',
-  path: '/links',
-  getParentRoute: () => AdminRoute,
-} as any)
 const AdminDeliveryApplicationsRoute =
   AdminDeliveryApplicationsRouteImport.update({
     id: '/delivery-applications',
@@ -293,9 +263,6 @@ export interface FileRoutesByFullPath {
   '/admin/banners': typeof AdminBannersRoute
   '/admin/delivery': typeof AdminDeliveryRoute
   '/admin/delivery-applications': typeof AdminDeliveryApplicationsRoute
-  '/admin/links': typeof AdminLinksRoute
-  '/admin/ondc': typeof AdminOndcRoute
-  '/admin/partners': typeof AdminPartnersRoute
   '/admin/services': typeof AdminServicesRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/vendors': typeof AdminVendorsRoute
@@ -307,8 +274,6 @@ export interface FileRoutesByFullPath {
   '/delivery/earnings': typeof DeliveryEarningsRoute
   '/delivery/onboarding': typeof DeliveryOnboardingRoute
   '/delivery/profile': typeof DeliveryProfileRoute
-  '/p/$partner': typeof PPartnerRoute
-  '/r/$shortCode': typeof RShortCodeRoute
   '/seller/auth': typeof SellerAuthRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/shop/$vendorId': typeof ShopVendorIdRoute
@@ -336,9 +301,6 @@ export interface FileRoutesByTo {
   '/admin/banners': typeof AdminBannersRoute
   '/admin/delivery': typeof AdminDeliveryRoute
   '/admin/delivery-applications': typeof AdminDeliveryApplicationsRoute
-  '/admin/links': typeof AdminLinksRoute
-  '/admin/ondc': typeof AdminOndcRoute
-  '/admin/partners': typeof AdminPartnersRoute
   '/admin/services': typeof AdminServicesRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/vendors': typeof AdminVendorsRoute
@@ -350,8 +312,6 @@ export interface FileRoutesByTo {
   '/delivery/earnings': typeof DeliveryEarningsRoute
   '/delivery/onboarding': typeof DeliveryOnboardingRoute
   '/delivery/profile': typeof DeliveryProfileRoute
-  '/p/$partner': typeof PPartnerRoute
-  '/r/$shortCode': typeof RShortCodeRoute
   '/seller/auth': typeof SellerAuthRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/shop/$vendorId': typeof ShopVendorIdRoute
@@ -383,9 +343,6 @@ export interface FileRoutesById {
   '/admin/banners': typeof AdminBannersRoute
   '/admin/delivery': typeof AdminDeliveryRoute
   '/admin/delivery-applications': typeof AdminDeliveryApplicationsRoute
-  '/admin/links': typeof AdminLinksRoute
-  '/admin/ondc': typeof AdminOndcRoute
-  '/admin/partners': typeof AdminPartnersRoute
   '/admin/services': typeof AdminServicesRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/vendors': typeof AdminVendorsRoute
@@ -397,8 +354,6 @@ export interface FileRoutesById {
   '/delivery/earnings': typeof DeliveryEarningsRoute
   '/delivery/onboarding': typeof DeliveryOnboardingRoute
   '/delivery/profile': typeof DeliveryProfileRoute
-  '/p/$partner': typeof PPartnerRoute
-  '/r/$shortCode': typeof RShortCodeRoute
   '/seller/auth': typeof SellerAuthRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/shop/$vendorId': typeof ShopVendorIdRoute
@@ -431,9 +386,6 @@ export interface FileRouteTypes {
     | '/admin/banners'
     | '/admin/delivery'
     | '/admin/delivery-applications'
-    | '/admin/links'
-    | '/admin/ondc'
-    | '/admin/partners'
     | '/admin/services'
     | '/admin/users'
     | '/admin/vendors'
@@ -445,8 +397,6 @@ export interface FileRouteTypes {
     | '/delivery/earnings'
     | '/delivery/onboarding'
     | '/delivery/profile'
-    | '/p/$partner'
-    | '/r/$shortCode'
     | '/seller/auth'
     | '/services/$slug'
     | '/shop/$vendorId'
@@ -474,9 +424,6 @@ export interface FileRouteTypes {
     | '/admin/banners'
     | '/admin/delivery'
     | '/admin/delivery-applications'
-    | '/admin/links'
-    | '/admin/ondc'
-    | '/admin/partners'
     | '/admin/services'
     | '/admin/users'
     | '/admin/vendors'
@@ -488,8 +435,6 @@ export interface FileRouteTypes {
     | '/delivery/earnings'
     | '/delivery/onboarding'
     | '/delivery/profile'
-    | '/p/$partner'
-    | '/r/$shortCode'
     | '/seller/auth'
     | '/services/$slug'
     | '/shop/$vendorId'
@@ -520,9 +465,6 @@ export interface FileRouteTypes {
     | '/admin/banners'
     | '/admin/delivery'
     | '/admin/delivery-applications'
-    | '/admin/links'
-    | '/admin/ondc'
-    | '/admin/partners'
     | '/admin/services'
     | '/admin/users'
     | '/admin/vendors'
@@ -534,8 +476,6 @@ export interface FileRouteTypes {
     | '/delivery/earnings'
     | '/delivery/onboarding'
     | '/delivery/profile'
-    | '/p/$partner'
-    | '/r/$shortCode'
     | '/seller/auth'
     | '/services/$slug'
     | '/shop/$vendorId'
@@ -565,8 +505,6 @@ export interface RootRouteChildren {
   ShopsRoute: typeof ShopsRoute
   VendorRoute: typeof VendorRouteWithChildren
   CCategoryRoute: typeof CCategoryRoute
-  PPartnerRoute: typeof PPartnerRoute
-  RShortCodeRoute: typeof RShortCodeRoute
   SellerAuthRoute: typeof SellerAuthRoute
   ServicesSlugRoute: typeof ServicesSlugRoute
   ShopVendorIdRoute: typeof ShopVendorIdRoute
@@ -730,20 +668,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SellerAuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/r/$shortCode': {
-      id: '/r/$shortCode'
-      path: '/r/$shortCode'
-      fullPath: '/r/$shortCode'
-      preLoaderRoute: typeof RShortCodeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/p/$partner': {
-      id: '/p/$partner'
-      path: '/p/$partner'
-      fullPath: '/p/$partner'
-      preLoaderRoute: typeof PPartnerRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/delivery/profile': {
       id: '/delivery/profile'
       path: '/profile'
@@ -821,27 +745,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminServicesRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/admin/partners': {
-      id: '/admin/partners'
-      path: '/partners'
-      fullPath: '/admin/partners'
-      preLoaderRoute: typeof AdminPartnersRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/ondc': {
-      id: '/admin/ondc'
-      path: '/ondc'
-      fullPath: '/admin/ondc'
-      preLoaderRoute: typeof AdminOndcRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/links': {
-      id: '/admin/links'
-      path: '/links'
-      fullPath: '/admin/links'
-      preLoaderRoute: typeof AdminLinksRouteImport
-      parentRoute: typeof AdminRoute
-    }
     '/admin/delivery-applications': {
       id: '/admin/delivery-applications'
       path: '/delivery-applications'
@@ -891,9 +794,6 @@ interface AdminRouteChildren {
   AdminBannersRoute: typeof AdminBannersRoute
   AdminDeliveryRoute: typeof AdminDeliveryRoute
   AdminDeliveryApplicationsRoute: typeof AdminDeliveryApplicationsRoute
-  AdminLinksRoute: typeof AdminLinksRoute
-  AdminOndcRoute: typeof AdminOndcRoute
-  AdminPartnersRoute: typeof AdminPartnersRoute
   AdminServicesRoute: typeof AdminServicesRoute
   AdminUsersRoute: typeof AdminUsersRoute
   AdminVendorsRoute: typeof AdminVendorsRoute
@@ -904,9 +804,6 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminBannersRoute: AdminBannersRoute,
   AdminDeliveryRoute: AdminDeliveryRoute,
   AdminDeliveryApplicationsRoute: AdminDeliveryApplicationsRoute,
-  AdminLinksRoute: AdminLinksRoute,
-  AdminOndcRoute: AdminOndcRoute,
-  AdminPartnersRoute: AdminPartnersRoute,
   AdminServicesRoute: AdminServicesRoute,
   AdminUsersRoute: AdminUsersRoute,
   AdminVendorsRoute: AdminVendorsRoute,
@@ -985,8 +882,6 @@ const rootRouteChildren: RootRouteChildren = {
   ShopsRoute: ShopsRoute,
   VendorRoute: VendorRouteWithChildren,
   CCategoryRoute: CCategoryRoute,
-  PPartnerRoute: PPartnerRoute,
-  RShortCodeRoute: RShortCodeRoute,
   SellerAuthRoute: SellerAuthRoute,
   ServicesSlugRoute: ServicesSlugRoute,
   ShopVendorIdRoute: ShopVendorIdRoute,
