@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { ArrowRight, MapPin, Search, TrendingUp } from "lucide-react";
+import { ArrowRight, MapPin, Search } from "lucide-react";
 import * as Icons from "lucide-react";
 import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
@@ -331,7 +331,7 @@ function ServicesRail() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("services")
-        .select("id, slug, name, icon, short_desc, base_price")
+        .select("id, slug, name, icon, short_desc, base_price, image_url")
         .eq("active", true)
         .order("sort_order");
       if (error) throw error;
@@ -339,95 +339,45 @@ function ServicesRail() {
     },
   });
 
+  const list = services ?? [];
+  if (list.length === 0) return null;
+
   return (
     <section className="mx-auto max-w-6xl px-4 pt-10">
       <div className="mb-3 flex items-end justify-between">
         <div>
           <h2 className="font-display text-lg font-bold">SuperApp India Services</h2>
-          <p className="text-xs text-muted-foreground">Book home services in minutes</p>
+          <p className="text-xs text-muted-foreground">Book verified home services in minutes</p>
         </div>
         <Link to="/categories" className="text-sm font-medium text-primary hover:underline">All services</Link>
       </div>
-      <div className="-mx-4 overflow-x-auto px-4 pb-2">
-        <div className="flex gap-2 min-w-max">
-          {(services ?? []).map((s) => {
-            const Icon = (Icons as Record<string, any>)[s.icon ?? "Sparkles"] ?? Icons.Sparkles;
-            return (
-              <Link
-                key={s.id}
-                to="/services/$slug"
-                params={{ slug: s.slug }}
-                className="group flex items-center gap-2.5 rounded-full border border-border/60 bg-card px-4 py-2.5 transition hover:border-primary/40 hover:bg-primary-soft/40"
-              >
-                <span className="grid h-8 w-8 place-items-center rounded-full bg-primary-soft text-primary">
-                  <Icon className="h-4 w-4" />
-                </span>
-                <div className="text-left">
-                  <p className="text-sm font-semibold leading-tight">{s.name}</p>
-                  {s.base_price && (
-                    <p className="text-[10px] text-muted-foreground">from ₹{Number(s.base_price)}</p>
-                  )}
-                </div>
-              </Link>
-            );
-          })}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function FeaturedPartners() {
-  const { data: partners } = useQuery({
-    queryKey: ["featured-partners"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("partners")
-        .select("id, slug, name, description, type, categories(slug,name,color,icon)")
-        .eq("active", true)
-        .eq("featured", true)
-        .limit(8);
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  return (
-    <section className="mx-auto max-w-6xl px-4 py-10">
-      <div className="mb-3 flex items-end justify-between">
-        <div>
-          <h2 className="font-display text-lg font-bold">Featured partners</h2>
-          <p className="text-xs text-muted-foreground">Top brands, exclusive cashback for SuperApp India users</p>
-        </div>
-        <span className="inline-flex items-center gap-1 rounded-full bg-primary-soft px-3 py-1 text-xs font-medium text-primary">
-          <TrendingUp className="h-3 w-3" /> Trending
-        </span>
-      </div>
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {(partners ?? []).map((p) => {
-          const cat: any = p.categories;
-          const Icon = (Icons as Record<string, any>)[cat?.icon ?? "Sparkles"] ?? Icons.Sparkles;
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        {list.map((s: any) => {
+          const Icon = (Icons as Record<string, any>)[s.icon ?? "Sparkles"] ?? Icons.Sparkles;
           return (
             <Link
-              key={p.id}
-              to="/p/$partner"
-              params={{ partner: p.slug }}
-              className="group flex items-start gap-3 rounded-2xl border border-border/60 bg-card p-4 transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-soft"
+              key={s.id}
+              to="/services/$slug"
+              params={{ slug: s.slug }}
+              className="group overflow-hidden rounded-2xl border border-border/60 bg-card shadow-soft transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
             >
-              <span
-                className="grid h-12 w-12 shrink-0 place-items-center rounded-xl"
-                style={{ backgroundColor: (cat?.color ?? "#16a34a") + "1f", color: cat?.color ?? undefined }}
-              >
-                <Icon className="h-6 w-6" />
-              </span>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <h3 className="truncate font-semibold">{p.name}</h3>
-                  {p.type === "own" && (
-                    <span className="rounded-full bg-accent px-1.5 py-0.5 text-[10px] font-medium text-accent-foreground">OWN</span>
-                  )}
-                </div>
-                <p className="line-clamp-2 text-xs text-muted-foreground">{p.description}</p>
+              <div className="relative aspect-[16/10] bg-muted">
+                {s.image_url ? (
+                  <img src={s.image_url} alt={s.name} loading="lazy" className="h-full w-full object-cover transition group-hover:scale-105" />
+                ) : (
+                  <div className="grid h-full w-full place-items-center bg-gradient-to-br from-primary-soft to-muted">
+                    <Icon className="h-10 w-10 text-primary/70" />
+                  </div>
+                )}
+                {s.base_price && (
+                  <span className="absolute right-2 top-2 rounded-full bg-black/70 px-2 py-0.5 text-[10px] font-semibold text-white backdrop-blur">
+                    from ₹{Number(s.base_price)}
+                  </span>
+                )}
+              </div>
+              <div className="p-3">
+                <p className="line-clamp-1 text-sm font-semibold">{s.name}</p>
+                {s.short_desc && <p className="mt-0.5 line-clamp-1 text-[11px] text-muted-foreground">{s.short_desc}</p>}
               </div>
             </Link>
           );
@@ -436,3 +386,7 @@ function FeaturedPartners() {
     </section>
   );
 }
+
+
+
+

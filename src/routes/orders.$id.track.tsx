@@ -51,15 +51,18 @@ function TrackOrder() {
   // Realtime: refresh when rider moves or order updates
   useEffect(() => {
     if (!id) return;
+    const riderId = order?.delivery_partner_id;
     const ch = supabase
       .channel(`track-${id}`)
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "orders", filter: `id=eq.${id}` },
-        () => qc.invalidateQueries({ queryKey: ["track-order", id] }))
-      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "delivery_partners" },
-        () => qc.invalidateQueries({ queryKey: ["track-rider"] }))
-      .subscribe();
+        () => qc.invalidateQueries({ queryKey: ["track-order", id] }));
+    if (riderId) {
+      ch.on("postgres_changes", { event: "UPDATE", schema: "public", table: "delivery_partners", filter: `user_id=eq.${riderId}` },
+        () => qc.invalidateQueries({ queryKey: ["track-rider", riderId] }));
+    }
+    ch.subscribe();
     return () => { supabase.removeChannel(ch); };
-  }, [id, qc]);
+  }, [id, order?.delivery_partner_id, qc]);
 
   if (isLoading) return <AppShell><div className="p-10 text-center">Loading…</div></AppShell>;
   if (!order) return null;

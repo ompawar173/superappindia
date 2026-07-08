@@ -39,21 +39,27 @@ function ServiceDetail() {
         <Link to="/" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary">
           <ArrowLeft className="h-4 w-4" /> Back
         </Link>
-        <div className="mt-4 rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
-          <div className="flex items-start gap-4">
-            <span className="grid h-16 w-16 place-items-center rounded-2xl bg-primary-soft text-primary">
-              <Icon className="h-8 w-8" />
-            </span>
-            <div className="flex-1">
-              <h1 className="font-display text-2xl font-bold">{service.name}</h1>
-              <p className="mt-1 text-sm text-muted-foreground">{service.short_desc}</p>
-              {service.base_price && (
-                <p className="mt-3 font-display text-xl font-bold text-primary">
-                  Starting at ₹{Number(service.base_price)}
-                </p>
-              )}
+        <div className="mt-4 overflow-hidden rounded-3xl border border-border/60 bg-card shadow-soft">
+          {service.image_url && (
+            <div className="relative aspect-[16/8] bg-muted">
+              <img src={service.image_url} alt={service.name} className="h-full w-full object-cover" />
             </div>
-          </div>
+          )}
+          <div className="p-6">
+            <div className="flex items-start gap-4">
+              <span className="grid h-16 w-16 place-items-center rounded-2xl bg-primary-soft text-primary">
+                <Icon className="h-8 w-8" />
+              </span>
+              <div className="flex-1">
+                <h1 className="font-display text-2xl font-bold">{service.name}</h1>
+                <p className="mt-1 text-sm text-muted-foreground">{service.short_desc}</p>
+                {service.base_price && (
+                  <p className="mt-3 font-display text-xl font-bold text-primary">
+                    Starting at ₹{Number(service.base_price)}
+                  </p>
+                )}
+              </div>
+            </div>
 
           <div className="mt-6 grid grid-cols-3 gap-3 text-center">
             <Perk icon={Clock} label="On-time" />
@@ -67,6 +73,7 @@ function ServiceDetail() {
           >
             Book {service.name}
           </Button>
+          </div>
         </div>
       </div>
     </AppShell>

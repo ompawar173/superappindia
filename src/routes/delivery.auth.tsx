@@ -26,19 +26,37 @@ function RiderAuth() {
     setLoading(true);
     try {
       if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: { emailRedirectTo: `${window.location.origin}/delivery` },
         });
         if (error) return toast.error(error.message);
-        toast.success("Account created — signed in");
+        // Auto sign-in if no session returned (some Supabase configs)
+        if (!data.session) {
+          const { error: siErr } = await supabase.auth.signInWithPassword({ email, password });
+          if (siErr) return toast.error(siErr.message);
+        }
+        toast.success("Account created");
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) return toast.error(error.message);
         toast.success("Signed in");
       }
+
+      // Route to onboarding if the rider has no delivery_partners row yet
+      const { data: userRes } = await supabase.auth.getUser();
+      const uid = userRes.user?.id;
+      if (uid) {
+        const { data: dp } = await supabase.from("delivery_partners").select("user_id").eq("user_id", uid).maybeSingle();
+        if (!dp) {
+          navigate({ to: "/delivery/onboarding" });
+          return;
+        }
+      }
       navigate({ to: "/delivery" });
+    } catch (err: any) {
+      toast.error(err?.message ?? "Sign-in failed");
     } finally {
       setLoading(false);
     }
