@@ -12,7 +12,7 @@ function AdminDashboard() {
     queryFn: async () => {
       const [vendors, riders, orders] = await Promise.all([
         supabase.from("vendors").select("id, kyc_status, is_active"),
-        supabase.from("delivery_partners").select("id, kyc_status, is_online"),
+        supabase.from("delivery_partners").select("user_id, kyc_status, is_online"),
         supabase.from("orders").select("total, status"),
       ]);
       const vens = (vendors.data ?? []) as { kyc_status: string; is_active: boolean }[];
