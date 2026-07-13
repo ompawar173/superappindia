@@ -29,13 +29,7 @@ function AvailableOrders() {
     queryKey: ["available-orders"],
     enabled: !!approved,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("orders")
-        .select("id,total,shipping_address,items,created_at,vendor_id,vendors(business_name,address)")
-        .is("delivery_partner_id", null)
-        .in("status", ["accepted", "preparing", "shipped"])
-        .order("created_at", { ascending: false })
-        .limit(50);
+      const { data, error } = await supabase.rpc("list_assignable_orders");
       if (error) throw error;
       return data ?? [];
     },
@@ -123,22 +117,25 @@ function AvailableOrders() {
         </button>
       </div>
       {orders.map((o: any) => {
-        const addr = o.shipping_address ?? {};
-        const itemCount = Array.isArray(o.items) ? o.items.reduce((s: number, i: any) => s + (i.qty ?? 1), 0) : 0;
+        const itemCount = Number(o.item_count ?? 0);
         const payout = Math.max(25, Math.round(Number(o.total) * 0.1));
+        const area = [o.drop_city, o.drop_pincode].filter(Boolean).join(" · ");
         return (
           <div key={o.id} className="rounded-2xl border border-border/60 bg-card p-4 shadow-soft">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <p className="text-xs text-muted-foreground">{new Date(o.created_at).toLocaleString()}</p>
-                <p className="font-semibold">{o.vendors?.business_name ?? "Vendor"}</p>
+                <p className="font-semibold">{o.vendor_business_name ?? "Vendor"}</p>
                 <p className="mt-1 flex items-start gap-1 text-xs text-muted-foreground">
                   <MapPin className="mt-0.5 h-3 w-3 shrink-0" />
-                  <span className="line-clamp-2">{[addr.line1, addr.city, addr.pincode].filter(Boolean).join(", ")}</span>
+                  <span className="line-clamp-2">
+                    Pickup: {o.vendor_city ?? "—"} · Drop: {area || "area TBD"}
+                  </span>
                 </p>
                 <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
                   <Package className="h-3 w-3" /> {itemCount} item{itemCount === 1 ? "" : "s"} · {inr(Number(o.total))}
                 </p>
+                <p className="mt-1 text-[11px] text-muted-foreground">Full address unlocks after pickup</p>
               </div>
               <div className="text-right">
                 <p className="text-[11px] text-muted-foreground">Earn</p>
