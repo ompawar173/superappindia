@@ -1067,6 +1067,24 @@ export type Database = {
         Returns: boolean
       }
       is_approved_rider: { Args: { _user_id: string }; Returns: boolean }
+      list_assignable_orders: {
+        Args: never
+        Returns: {
+          created_at: string
+          drop_city: string
+          drop_lat: number
+          drop_lng: number
+          drop_pincode: string
+          id: string
+          item_count: number
+          pickup_lat: number
+          pickup_lng: number
+          total: number
+          vendor_business_name: string
+          vendor_city: string
+          vendor_id: string
+        }[]
+      }
     }
     Enums: {
       app_role: "user" | "vendor" | "admin" | "super_admin" | "delivery"
