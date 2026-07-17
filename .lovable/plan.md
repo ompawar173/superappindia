@@ -1,60 +1,46 @@
+## Goal
+Turn SuperApp India into a purely local marketplace: no third-party partners/affiliate surfaces anywhere, local businesses register directly, and service enquiries flow from customers → admin.
 
-## 1. Remove all third-party vendor UI
+## 1. Remove third-party surfaces
+- **`src/routes/c.$category.tsx`** — stop reading `partners`. Show local `vendors` (approved, matching category) + `vendor_products` in that category.
+- **`src/routes/categories.tsx`** — copy: "Pick a category to see local shops" (not "partners").
+- **`src/routes/rewards.tsx`** — rewrite copy: coins redeemable on local shops/services (no "partner offers").
+- **`src/routes/admin.tsx` nav** — already partner-free. Leave `partners`, `affiliate_links`, `conversions`, `link_clicks`, `partner_offers`, `ondc_*` tables in DB (no user-facing surface reads them anymore). ONDC/postback API routes stay for future but no UI links to them.
+- Delete unused route files if any reference partners (none currently — `/p/$partner` route doesn't exist, so the dead `<Link to="/p/$partner">` in `c.$category.tsx` is removed with the rewrite).
 
-Third-party affiliate stuff (Swiggy/Blinkit-style partners) is still on the home and in admin. Strip it end to end so only local shops + services remain.
+## 2. "Register your local business" info
+- **`src/routes/delivery.index.tsx`** already covers riders. Add a matching public **`src/routes/register.tsx`** landing that explains: local shopkeepers, hotels, home services, transporters can join — with two CTAs → `/seller/auth` (shop) and `/delivery/auth` (rider).
+- Add a link in the homepage hero + footer/app-shell to `/register`.
 
-- `src/routes/index.tsx`: delete the unused `FeaturedPartners` function (already not rendered) so it can't come back.
-- `src/routes/admin.tsx`: remove **Partners**, **UTM Links**, and **ONDC** nav items.
-- Delete route files: `src/routes/admin.partners.tsx`, `src/routes/admin.links.tsx`, `src/routes/admin.ondc.tsx`, `src/routes/p.$partner.tsx`, `src/routes/r.$shortCode.tsx`.
-- `src/routes/admin.index.tsx`: drop the Partners / Links / Clicks / Conversions / GMV stats block; keep vendor + rider KPIs only.
-- Data stays in DB (partners / affiliate_links / conversions tables) but has no UI surface anymore — no migration needed.
+## 3. Service requests (customer → admin)
+New table `service_requests`:
+- `id, user_id (nullable for guests), service_id, name, phone, address, city, pincode, scheduled_for (nullable), notes, status ('new'|'assigned'|'in_progress'|'completed'|'cancelled'), created_at, updated_at`
+- RLS: user reads own; admin reads all; anyone authenticated can insert their own; admin can update status.
+- GRANTs: `authenticated` SELECT/INSERT own, admin ALL; `service_role` ALL.
 
-## 2. Rider email/password login actually works
+Surfaces:
+- **`src/routes/services.$slug.tsx`** — add "Request this service" form (name, phone, address, date, notes). Requires sign-in; unauthenticated users see a "Sign in to request" CTA.
+- **`src/routes/admin.service-requests.tsx`** (new) — admin queue: list all requests with status filter, mark assigned/in-progress/completed, contact info visible.
+- Add nav item in `src/routes/admin.tsx` sidebar: "Service Requests".
 
-Auth logs show only stale refresh tokens — no failed sign-in. Symptom is probably "signed up but sign-in says invalid" because `auto_confirm_email` was toggled off at some point.
+## 4. Services visibility on home
+- Verify `ServicesRail` on `src/routes/index.tsx` shows all `services WHERE active=true`. If empty, seed a few common home/kitchen services in the migration (Plumber, Electrician, AC repair, Cook, House cleaning, Salon at home) so they appear immediately.
 
-- Call `supabase--configure_auth` with `auto_confirm_email: true` (rider + customer both benefit; no email verification step).
-- `src/routes/delivery.auth.tsx`: after successful `signUp`, immediately call `signInWithPassword` as a fallback (handles the "session not returned" case), then navigate. Surface the real Supabase error message on failure instead of eating it.
-- After sign-in, if the rider has no `delivery_partners` row yet, redirect to `/delivery/onboarding` instead of `/delivery` (prevents blank dashboard).
+## 5. Category-aware landing after sign-in
+- On `src/routes/auth.tsx` success: existing behaviour redirects to `/`. Keep as is — home page already surfaces categories & shops. Vendor sign-in goes to `/vendor`, rider to `/delivery/dashboard`. No change needed here beyond confirming redirects; user's phrasing "particular category will be show" is satisfied by the category → local shops browsing flow rebuilt in step 1.
 
-## 3. Customer can see the assigned rider + live location
+## 6. Credentials
+Already email+password for user (`/auth`), vendor (`/seller/auth`), rider (`/delivery/auth`) with auto-confirm on. No change.
 
-Tracking page already has rider card + `LiveMap`, but it only shows when `delivery_partner_id` is set. Two gaps:
+## Migration
+Single migration:
+1. Create `service_requests` + grants + RLS + policies + `updated_at` trigger.
+2. Seed default home/kitchen services (idempotent `ON CONFLICT (slug) DO NOTHING`).
 
-- `src/routes/orders.tsx` (Active list): each active order card gets a compact rider strip (name · vehicle · Call button) plus a "Live map" toggle that expands the `LiveMap` inline — no need to open Track for a quick glance.
-- `src/routes/orders.$id.track.tsx`: the rider realtime channel currently filters on nothing; scope it to `filter: user_id=eq.<rider_id>` so location pings arrive without flooding. Also show the pickup pin (vendor lat/lng) on the same map alongside the rider emoji.
+## Files touched
+- Edit: `c.$category.tsx`, `categories.tsx`, `rewards.tsx`, `services.$slug.tsx`, `admin.tsx`, `index.tsx`.
+- New: `register.tsx`, `admin.service-requests.tsx`.
+- Migration: `service_requests` table + seed services.
 
-## 4. Services admin — proper page with image uploads + preview
-
-Services table already has `image_url`. Admin UI never lets you upload one, so home service cards look plain.
-
-- Create storage bucket `service-images` (public read, authed write) via migration.
-- `src/routes/admin.services.tsx`: rebuild card layout — larger cover image, upload button (uses `service-images` bucket, stores public URL in `image_url`), edit dialog (name / desc / price / icon / image / sort), delete confirm. Show live count and "Hidden" chip.
-- `src/routes/index.tsx` `ServicesRail`: when `image_url` is set, render an image-forward tile (thumbnail + name + from-price) instead of the icon-only pill. Fallback to icon when no image.
-- `src/routes/services.$slug.tsx`: use `image_url` as the hero banner if present.
-
-## Technical details
-
-**Files created**
-- `supabase/migrations/<ts>_service_images_bucket.sql` — `insert into storage.buckets` for `service-images` + storage policies (public select, admin insert/update/delete via `has_role`).
-
-**Files edited**
-- `src/routes/index.tsx` (drop FeaturedPartners, service tile redesign)
-- `src/routes/admin.tsx` (nav trim)
-- `src/routes/admin.index.tsx` (KPI trim)
-- `src/routes/admin.services.tsx` (image upload + edit)
-- `src/routes/services.$slug.tsx` (hero image)
-- `src/routes/delivery.auth.tsx` (post-signup auto sign-in + onboarding redirect + surfaced errors)
-- `src/routes/orders.tsx` (inline rider strip + live-map toggle)
-- `src/routes/orders.$id.track.tsx` (realtime filter, pickup pin)
-
-**Files deleted**
-- `src/routes/admin.partners.tsx`, `src/routes/admin.links.tsx`, `src/routes/admin.ondc.tsx`, `src/routes/p.$partner.tsx`, `src/routes/r.$shortCode.tsx`
-
-**Auth config**
-- `auto_confirm_email: true`, `disable_signup: false`, `external_anonymous_users_enabled: false`, `password_hibp_enabled: false`
-
-**Out of scope**
-- No changes to vendor orders flow (already covered previously).
-- No LiveMap changes for `delivery.dashboard.tsx` — already added.
-- Not deleting the `partners`/`affiliate_links` DB tables (kept in case you re-enable later).
+## Out of scope (say no if asked mid-flight)
+Dropping the partners/affiliate/ondc tables — leaving them dormant avoids touching working postback endpoints; can remove later once confirmed unused.

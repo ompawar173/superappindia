@@ -8,7 +8,7 @@ export const Route = createFileRoute("/categories")({
   head: () => ({
     meta: [
       { title: "Explore categories — SuperApp India" },
-      { name: "description", content: "Browse all SuperApp India categories: food, grocery, travel, hotels, cabs, pharmacy, recharges and home services." },
+      { name: "description", content: "Browse local shops, hotels and home services near you on SuperApp India — food, grocery, pharmacy, home services and more." },
     ],
   }),
   component: CategoriesPage,
@@ -32,7 +32,7 @@ function CategoriesPage() {
     <AppShell>
       <div className="mx-auto max-w-6xl px-4 py-6">
         <h1 className="font-display text-2xl font-bold">Explore</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Pick a category to see all partners.</p>
+        <p className="mt-1 text-sm text-muted-foreground">Pick a category to see local shops & services near you.</p>
         <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           {(categories ?? []).map((c) => {
             const Icon = (Icons as Record<string, any>)[c.icon ?? "Sparkles"] ?? Icons.Sparkles;
@@ -53,7 +53,7 @@ function CategoriesPage() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                 <div className="absolute inset-x-0 bottom-0 p-3">
                   <h3 className="font-display text-base font-bold text-white drop-shadow">{c.name}</h3>
-                  <p className="text-[11px] text-white/80">View partners →</p>
+                  <p className="text-[11px] text-white/80">View local shops →</p>
                 </div>
               </Link>
             );

@@ -823,6 +823,71 @@ export type Database = {
         }
         Relationships: []
       }
+      service_requests: {
+        Row: {
+          address: string
+          admin_notes: string | null
+          city: string | null
+          created_at: string
+          id: string
+          name: string
+          notes: string | null
+          phone: string
+          pincode: string | null
+          scheduled_for: string | null
+          service_id: string | null
+          service_name: string | null
+          service_slug: string | null
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          address: string
+          admin_notes?: string | null
+          city?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          notes?: string | null
+          phone: string
+          pincode?: string | null
+          scheduled_for?: string | null
+          service_id?: string | null
+          service_name?: string | null
+          service_slug?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          address?: string
+          admin_notes?: string | null
+          city?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          phone?: string
+          pincode?: string | null
+          scheduled_for?: string | null
+          service_id?: string | null
+          service_name?: string | null
+          service_slug?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_requests_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       services: {
         Row: {
           active: boolean

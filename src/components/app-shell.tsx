@@ -27,7 +27,7 @@ function TopBar() {
           <TopLink to="/shops" label="Shops" />
           <TopLink to="/categories" label="Explore" />
           <TopLink to="/rewards" label="Rewards" />
-          <TopLink to="/seller/auth" label="Sell with us" />
+          <TopLink to="/register" label="Register business" />
           <TopLink to="/delivery" label="Ride with us" />
         </nav>
         <div className="flex items-center gap-2">

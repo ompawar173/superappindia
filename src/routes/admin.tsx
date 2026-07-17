@@ -1,7 +1,7 @@
 import { Link, Outlet, createFileRoute, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect } from "react";
 import {
-  BarChart3, Bike, Image, Sparkles, Store, UserPlus, Users2, Wrench,
+  BarChart3, Bike, ClipboardList, Image, Sparkles, Store, UserPlus, Users2, Wrench,
 } from "lucide-react";
 import { useRoles } from "@/hooks/use-role";
 import { cn } from "@/lib/utils";
@@ -13,6 +13,7 @@ const NAV = [
   { to: "/admin", label: "Dashboard", icon: BarChart3, exact: true },
   { to: "/admin/banners", label: "Banners", icon: Image },
   { to: "/admin/services", label: "Services", icon: Wrench },
+  { to: "/admin/service-requests", label: "Service Requests", icon: ClipboardList },
   { to: "/admin/vendors", label: "Vendors", icon: Store },
   { to: "/admin/delivery", label: "Riders", icon: Bike },
   { to: "/admin/delivery-applications", label: "Rider Applications", icon: UserPlus },

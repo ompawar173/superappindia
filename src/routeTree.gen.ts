@@ -13,6 +13,7 @@ import { Route as VendorRouteImport } from './routes/vendor'
 import { Route as ShopsRouteImport } from './routes/shops'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as RewardsRouteImport } from './routes/rewards'
+import { Route as RegisterRouteImport } from './routes/register'
 import { Route as OrdersRouteImport } from './routes/orders'
 import { Route as DeliveryRouteImport } from './routes/delivery'
 import { Route as CheckoutRouteImport } from './routes/checkout'
@@ -42,6 +43,7 @@ import { Route as CCategoryRouteImport } from './routes/c.$category'
 import { Route as AdminVendorsRouteImport } from './routes/admin.vendors'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminServicesRouteImport } from './routes/admin.services'
+import { Route as AdminServiceRequestsRouteImport } from './routes/admin.service-requests'
 import { Route as AdminDeliveryApplicationsRouteImport } from './routes/admin.delivery-applications'
 import { Route as AdminDeliveryRouteImport } from './routes/admin.delivery'
 import { Route as AdminBannersRouteImport } from './routes/admin.banners'
@@ -67,6 +69,11 @@ const SearchRoute = SearchRouteImport.update({
 const RewardsRoute = RewardsRouteImport.update({
   id: '/rewards',
   path: '/rewards',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OrdersRoute = OrdersRouteImport.update({
@@ -214,6 +221,11 @@ const AdminServicesRoute = AdminServicesRouteImport.update({
   path: '/services',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminServiceRequestsRoute = AdminServiceRequestsRouteImport.update({
+  id: '/service-requests',
+  path: '/service-requests',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminDeliveryApplicationsRoute =
   AdminDeliveryApplicationsRouteImport.update({
     id: '/delivery-applications',
@@ -256,6 +268,7 @@ export interface FileRoutesByFullPath {
   '/checkout': typeof CheckoutRoute
   '/delivery': typeof DeliveryRouteWithChildren
   '/orders': typeof OrdersRouteWithChildren
+  '/register': typeof RegisterRoute
   '/rewards': typeof RewardsRoute
   '/search': typeof SearchRoute
   '/shops': typeof ShopsRoute
@@ -263,6 +276,7 @@ export interface FileRoutesByFullPath {
   '/admin/banners': typeof AdminBannersRoute
   '/admin/delivery': typeof AdminDeliveryRoute
   '/admin/delivery-applications': typeof AdminDeliveryApplicationsRoute
+  '/admin/service-requests': typeof AdminServiceRequestsRoute
   '/admin/services': typeof AdminServicesRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/vendors': typeof AdminVendorsRoute
@@ -295,12 +309,14 @@ export interface FileRoutesByTo {
   '/categories': typeof CategoriesRoute
   '/checkout': typeof CheckoutRoute
   '/orders': typeof OrdersRouteWithChildren
+  '/register': typeof RegisterRoute
   '/rewards': typeof RewardsRoute
   '/search': typeof SearchRoute
   '/shops': typeof ShopsRoute
   '/admin/banners': typeof AdminBannersRoute
   '/admin/delivery': typeof AdminDeliveryRoute
   '/admin/delivery-applications': typeof AdminDeliveryApplicationsRoute
+  '/admin/service-requests': typeof AdminServiceRequestsRoute
   '/admin/services': typeof AdminServicesRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/vendors': typeof AdminVendorsRoute
@@ -336,6 +352,7 @@ export interface FileRoutesById {
   '/checkout': typeof CheckoutRoute
   '/delivery': typeof DeliveryRouteWithChildren
   '/orders': typeof OrdersRouteWithChildren
+  '/register': typeof RegisterRoute
   '/rewards': typeof RewardsRoute
   '/search': typeof SearchRoute
   '/shops': typeof ShopsRoute
@@ -343,6 +360,7 @@ export interface FileRoutesById {
   '/admin/banners': typeof AdminBannersRoute
   '/admin/delivery': typeof AdminDeliveryRoute
   '/admin/delivery-applications': typeof AdminDeliveryApplicationsRoute
+  '/admin/service-requests': typeof AdminServiceRequestsRoute
   '/admin/services': typeof AdminServicesRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/vendors': typeof AdminVendorsRoute
@@ -379,6 +397,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/delivery'
     | '/orders'
+    | '/register'
     | '/rewards'
     | '/search'
     | '/shops'
@@ -386,6 +405,7 @@ export interface FileRouteTypes {
     | '/admin/banners'
     | '/admin/delivery'
     | '/admin/delivery-applications'
+    | '/admin/service-requests'
     | '/admin/services'
     | '/admin/users'
     | '/admin/vendors'
@@ -418,12 +438,14 @@ export interface FileRouteTypes {
     | '/categories'
     | '/checkout'
     | '/orders'
+    | '/register'
     | '/rewards'
     | '/search'
     | '/shops'
     | '/admin/banners'
     | '/admin/delivery'
     | '/admin/delivery-applications'
+    | '/admin/service-requests'
     | '/admin/services'
     | '/admin/users'
     | '/admin/vendors'
@@ -458,6 +480,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/delivery'
     | '/orders'
+    | '/register'
     | '/rewards'
     | '/search'
     | '/shops'
@@ -465,6 +488,7 @@ export interface FileRouteTypes {
     | '/admin/banners'
     | '/admin/delivery'
     | '/admin/delivery-applications'
+    | '/admin/service-requests'
     | '/admin/services'
     | '/admin/users'
     | '/admin/vendors'
@@ -500,6 +524,7 @@ export interface RootRouteChildren {
   CheckoutRoute: typeof CheckoutRoute
   DeliveryRoute: typeof DeliveryRouteWithChildren
   OrdersRoute: typeof OrdersRouteWithChildren
+  RegisterRoute: typeof RegisterRoute
   RewardsRoute: typeof RewardsRoute
   SearchRoute: typeof SearchRoute
   ShopsRoute: typeof ShopsRoute
@@ -540,6 +565,13 @@ declare module '@tanstack/react-router' {
       path: '/rewards'
       fullPath: '/rewards'
       preLoaderRoute: typeof RewardsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/orders': {
@@ -745,6 +777,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminServicesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/service-requests': {
+      id: '/admin/service-requests'
+      path: '/service-requests'
+      fullPath: '/admin/service-requests'
+      preLoaderRoute: typeof AdminServiceRequestsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/delivery-applications': {
       id: '/admin/delivery-applications'
       path: '/delivery-applications'
@@ -794,6 +833,7 @@ interface AdminRouteChildren {
   AdminBannersRoute: typeof AdminBannersRoute
   AdminDeliveryRoute: typeof AdminDeliveryRoute
   AdminDeliveryApplicationsRoute: typeof AdminDeliveryApplicationsRoute
+  AdminServiceRequestsRoute: typeof AdminServiceRequestsRoute
   AdminServicesRoute: typeof AdminServicesRoute
   AdminUsersRoute: typeof AdminUsersRoute
   AdminVendorsRoute: typeof AdminVendorsRoute
@@ -804,6 +844,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminBannersRoute: AdminBannersRoute,
   AdminDeliveryRoute: AdminDeliveryRoute,
   AdminDeliveryApplicationsRoute: AdminDeliveryApplicationsRoute,
+  AdminServiceRequestsRoute: AdminServiceRequestsRoute,
   AdminServicesRoute: AdminServicesRoute,
   AdminUsersRoute: AdminUsersRoute,
   AdminVendorsRoute: AdminVendorsRoute,
@@ -877,6 +918,7 @@ const rootRouteChildren: RootRouteChildren = {
   CheckoutRoute: CheckoutRoute,
   DeliveryRoute: DeliveryRouteWithChildren,
   OrdersRoute: OrdersRouteWithChildren,
+  RegisterRoute: RegisterRoute,
   RewardsRoute: RewardsRoute,
   SearchRoute: SearchRoute,
   ShopsRoute: ShopsRoute,
@@ -891,13 +933,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

@@ -1,11 +1,16 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { ArrowLeft, CheckCircle2, Clock, Shield } from "lucide-react";
 import * as Icons from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/services/$slug")({
   component: ServiceDetail,
@@ -19,6 +24,11 @@ export const Route = createFileRoute("/services/$slug")({
 
 function ServiceDetail() {
   const { slug } = Route.useParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const [form, setForm] = useState({ name: "", phone: "", address: "", city: "", pincode: "", scheduled_for: "", notes: "" });
+  const [submitting, setSubmitting] = useState(false);
+
   const { data: service, isLoading } = useQuery({
     queryKey: ["service", slug],
     queryFn: async () => {
@@ -32,6 +42,33 @@ function ServiceDetail() {
   if (isLoading) return <AppShell><div className="p-10 text-center text-muted-foreground">Loading…</div></AppShell>;
   if (!service) return null;
   const Icon = (Icons as any)[service.icon ?? "Sparkles"] ?? Icons.Sparkles;
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) { navigate({ to: "/auth" }); return; }
+    if (!form.name.trim() || !form.phone.trim() || !form.address.trim()) {
+      toast.error("Please fill name, phone and address");
+      return;
+    }
+    setSubmitting(true);
+    const { error } = await supabase.from("service_requests").insert({
+      user_id: user.id,
+      service_id: service.id,
+      service_slug: service.slug,
+      service_name: service.name,
+      name: form.name.trim(),
+      phone: form.phone.trim(),
+      address: form.address.trim(),
+      city: form.city.trim() || null,
+      pincode: form.pincode.trim() || null,
+      scheduled_for: form.scheduled_for || null,
+      notes: form.notes.trim() || null,
+    });
+    setSubmitting(false);
+    if (error) return toast.error(error.message);
+    toast.success("Request submitted. Our team will call you shortly.");
+    setForm({ name: "", phone: "", address: "", city: "", pincode: "", scheduled_for: "", notes: "" });
+  };
 
   return (
     <AppShell>
@@ -61,19 +98,34 @@ function ServiceDetail() {
               </div>
             </div>
 
-          <div className="mt-6 grid grid-cols-3 gap-3 text-center">
-            <Perk icon={Clock} label="On-time" />
-            <Perk icon={Shield} label="Verified pros" />
-            <Perk icon={CheckCircle2} label="100% safe" />
+            <div className="mt-6 grid grid-cols-3 gap-3 text-center">
+              <Perk icon={Clock} label="On-time" />
+              <Perk icon={Shield} label="Verified pros" />
+              <Perk icon={CheckCircle2} label="100% safe" />
+            </div>
           </div>
+        </div>
 
-          <Button
-            className="mt-6 w-full rounded-full"
-            onClick={() => toast.success("Booking request placed. Our team will call you within 10 minutes.")}
-          >
-            Book {service.name}
-          </Button>
-          </div>
+        <div className="mt-6 rounded-3xl border border-border/60 bg-card p-6 shadow-soft">
+          <h2 className="font-display text-lg font-bold">Request this service</h2>
+          <p className="text-xs text-muted-foreground">Fill the form and our team will call you within 10 minutes.</p>
+          {!user && (
+            <div className="mt-3 rounded-lg border border-dashed border-border bg-muted/30 p-3 text-sm">
+              Please <Link to="/auth" className="text-primary underline">sign in</Link> to place a request.
+            </div>
+          )}
+          <form onSubmit={submit} className="mt-4 grid gap-3 sm:grid-cols-2">
+            <div><Label>Your name *</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></div>
+            <div><Label>Phone *</Label><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} required /></div>
+            <div className="sm:col-span-2"><Label>Address *</Label><Input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} required /></div>
+            <div><Label>City</Label><Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} /></div>
+            <div><Label>Pincode</Label><Input value={form.pincode} onChange={(e) => setForm({ ...form, pincode: e.target.value })} /></div>
+            <div className="sm:col-span-2"><Label>Preferred date & time</Label><Input type="datetime-local" value={form.scheduled_for} onChange={(e) => setForm({ ...form, scheduled_for: e.target.value })} /></div>
+            <div className="sm:col-span-2"><Label>Notes</Label><Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={3} placeholder="Tell us more about what you need…" /></div>
+            <Button type="submit" disabled={submitting || !user} className="rounded-full sm:col-span-2">
+              {submitting ? "Submitting…" : `Request ${service.name}`}
+            </Button>
+          </form>
         </div>
       </div>
     </AppShell>
