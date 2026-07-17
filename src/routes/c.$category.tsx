@@ -33,8 +33,8 @@ function CategoryPage() {
       // Products tagged to this category id.
       const { data: products } = await supabase
         .from("vendor_products")
-        .select("id,title,price,image_url,vendor_id")
-        .eq("is_active", true)
+        .select("id,title,price,images,vendor_id")
+        .eq("active", true)
         .eq("category_id", cat.id)
         .limit(24);
 
@@ -100,7 +100,7 @@ function CategoryPage() {
                   className="overflow-hidden rounded-2xl border border-border/60 bg-card transition hover:-translate-y-0.5 hover:shadow-soft"
                 >
                   <div className="aspect-square bg-muted">
-                    {p.image_url && <img src={p.image_url} alt={p.title} className="h-full w-full object-cover" loading="lazy" />}
+                    {p.images?.[0] && <img src={p.images[0]} alt={p.title} className="h-full w-full object-cover" loading="lazy" />}
                   </div>
                   <div className="p-3">
                     <p className="truncate text-sm font-medium">{p.title}</p>
