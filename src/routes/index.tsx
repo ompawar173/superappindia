@@ -250,28 +250,76 @@ function BannerCarousel() {
   );
 }
 
+const MH_CITIES = [
+  "Mumbai", "Pune", "Nagpur", "Nashik", "Thane", "Aurangabad",
+  "Solapur", "Kolhapur", "Amravati", "Navi Mumbai", "Sangli", "Jalgaon",
+  "Akola", "Latur", "Ahmednagar", "Chandrapur", "Satara", "Ratnagiri",
+];
+
 function HomeSearchBar() {
   const navigate = useNavigate();
   const [q, setQ] = useState("");
+  const [city, setCity] = useState<string>(() =>
+    (typeof window !== "undefined" && localStorage.getItem("sa_city")) || "Mumbai"
+  );
+  const [open, setOpen] = useState(false);
+
+  const pick = (c: string) => {
+    setCity(c);
+    try { localStorage.setItem("sa_city", c); } catch { /* ignore */ }
+    setOpen(false);
+  };
+
   return (
-    <form
-      onSubmit={(e) => { e.preventDefault(); navigate({ to: "/search", search: { q } }); }}
-      className="mt-4 flex items-center gap-2 rounded-full border border-border/60 bg-card px-4 py-2.5 shadow-soft"
-    >
-      <MapPin className="h-4 w-4 text-primary" />
-      <span className="text-sm font-medium">Mumbai, MH</span>
-      <span className="text-xs text-muted-foreground">· change</span>
-      <div className="mx-2 h-5 w-px bg-border" />
-      <Search className="h-4 w-4 text-muted-foreground" />
-      <input
-        value={q}
-        onChange={(e) => setQ(e.target.value)}
-        className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-        placeholder='Search shops, products, services…'
-      />
-    </form>
+    <div className="mt-4 rounded-full border border-border/60 bg-card px-4 py-2.5 shadow-soft">
+      <form
+        onSubmit={(e) => { e.preventDefault(); navigate({ to: "/search", search: { q } }); }}
+        className="flex items-center gap-2"
+      >
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          className="flex items-center gap-1.5 rounded-full px-1 py-0.5 hover:bg-muted"
+          aria-haspopup="listbox"
+          aria-expanded={open}
+        >
+          <MapPin className="h-4 w-4 text-primary" />
+          <span className="text-sm font-medium">{city}, MH</span>
+          <span className="text-xs text-muted-foreground">▾</span>
+        </button>
+        <div className="mx-2 h-5 w-px bg-border" />
+        <Search className="h-4 w-4 text-muted-foreground" />
+        <input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+          placeholder='Search shops, products, services…'
+        />
+      </form>
+      {open && (
+        <div className="relative">
+          <ul
+            role="listbox"
+            className="absolute left-0 top-2 z-20 max-h-64 w-56 overflow-y-auto rounded-2xl border border-border/60 bg-card p-1 shadow-lg"
+          >
+            {MH_CITIES.map((c) => (
+              <li key={c}>
+                <button
+                  type="button"
+                  onClick={() => pick(c)}
+                  className={`flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm hover:bg-muted ${c === city ? "bg-muted font-semibold" : ""}`}
+                >
+                  <MapPin className="h-3.5 w-3.5 text-primary" /> {c}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
   );
 }
+
 
 function CategoriesGrid() {
   const { data: categories } = useQuery({
