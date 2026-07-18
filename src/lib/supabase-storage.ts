@@ -9,16 +9,16 @@ import { supabase } from '@/integrations/supabase/client';
 export function getSupabaseStorageUrl(bucket: string, path: string | null): string | null {
   if (!path) return null;
 
-  // If it's already a full URL, return it as-is
+  // Already a full URL
   if (path.startsWith('http://') || path.startsWith('https://')) {
     return path;
   }
 
-  // If it's a Lovable asset URL, skip it (shouldn't happen in production)
+  // Lovable CDN asset URL — serve as-is (works in preview and production)
   if (path.startsWith('/__l5e/')) {
-    console.warn(`[Image] Lovable asset detected on production: ${path}`);
-    return null;
+    return path;
   }
+
 
   try {
     const { data } = supabase.storage
