@@ -620,7 +620,7 @@ export type Database = {
           external_order_id?: string | null
           id?: string
           items?: Json
-          order_number: string
+          order_number?: string
           payment_ref?: string | null
           pickup_address?: Json | null
           pickup_lat?: number | null
