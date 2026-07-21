@@ -31,7 +31,7 @@ function RiderHome() {
     queryFn: async () => {
       const { data } = await supabase
         .from("delivery_assignments")
-        .select("*, orders(id,total,shipping_address,items)")
+        .select("*, orders(id,order_number,total,shipping_address,items)")
         .eq("partner_id", user!.id)
         .in("status", ["assigned", "accepted", "picked_up"])
         .order("assigned_at", { ascending: false })
@@ -239,7 +239,7 @@ function ActiveAssignment({ assignment }: { assignment: any }) {
         <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-semibold uppercase text-primary">
           {assignment.status.replace("_", " ")}
         </span>
-        <span className="text-xs text-muted-foreground">Order #{String(assignment.order_id).slice(0, 6)}</span>
+        <span className="font-mono text-xs text-muted-foreground">{assignment.orders?.order_number ?? `#${String(assignment.order_id).slice(0, 6)}`}</span>
       </div>
       <p className="mt-3 font-display text-lg font-bold">{inr(Number(assignment.orders?.total ?? 0))}</p>
       <div className="mt-3 space-y-2 text-sm">

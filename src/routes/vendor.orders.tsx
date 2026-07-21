@@ -141,7 +141,7 @@ function OrderCard({ o, onStatus }: { o: any; onStatus: (id: string, s: OrderSta
   return (
     <div className="rounded-xl border border-border/60 bg-background p-3 shadow-soft">
       <div className="flex items-center justify-between">
-        <span className="font-mono text-[11px] text-muted-foreground">#{String(o.id).slice(0, 8)}</span>
+        <span className="font-mono text-[11px] font-semibold text-foreground">{o.order_number}</span>
         <span className="font-semibold">{inr(Number(o.total))}</span>
       </div>
       <p className="mt-1 text-[11px] text-muted-foreground">{new Date(o.created_at).toLocaleString()}</p>

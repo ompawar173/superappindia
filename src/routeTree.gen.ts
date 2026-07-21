@@ -36,6 +36,7 @@ import { Route as DeliveryProfileRouteImport } from './routes/delivery.profile'
 import { Route as DeliveryOnboardingRouteImport } from './routes/delivery.onboarding'
 import { Route as DeliveryEarningsRouteImport } from './routes/delivery.earnings'
 import { Route as DeliveryDashboardRouteImport } from './routes/delivery.dashboard'
+import { Route as DeliveryChangePasswordRouteImport } from './routes/delivery.change-password'
 import { Route as DeliveryAvailableRouteImport } from './routes/delivery.available'
 import { Route as DeliveryAuthRouteImport } from './routes/delivery.auth'
 import { Route as DeliveryAssignmentsRouteImport } from './routes/delivery.assignments'
@@ -44,6 +45,7 @@ import { Route as AdminVendorsRouteImport } from './routes/admin.vendors'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminServicesRouteImport } from './routes/admin.services'
 import { Route as AdminServiceRequestsRouteImport } from './routes/admin.service-requests'
+import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
 import { Route as AdminDeliveryApplicationsRouteImport } from './routes/admin.delivery-applications'
 import { Route as AdminDeliveryRouteImport } from './routes/admin.delivery'
 import { Route as AdminBannersRouteImport } from './routes/admin.banners'
@@ -186,6 +188,11 @@ const DeliveryDashboardRoute = DeliveryDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => DeliveryRoute,
 } as any)
+const DeliveryChangePasswordRoute = DeliveryChangePasswordRouteImport.update({
+  id: '/change-password',
+  path: '/change-password',
+  getParentRoute: () => DeliveryRoute,
+} as any)
 const DeliveryAvailableRoute = DeliveryAvailableRouteImport.update({
   id: '/available',
   path: '/available',
@@ -224,6 +231,11 @@ const AdminServicesRoute = AdminServicesRouteImport.update({
 const AdminServiceRequestsRoute = AdminServiceRequestsRouteImport.update({
   id: '/service-requests',
   path: '/service-requests',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminOrdersRoute = AdminOrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminDeliveryApplicationsRoute =
@@ -276,6 +288,7 @@ export interface FileRoutesByFullPath {
   '/admin/banners': typeof AdminBannersRoute
   '/admin/delivery': typeof AdminDeliveryRoute
   '/admin/delivery-applications': typeof AdminDeliveryApplicationsRoute
+  '/admin/orders': typeof AdminOrdersRoute
   '/admin/service-requests': typeof AdminServiceRequestsRoute
   '/admin/services': typeof AdminServicesRoute
   '/admin/users': typeof AdminUsersRoute
@@ -284,6 +297,7 @@ export interface FileRoutesByFullPath {
   '/delivery/assignments': typeof DeliveryAssignmentsRoute
   '/delivery/auth': typeof DeliveryAuthRoute
   '/delivery/available': typeof DeliveryAvailableRoute
+  '/delivery/change-password': typeof DeliveryChangePasswordRoute
   '/delivery/dashboard': typeof DeliveryDashboardRoute
   '/delivery/earnings': typeof DeliveryEarningsRoute
   '/delivery/onboarding': typeof DeliveryOnboardingRoute
@@ -316,6 +330,7 @@ export interface FileRoutesByTo {
   '/admin/banners': typeof AdminBannersRoute
   '/admin/delivery': typeof AdminDeliveryRoute
   '/admin/delivery-applications': typeof AdminDeliveryApplicationsRoute
+  '/admin/orders': typeof AdminOrdersRoute
   '/admin/service-requests': typeof AdminServiceRequestsRoute
   '/admin/services': typeof AdminServicesRoute
   '/admin/users': typeof AdminUsersRoute
@@ -324,6 +339,7 @@ export interface FileRoutesByTo {
   '/delivery/assignments': typeof DeliveryAssignmentsRoute
   '/delivery/auth': typeof DeliveryAuthRoute
   '/delivery/available': typeof DeliveryAvailableRoute
+  '/delivery/change-password': typeof DeliveryChangePasswordRoute
   '/delivery/dashboard': typeof DeliveryDashboardRoute
   '/delivery/earnings': typeof DeliveryEarningsRoute
   '/delivery/onboarding': typeof DeliveryOnboardingRoute
@@ -360,6 +376,7 @@ export interface FileRoutesById {
   '/admin/banners': typeof AdminBannersRoute
   '/admin/delivery': typeof AdminDeliveryRoute
   '/admin/delivery-applications': typeof AdminDeliveryApplicationsRoute
+  '/admin/orders': typeof AdminOrdersRoute
   '/admin/service-requests': typeof AdminServiceRequestsRoute
   '/admin/services': typeof AdminServicesRoute
   '/admin/users': typeof AdminUsersRoute
@@ -368,6 +385,7 @@ export interface FileRoutesById {
   '/delivery/assignments': typeof DeliveryAssignmentsRoute
   '/delivery/auth': typeof DeliveryAuthRoute
   '/delivery/available': typeof DeliveryAvailableRoute
+  '/delivery/change-password': typeof DeliveryChangePasswordRoute
   '/delivery/dashboard': typeof DeliveryDashboardRoute
   '/delivery/earnings': typeof DeliveryEarningsRoute
   '/delivery/onboarding': typeof DeliveryOnboardingRoute
@@ -405,6 +423,7 @@ export interface FileRouteTypes {
     | '/admin/banners'
     | '/admin/delivery'
     | '/admin/delivery-applications'
+    | '/admin/orders'
     | '/admin/service-requests'
     | '/admin/services'
     | '/admin/users'
@@ -413,6 +432,7 @@ export interface FileRouteTypes {
     | '/delivery/assignments'
     | '/delivery/auth'
     | '/delivery/available'
+    | '/delivery/change-password'
     | '/delivery/dashboard'
     | '/delivery/earnings'
     | '/delivery/onboarding'
@@ -445,6 +465,7 @@ export interface FileRouteTypes {
     | '/admin/banners'
     | '/admin/delivery'
     | '/admin/delivery-applications'
+    | '/admin/orders'
     | '/admin/service-requests'
     | '/admin/services'
     | '/admin/users'
@@ -453,6 +474,7 @@ export interface FileRouteTypes {
     | '/delivery/assignments'
     | '/delivery/auth'
     | '/delivery/available'
+    | '/delivery/change-password'
     | '/delivery/dashboard'
     | '/delivery/earnings'
     | '/delivery/onboarding'
@@ -488,6 +510,7 @@ export interface FileRouteTypes {
     | '/admin/banners'
     | '/admin/delivery'
     | '/admin/delivery-applications'
+    | '/admin/orders'
     | '/admin/service-requests'
     | '/admin/services'
     | '/admin/users'
@@ -496,6 +519,7 @@ export interface FileRouteTypes {
     | '/delivery/assignments'
     | '/delivery/auth'
     | '/delivery/available'
+    | '/delivery/change-password'
     | '/delivery/dashboard'
     | '/delivery/earnings'
     | '/delivery/onboarding'
@@ -728,6 +752,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DeliveryDashboardRouteImport
       parentRoute: typeof DeliveryRoute
     }
+    '/delivery/change-password': {
+      id: '/delivery/change-password'
+      path: '/change-password'
+      fullPath: '/delivery/change-password'
+      preLoaderRoute: typeof DeliveryChangePasswordRouteImport
+      parentRoute: typeof DeliveryRoute
+    }
     '/delivery/available': {
       id: '/delivery/available'
       path: '/available'
@@ -784,6 +815,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminServiceRequestsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/orders': {
+      id: '/admin/orders'
+      path: '/orders'
+      fullPath: '/admin/orders'
+      preLoaderRoute: typeof AdminOrdersRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/delivery-applications': {
       id: '/admin/delivery-applications'
       path: '/delivery-applications'
@@ -833,6 +871,7 @@ interface AdminRouteChildren {
   AdminBannersRoute: typeof AdminBannersRoute
   AdminDeliveryRoute: typeof AdminDeliveryRoute
   AdminDeliveryApplicationsRoute: typeof AdminDeliveryApplicationsRoute
+  AdminOrdersRoute: typeof AdminOrdersRoute
   AdminServiceRequestsRoute: typeof AdminServiceRequestsRoute
   AdminServicesRoute: typeof AdminServicesRoute
   AdminUsersRoute: typeof AdminUsersRoute
@@ -844,6 +883,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminBannersRoute: AdminBannersRoute,
   AdminDeliveryRoute: AdminDeliveryRoute,
   AdminDeliveryApplicationsRoute: AdminDeliveryApplicationsRoute,
+  AdminOrdersRoute: AdminOrdersRoute,
   AdminServiceRequestsRoute: AdminServiceRequestsRoute,
   AdminServicesRoute: AdminServicesRoute,
   AdminUsersRoute: AdminUsersRoute,
@@ -857,6 +897,7 @@ interface DeliveryRouteChildren {
   DeliveryAssignmentsRoute: typeof DeliveryAssignmentsRoute
   DeliveryAuthRoute: typeof DeliveryAuthRoute
   DeliveryAvailableRoute: typeof DeliveryAvailableRoute
+  DeliveryChangePasswordRoute: typeof DeliveryChangePasswordRoute
   DeliveryDashboardRoute: typeof DeliveryDashboardRoute
   DeliveryEarningsRoute: typeof DeliveryEarningsRoute
   DeliveryOnboardingRoute: typeof DeliveryOnboardingRoute
@@ -868,6 +909,7 @@ const DeliveryRouteChildren: DeliveryRouteChildren = {
   DeliveryAssignmentsRoute: DeliveryAssignmentsRoute,
   DeliveryAuthRoute: DeliveryAuthRoute,
   DeliveryAvailableRoute: DeliveryAvailableRoute,
+  DeliveryChangePasswordRoute: DeliveryChangePasswordRoute,
   DeliveryDashboardRoute: DeliveryDashboardRoute,
   DeliveryEarningsRoute: DeliveryEarningsRoute,
   DeliveryOnboardingRoute: DeliveryOnboardingRoute,
@@ -933,13 +975,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

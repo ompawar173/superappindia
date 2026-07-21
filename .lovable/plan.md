@@ -1,46 +1,80 @@
-## Goal
-Turn SuperApp India into a purely local marketplace: no third-party partners/affiliate surfaces anywhere, local businesses register directly, and service enquiries flow from customers → admin.
 
-## 1. Remove third-party surfaces
-- **`src/routes/c.$category.tsx`** — stop reading `partners`. Show local `vendors` (approved, matching category) + `vendor_products` in that category.
-- **`src/routes/categories.tsx`** — copy: "Pick a category to see local shops" (not "partners").
-- **`src/routes/rewards.tsx`** — rewrite copy: coins redeemable on local shops/services (no "partner offers").
-- **`src/routes/admin.tsx` nav** — already partner-free. Leave `partners`, `affiliate_links`, `conversions`, `link_clicks`, `partner_offers`, `ondc_*` tables in DB (no user-facing surface reads them anymore). ONDC/postback API routes stay for future but no UI links to them.
-- Delete unused route files if any reference partners (none currently — `/p/$partner` route doesn't exist, so the dead `<Link to="/p/$partner">` in `c.$category.tsx` is removed with the rewrite).
+## Decisions (chosen for you)
 
-## 2. "Register your local business" info
-- **`src/routes/delivery.index.tsx`** already covers riders. Add a matching public **`src/routes/register.tsx`** landing that explains: local shopkeepers, hotels, home services, transporters can join — with two CTAs → `/seller/auth` (shop) and `/delivery/auth` (rider).
-- Add a link in the homepage hero + footer/app-shell to `/register`.
+- **Rider signup removed.** `/delivery/auth` becomes a login-only page that accepts **Rider ID + Password**. `/delivery/onboarding` is deleted. Admin creates every rider.
+- **Rider ID format:** `RDR-XXXXXX` (6 random alphanumeric chars, unique). Shown everywhere, used to log in.
+- **Order ID:** Add a new human-readable `order_number` column like `SA-000123` (sequential, unique). Internal UUID stays as primary key. Displayed to customer, vendor, rider, admin.
+- **Login credential mapping:** Admin creates rider → system provisions a synthetic Supabase auth email `<riderid>@riders.superapp.local` with a temp password. Rider types only Rider ID + Password; the login screen maps ID → synthetic email before calling Supabase. Passwords stored via Supabase Auth (bcrypt) — no plaintext anywhere.
 
-## 3. Service requests (customer → admin)
-New table `service_requests`:
-- `id, user_id (nullable for guests), service_id, name, phone, address, city, pincode, scheduled_for (nullable), notes, status ('new'|'assigned'|'in_progress'|'completed'|'cancelled'), created_at, updated_at`
-- RLS: user reads own; admin reads all; anyone authenticated can insert their own; admin can update status.
-- GRANTs: `authenticated` SELECT/INSERT own, admin ALL; `service_role` ALL.
+## What ships
 
-Surfaces:
-- **`src/routes/services.$slug.tsx`** — add "Request this service" form (name, phone, address, date, notes). Requires sign-in; unauthenticated users see a "Sign in to request" CTA.
-- **`src/routes/admin.service-requests.tsx`** (new) — admin queue: list all requests with status filter, mark assigned/in-progress/completed, contact info visible.
-- Add nav item in `src/routes/admin.tsx` sidebar: "Service Requests".
+### 1. Database (one migration)
 
-## 4. Services visibility on home
-- Verify `ServicesRail` on `src/routes/index.tsx` shows all `services WHERE active=true`. If empty, seed a few common home/kitchen services in the migration (Plumber, Electrician, AC repair, Cook, House cleaning, Salon at home) so they appear immediately.
+- `delivery_partners`: add `rider_code TEXT UNIQUE`, `is_disabled BOOLEAN DEFAULT false`, `must_change_password BOOLEAN DEFAULT true`, `created_by UUID`.
+- `orders`: add `order_number TEXT UNIQUE` (backfilled), populated by a `BEFORE INSERT` trigger using a sequence → `SA-000001`, `SA-000002`, …
+- New RPC `admin_create_rider(...)` (SECURITY DEFINER, admin-only): validates admin caller, generates unique `rider_code`, calls Auth admin to create user with synthetic email + temp password, inserts `delivery_partners` row with `kyc_status='approved'`, inserts `user_roles` row. Returns `{ rider_code, temp_password }` shown once.
+- New RPC `admin_reset_rider_password(user_id)` (admin-only): generates new temp password, resets via Auth admin, sets `must_change_password=true`, returns password once.
+- New RPC `admin_set_rider_disabled(user_id, disabled)` and `admin_delete_rider(user_id)`.
+- New RPC `admin_assign_order(order_id, rider_user_id)` (admin-only): sets `delivery_partner_id`, creates `delivery_assignments` row with status `assigned`.
+- Tighten RLS: riders may read/update ONLY orders where `delivery_partner_id = auth.uid()`. Disabled riders can't log in (checked in login flow + `is_disabled` guard on assignment claims).
+- Grants + RLS follow the standard template.
 
-## 5. Category-aware landing after sign-in
-- On `src/routes/auth.tsx` success: existing behaviour redirects to `/`. Keep as is — home page already surfaces categories & shops. Vendor sign-in goes to `/vendor`, rider to `/delivery/dashboard`. No change needed here beyond confirming redirects; user's phrasing "particular category will be show" is satisfied by the category → local shops browsing flow rebuilt in step 1.
+### 2. Rider flows
 
-## 6. Credentials
-Already email+password for user (`/auth`), vendor (`/seller/auth`), rider (`/delivery/auth`) with auto-confirm on. No change.
+- **`/delivery/auth`** — Rider ID + Password form only. Resolves ID → synthetic email, calls `signInWithPassword`. If `must_change_password`, redirects to `/delivery/change-password` before dashboard.
+- **`/delivery/change-password`** — new page; forces password update via `supabase.auth.updateUser`, then clears `must_change_password`.
+- **`/delivery/dashboard`** — unchanged core, but shows Rider ID prominently; "Available Pickups" tab REMOVED (admin assigns).
+- **`/delivery/onboarding`** — deleted (route + link).
+- Sign-up toggle removed from auth page.
+- Existing self-registered riders keep working; admin can migrate them by issuing them a `rider_code` from the admin page.
 
-## Migration
-Single migration:
-1. Create `service_requests` + grants + RLS + policies + `updated_at` trigger.
-2. Seed default home/kitchen services (idempotent `ON CONFLICT (slug) DO NOTHING`).
+### 3. Admin — Rider Management (`/admin/delivery` redesigned)
+
+- Table of all riders: Rider ID, name, city, vehicle, status chip (Active / Disabled / Pending KYC), today's trips, rating.
+- **Create rider** dialog: name, phone, city, vehicle. On submit → calls `admin_create_rider`, shows a one-time modal with Rider ID + temp password + copy buttons.
+- Row actions: **Edit** (name/phone/city/vehicle), **Reset password** (shows new temp password once), **Disable/Enable**, **Delete** (confirm).
+- Existing "Applications" tab is hidden (no more self-apply).
+
+### 4. Admin — Order Management (new `/admin/orders`)
+
+Clean, professional layout:
+
+```text
+┌─ Filters: [All] [Pending] [Accepted] [Picked up] [Delivered] [Cancelled]  Search: order # / phone
+├─ Table
+│   Order#     Customer         Vendor            Total    Payment   Delivery      Rider           Actions
+│   SA-000123  Rahul • 98xxx    Sharma Kirana     ₹540     Paid      Out for del.  RDR-K7X2P9 ▾    View
+```
+
+- Click a row → side panel with full details: items, shipping address, payment status, timestamps, current rider, action buttons.
+- **Assign rider** dropdown (only online, active, same-city riders shown) → `admin_assign_order`.
+- Status filter chips + free-text search over `order_number` and customer phone.
+- Add to admin sidebar.
+
+### 5. Order visibility everywhere
+
+- Customer `/orders` and `/orders/$id/track`: show `SA-000123` instead of UUID slice; show rider name + Rider ID + phone once assigned.
+- Vendor `/vendor/orders`: show `order_number` on every card.
+- Rider dashboard: show `order_number` on active card and history.
+
+### 6. Security
+
+- All admin RPCs check `has_role(auth.uid(), 'admin' OR 'super_admin')` and raise if not.
+- Passwords never touch app code paths beyond the one-time display after generation.
+- `rider_code` unique constraint + `order_number` unique constraint prevent duplicates at DB level.
+- Synthetic rider emails live in the reserved `.local` TLD (never routable).
+- Disabled riders: login RPC returns "account disabled"; RLS assignment policies exclude them.
+
+## Out of scope this pass
+
+- SMS/email delivery of temp password (shown in admin UI, admin communicates it).
+- Editing an already-assigned order's rider (can unassign + reassign via the same dialog).
+- Rider mobile push notifications.
 
 ## Files touched
-- Edit: `c.$category.tsx`, `categories.tsx`, `rewards.tsx`, `services.$slug.tsx`, `admin.tsx`, `index.tsx`.
-- New: `register.tsx`, `admin.service-requests.tsx`.
-- Migration: `service_requests` table + seed services.
 
-## Out of scope (say no if asked mid-flight)
-Dropping the partners/affiliate/ondc tables — leaving them dormant avoids touching working postback endpoints; can remove later once confirmed unused.
+- Migration: 1 new
+- New: `src/routes/admin.orders.tsx`, `src/routes/delivery.change-password.tsx`, `src/lib/admin-riders.functions.ts`
+- Rewritten: `src/routes/delivery.auth.tsx`, `src/routes/admin.delivery.tsx`
+- Updated: `src/routes/admin.tsx` (nav), `src/routes/orders.tsx`, `src/routes/orders.$id.track.tsx`, `src/routes/vendor.orders.tsx`, `src/routes/delivery.dashboard.tsx`, `src/routes/delivery.assignments.tsx`, `src/components/app-shell.tsx` (drop onboarding link)
+- Deleted: `src/routes/delivery.onboarding.tsx`, `src/routes/delivery.available.tsx`

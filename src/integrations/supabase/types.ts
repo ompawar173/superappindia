@@ -401,16 +401,20 @@ export type Database = {
         Row: {
           city: string
           created_at: string
+          created_by: string | null
           current_lat: number | null
           current_lng: number | null
           full_name: string
+          is_disabled: boolean
           is_online: boolean
           kyc_rejection_reason: string | null
           kyc_status: Database["public"]["Enums"]["kyc_status_t"]
           last_location_at: string | null
           last_seen_at: string | null
+          must_change_password: boolean
           phone: string
           rating: number | null
+          rider_code: string
           total_deliveries: number
           updated_at: string
           user_id: string
@@ -420,16 +424,20 @@ export type Database = {
         Insert: {
           city: string
           created_at?: string
+          created_by?: string | null
           current_lat?: number | null
           current_lng?: number | null
           full_name: string
+          is_disabled?: boolean
           is_online?: boolean
           kyc_rejection_reason?: string | null
           kyc_status?: Database["public"]["Enums"]["kyc_status_t"]
           last_location_at?: string | null
           last_seen_at?: string | null
+          must_change_password?: boolean
           phone: string
           rating?: number | null
+          rider_code: string
           total_deliveries?: number
           updated_at?: string
           user_id: string
@@ -439,16 +447,20 @@ export type Database = {
         Update: {
           city?: string
           created_at?: string
+          created_by?: string | null
           current_lat?: number | null
           current_lng?: number | null
           full_name?: string
+          is_disabled?: boolean
           is_online?: boolean
           kyc_rejection_reason?: string | null
           kyc_status?: Database["public"]["Enums"]["kyc_status_t"]
           last_location_at?: string | null
           last_seen_at?: string | null
+          must_change_password?: boolean
           phone?: string
           rating?: number | null
+          rider_code?: string
           total_deliveries?: number
           updated_at?: string
           user_id?: string
@@ -582,6 +594,7 @@ export type Database = {
           external_order_id: string | null
           id: string
           items: Json
+          order_number: string
           payment_ref: string | null
           pickup_address: Json | null
           pickup_lat: number | null
@@ -607,6 +620,7 @@ export type Database = {
           external_order_id?: string | null
           id?: string
           items?: Json
+          order_number?: string
           payment_ref?: string | null
           pickup_address?: Json | null
           pickup_lat?: number | null
@@ -632,6 +646,7 @@ export type Database = {
           external_order_id?: string | null
           id?: string
           items?: Json
+          order_number?: string
           payment_ref?: string | null
           pickup_address?: Json | null
           pickup_lat?: number | null
@@ -1150,6 +1165,7 @@ export type Database = {
           vendor_id: string
         }[]
       }
+      rider_login_email: { Args: { _code: string }; Returns: string }
     }
     Enums: {
       app_role: "user" | "vendor" | "admin" | "super_admin" | "delivery"
