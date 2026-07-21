@@ -36,6 +36,7 @@ import { Route as DeliveryProfileRouteImport } from './routes/delivery.profile'
 import { Route as DeliveryOnboardingRouteImport } from './routes/delivery.onboarding'
 import { Route as DeliveryEarningsRouteImport } from './routes/delivery.earnings'
 import { Route as DeliveryDashboardRouteImport } from './routes/delivery.dashboard'
+import { Route as DeliveryChangePasswordRouteImport } from './routes/delivery.change-password'
 import { Route as DeliveryAvailableRouteImport } from './routes/delivery.available'
 import { Route as DeliveryAuthRouteImport } from './routes/delivery.auth'
 import { Route as DeliveryAssignmentsRouteImport } from './routes/delivery.assignments'
@@ -186,6 +187,11 @@ const DeliveryDashboardRoute = DeliveryDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => DeliveryRoute,
 } as any)
+const DeliveryChangePasswordRoute = DeliveryChangePasswordRouteImport.update({
+  id: '/change-password',
+  path: '/change-password',
+  getParentRoute: () => DeliveryRoute,
+} as any)
 const DeliveryAvailableRoute = DeliveryAvailableRouteImport.update({
   id: '/available',
   path: '/available',
@@ -284,6 +290,7 @@ export interface FileRoutesByFullPath {
   '/delivery/assignments': typeof DeliveryAssignmentsRoute
   '/delivery/auth': typeof DeliveryAuthRoute
   '/delivery/available': typeof DeliveryAvailableRoute
+  '/delivery/change-password': typeof DeliveryChangePasswordRoute
   '/delivery/dashboard': typeof DeliveryDashboardRoute
   '/delivery/earnings': typeof DeliveryEarningsRoute
   '/delivery/onboarding': typeof DeliveryOnboardingRoute
@@ -324,6 +331,7 @@ export interface FileRoutesByTo {
   '/delivery/assignments': typeof DeliveryAssignmentsRoute
   '/delivery/auth': typeof DeliveryAuthRoute
   '/delivery/available': typeof DeliveryAvailableRoute
+  '/delivery/change-password': typeof DeliveryChangePasswordRoute
   '/delivery/dashboard': typeof DeliveryDashboardRoute
   '/delivery/earnings': typeof DeliveryEarningsRoute
   '/delivery/onboarding': typeof DeliveryOnboardingRoute
@@ -368,6 +376,7 @@ export interface FileRoutesById {
   '/delivery/assignments': typeof DeliveryAssignmentsRoute
   '/delivery/auth': typeof DeliveryAuthRoute
   '/delivery/available': typeof DeliveryAvailableRoute
+  '/delivery/change-password': typeof DeliveryChangePasswordRoute
   '/delivery/dashboard': typeof DeliveryDashboardRoute
   '/delivery/earnings': typeof DeliveryEarningsRoute
   '/delivery/onboarding': typeof DeliveryOnboardingRoute
@@ -413,6 +422,7 @@ export interface FileRouteTypes {
     | '/delivery/assignments'
     | '/delivery/auth'
     | '/delivery/available'
+    | '/delivery/change-password'
     | '/delivery/dashboard'
     | '/delivery/earnings'
     | '/delivery/onboarding'
@@ -453,6 +463,7 @@ export interface FileRouteTypes {
     | '/delivery/assignments'
     | '/delivery/auth'
     | '/delivery/available'
+    | '/delivery/change-password'
     | '/delivery/dashboard'
     | '/delivery/earnings'
     | '/delivery/onboarding'
@@ -496,6 +507,7 @@ export interface FileRouteTypes {
     | '/delivery/assignments'
     | '/delivery/auth'
     | '/delivery/available'
+    | '/delivery/change-password'
     | '/delivery/dashboard'
     | '/delivery/earnings'
     | '/delivery/onboarding'
@@ -728,6 +740,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DeliveryDashboardRouteImport
       parentRoute: typeof DeliveryRoute
     }
+    '/delivery/change-password': {
+      id: '/delivery/change-password'
+      path: '/change-password'
+      fullPath: '/delivery/change-password'
+      preLoaderRoute: typeof DeliveryChangePasswordRouteImport
+      parentRoute: typeof DeliveryRoute
+    }
     '/delivery/available': {
       id: '/delivery/available'
       path: '/available'
@@ -857,6 +876,7 @@ interface DeliveryRouteChildren {
   DeliveryAssignmentsRoute: typeof DeliveryAssignmentsRoute
   DeliveryAuthRoute: typeof DeliveryAuthRoute
   DeliveryAvailableRoute: typeof DeliveryAvailableRoute
+  DeliveryChangePasswordRoute: typeof DeliveryChangePasswordRoute
   DeliveryDashboardRoute: typeof DeliveryDashboardRoute
   DeliveryEarningsRoute: typeof DeliveryEarningsRoute
   DeliveryOnboardingRoute: typeof DeliveryOnboardingRoute
@@ -868,6 +888,7 @@ const DeliveryRouteChildren: DeliveryRouteChildren = {
   DeliveryAssignmentsRoute: DeliveryAssignmentsRoute,
   DeliveryAuthRoute: DeliveryAuthRoute,
   DeliveryAvailableRoute: DeliveryAvailableRoute,
+  DeliveryChangePasswordRoute: DeliveryChangePasswordRoute,
   DeliveryDashboardRoute: DeliveryDashboardRoute,
   DeliveryEarningsRoute: DeliveryEarningsRoute,
   DeliveryOnboardingRoute: DeliveryOnboardingRoute,
