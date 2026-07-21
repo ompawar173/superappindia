@@ -15,7 +15,7 @@ function Trips() {
     queryFn: async () => {
       const { data } = await supabase
         .from("delivery_assignments")
-        .select("*, orders(total)")
+        .select("*, orders(total, order_number)")
         .eq("partner_id", user!.id)
         .order("assigned_at", { ascending: false })
         .limit(100);
@@ -39,7 +39,7 @@ function Trips() {
         <div key={t.id} className="flex items-center justify-between rounded-2xl border border-border/60 bg-card p-4">
           <div>
             <p className="text-xs text-muted-foreground">{new Date(t.assigned_at).toLocaleString()}</p>
-            <p className="font-medium">Order #{String(t.order_id).slice(0, 6)}</p>
+            <p className="font-mono font-medium">{t.orders?.order_number ?? `#${String(t.order_id).slice(0, 6)}`}</p>
             <p className="text-xs capitalize text-muted-foreground">{t.status.replace("_", " ")}</p>
           </div>
           <div className="text-right">

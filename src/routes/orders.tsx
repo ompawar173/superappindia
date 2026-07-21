@@ -41,7 +41,7 @@ function OrdersPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("orders")
-        .select("id, status, delivery_status, total, items, shipping_address, created_at, delivery_partner_id, vendor_id, vendors(business_name), delivery_partner:delivery_partners!orders_delivery_partner_id_fkey(full_name, phone, current_lat, current_lng, last_location_at, vehicle_type, vehicle_number)")
+        .select("id, order_number, status, delivery_status, total, items, shipping_address, created_at, delivery_partner_id, vendor_id, vendors(business_name), delivery_partner:delivery_partners!orders_delivery_partner_id_fkey(full_name, phone, current_lat, current_lng, last_location_at, vehicle_type, vehicle_number, rider_code)")
         .eq("user_id", user!.id)
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -125,7 +125,7 @@ function OrderCard({ order, showTrack }: { order: any; showTrack?: boolean }) {
     <div className="rounded-2xl border border-border bg-card p-4 shadow-soft">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-xs text-muted-foreground">#{String(order.id).slice(0, 8)} · {new Date(order.created_at).toLocaleString()}</p>
+          <p className="text-xs text-muted-foreground"><span className="font-mono font-semibold text-foreground">{order.order_number}</span> · {new Date(order.created_at).toLocaleString()}</p>
           {order.vendors?.business_name && (
             <p className="mt-0.5 flex items-center gap-1 text-xs font-medium text-foreground/80">
               <Store className="h-3 w-3 text-primary" /> {order.vendors.business_name}
