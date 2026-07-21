@@ -55,11 +55,11 @@ function AdminOrders() {
 
   const filtered = useMemo(() => {
     const list = orders ?? [];
-    const f = FILTERS.find((x) => x.key === filter)!;
+    const f = FILTERS.find((x) => x.key === filter) as any;
     const byStatus = list.filter((o: any) => {
       if (filter === "all") return true;
-      if ("delivery" in f && f.delivery) return f.delivery.includes(o.delivery_status);
-      if ("statuses" in f && f.statuses) return f.statuses.includes(o.status);
+      if (f?.delivery) return f.delivery.includes(o.delivery_status);
+      if (f?.statuses) return f.statuses.includes(o.status);
       return true;
     });
     if (!q.trim()) return byStatus;
